@@ -47,7 +47,7 @@ export function AppSidebar() {
                       className={({ isActive }) =>
                         isActive
                           ? "bg-primary text-primary-foreground font-medium"
-                          : "hover:bg-muted text-foreground"
+                          : "text-sidebar-foreground hover:bg-primary hover:text-primary-foreground"
                       }
                     >
                       <item.icon className="h-4 w-4" />
@@ -69,19 +69,19 @@ export function AppSidebar() {
               <SidebarMenu>
                 {adminMenuItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to={item.url}
-                        className={({ isActive }) =>
-                          isActive
-                            ? "bg-primary text-primary-foreground font-medium"
-                            : "hover:bg-muted text-foreground"
-                        }
-                      >
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </NavLink>
-                    </SidebarMenuButton>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to={item.url}
+                      className={({ isActive }) =>
+                        isActive
+                          ? "bg-primary text-primary-foreground font-medium"
+                          : "text-sidebar-foreground hover:bg-primary hover:text-primary-foreground"
+                      }
+                    >
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
