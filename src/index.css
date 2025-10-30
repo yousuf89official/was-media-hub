@@ -41,7 +41,7 @@ All colors MUST be HSL.
 
     /* Sidebar tokens */
     --sidebar: 0 0% 98%;
-    --sidebar-foreground: 0 0% 15%;
+    --sidebar-foreground: 0 0% 0%;
     --sidebar-border: 0 0% 90%;
     --sidebar-accent: 357 100% 44%;
     --sidebar-accent-foreground: 0 0% 100%;
