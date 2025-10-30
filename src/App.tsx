@@ -10,6 +10,7 @@ import Campaigns from "./pages/Campaigns";
 import Brands from "./pages/Brands";
 import AVECalculator from "./pages/AVECalculator";
 import NotFound from "./pages/NotFound";
+import { DashboardLayout } from "./components/DashboardLayout";
 
 const queryClient = new QueryClient();
 
@@ -22,10 +23,15 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/campaigns" element={<Campaigns />} />
-          <Route path="/brands" element={<Brands />} />
-          <Route path="/ave-calculator" element={<AVECalculator />} />
+          
+          {/* Protected routes with sidebar */}
+          <Route element={<DashboardLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/campaigns" element={<Campaigns />} />
+            <Route path="/brands" element={<Brands />} />
+            <Route path="/ave-calculator" element={<AVECalculator />} />
+          </Route>
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

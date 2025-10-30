@@ -29,10 +29,10 @@ const Brands = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-primary">Brands</h1>
+    <div className="bg-background min-h-full">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold">Brands</h1>
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -61,9 +61,6 @@ const Brands = () => {
             </DialogContent>
           </Dialog>
         </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {brands?.map((brand) => (
             <Card key={brand.id}>
@@ -85,7 +82,7 @@ const Brands = () => {
             <Button onClick={() => setIsOpen(true)}>Create your first brand</Button>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 };

@@ -124,14 +124,9 @@ const AVECalculator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 h-16 flex items-center">
-          <h1 className="text-2xl font-bold text-primary">AVE Calculator</h1>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="bg-background min-h-full">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <h1 className="text-3xl font-bold mb-8">AVE Calculator</h1>
         {step === 1 && (
           <Card>
             <CardHeader>
@@ -400,7 +395,7 @@ const AVECalculator = () => {
             </Button>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 };

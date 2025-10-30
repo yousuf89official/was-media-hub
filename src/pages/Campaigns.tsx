@@ -38,18 +38,15 @@ const Campaigns = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-primary">Campaigns</h1>
+    <div className="bg-background min-h-full">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold">Campaigns</h1>
           <Button onClick={() => navigate("/campaigns/new")}>
             <Plus className="w-4 h-4 mr-2" />
             New Campaign
           </Button>
         </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -102,7 +99,7 @@ const Campaigns = () => {
             </Button>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 };
