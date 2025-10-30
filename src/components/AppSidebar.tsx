@@ -47,7 +47,7 @@ export function AppSidebar() {
                       className={({ isActive }) =>
                         isActive
                           ? "bg-primary text-primary-foreground font-medium"
-                          : "text-sidebar-foreground hover:bg-primary hover:text-primary-foreground"
+                          : "!text-sidebar-foreground hover:bg-primary hover:text-primary-foreground"
                       }
                     >
                       <item.icon className="h-4 w-4" />
@@ -75,7 +75,7 @@ export function AppSidebar() {
                       className={({ isActive }) =>
                         isActive
                           ? "bg-primary text-primary-foreground font-medium"
-                          : "text-sidebar-foreground hover:bg-primary hover:text-primary-foreground"
+                          : "!text-sidebar-foreground hover:bg-primary hover:text-primary-foreground"
                       }
                     >
                       <item.icon className="h-4 w-4" />

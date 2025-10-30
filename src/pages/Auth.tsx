@@ -47,7 +47,6 @@ const Auth = () => {
         email: signupEmail,
         password: signupPassword,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
           data: {
             name: signupName,
           },
@@ -56,13 +55,10 @@ const Auth = () => {
 
       if (error) throw error;
 
-      toast.success("Account created! Please check your email to verify.");
-      setSignupEmail("");
-      setSignupPassword("");
-      setSignupName("");
+      toast.success("Account created! Please check your email for the verification code.");
+      navigate(`/verify-email?type=signup&email=${encodeURIComponent(signupEmail)}`);
     } catch (error: any) {
       toast.error(error.message || "Failed to sign up");
-    } finally {
       setIsLoading(false);
     }
   };

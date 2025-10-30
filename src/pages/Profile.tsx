@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 
 export default function Profile() {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -84,16 +86,16 @@ export default function Profile() {
     if (!profile?.email) return;
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(profile.email, {
-        redirectTo: `${window.location.origin}/auth`,
-      });
+      const { error } = await supabase.auth.resetPasswordForEmail(profile.email);
 
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: "Password reset email sent. Check your inbox.",
+        description: "Verification code sent! Check your email.",
       });
+
+      navigate(`/verify-email?type=reset&email=${encodeURIComponent(profile.email)}`);
     } catch (error: any) {
       toast({
         title: "Error",
