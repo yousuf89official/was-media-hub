@@ -5,11 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { BarChart3, TrendingUp, Users, LogOut } from "lucide-react";
+import { useCampaigns } from "@/hooks/useCampaigns";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { data: campaigns } = useCampaigns();
+
+  const activeCampaigns = campaigns?.filter((c) => c.status === "running").length || 0;
 
   useEffect(() => {
     // Check initial session
@@ -95,10 +99,12 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <div className="text-3xl font-bold">0</div>
+                <div className="text-3xl font-bold">{activeCampaigns}</div>
                 <BarChart3 className="w-8 h-8 text-primary/60" />
               </div>
-              <p className="text-xs text-muted-foreground mt-2">No campaigns yet</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                {activeCampaigns === 0 ? "No campaigns yet" : "Currently running"}
+              </p>
             </CardContent>
           </Card>
 
@@ -143,21 +149,33 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
-              <Button className="w-full justify-start" variant="outline">
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => navigate("/campaigns")}
+              >
                 <BarChart3 className="w-4 h-4 mr-2" />
-                Create Campaign
+                View Campaigns
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => navigate("/brands")}
+              >
                 <Users className="w-4 h-4 mr-2" />
-                Add Brand
+                Manage Brands
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => navigate("/ave-calculator")}
+              >
                 <TrendingUp className="w-4 h-4 mr-2" />
-                View Reports
+                Calculate AVE
               </Button>
               <Button className="w-full justify-start" variant="outline">
                 <BarChart3 className="w-4 h-4 mr-2" />
-                Calculate AVE
+                View Reports
               </Button>
             </div>
           </CardContent>
