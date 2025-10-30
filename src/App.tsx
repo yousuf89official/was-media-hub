@@ -11,6 +11,7 @@ import Brands from "./pages/Brands";
 import AVECalculator from "./pages/AVECalculator";
 import CalculationLogs from "./pages/CalculationLogs";
 import AdminSettings from "./pages/AdminSettings";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import { DashboardLayout } from "./components/DashboardLayout";
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/ave-calculator" element={<AVECalculator />} />
             <Route path="/calculation-logs" element={<CalculationLogs />} />
             <Route path="/admin-settings" element={<AdminSettings />} />
+            <Route path="/profile" element={<Profile />} />
           </Route>
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
