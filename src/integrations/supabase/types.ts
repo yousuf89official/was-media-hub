@@ -136,6 +136,54 @@ export type Database = {
           },
         ]
       }
+      calculation_logs: {
+        Row: {
+          brand_id: string | null
+          calculation_type: string
+          campaign_id: string | null
+          created_at: string
+          id: string
+          inputs: Json
+          results: Json
+          user_id: string
+        }
+        Insert: {
+          brand_id?: string | null
+          calculation_type?: string
+          campaign_id?: string | null
+          created_at?: string
+          id?: string
+          inputs: Json
+          results: Json
+          user_id: string
+        }
+        Update: {
+          brand_id?: string | null
+          calculation_type?: string
+          campaign_id?: string | null
+          created_at?: string
+          id?: string
+          inputs?: Json
+          results?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calculation_logs_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calculation_logs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaigns: {
         Row: {
           brand_id: string
@@ -598,6 +646,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_activity_logs: {
+        Row: {
+          activity_type: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          page_path: string
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          page_path: string
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          page_path?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {

@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
-import { Calculator, Download } from "lucide-react";
+import { Calculator, Download, Edit2, Save, X } from "lucide-react";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const AVECalculator = () => {
   const [selectedBrand, setSelectedBrand] = useState<string>("");
@@ -26,12 +27,15 @@ const AVECalculator = () => {
   const [showResults, setShowResults] = useState(false);
   const [finalAVE, setFinalAVE] = useState<number>(0);
   const [breakdown, setBreakdown] = useState<any[]>([]);
+  const [editingCpm, setEditingCpm] = useState<string | null>(null);
+  const [editCpmValue, setEditCpmValue] = useState<string>("");
 
   const { data: brands } = useBrands();
   const { data: campaigns } = useCampaigns();
   const { data: channels } = useChannels();
-  const { data: cpmRates } = useCPMRates();
+  const { data: cpmRates, refetch: refetchCpm } = useCPMRates();
   const { data: multipliers } = useMultipliers();
+  const { data: userRole } = useUserRole();
 
   const filteredCampaigns = campaigns?.filter((c) => 
     (!selectedBrand || c.brand_id === selectedBrand) && c.status === "finished"
@@ -60,6 +64,22 @@ const AVECalculator = () => {
       toast.success(`Loaded ${total.toLocaleString()} impressions`);
     } else {
       toast.info("No metrics found for this channel");
+    }
+  };
+
+  const handleUpdateCpm = async (channelId: string) => {
+    const { error } = await supabase
+      .from("cpm_rates")
+      .update({ cpm_value: parseFloat(editCpmValue) })
+      .eq("channel_id", channelId)
+      .is("effective_to", null);
+
+    if (error) {
+      toast.error("Failed to update CPM rate");
+    } else {
+      toast.success("CPM rate updated successfully");
+      setEditingCpm(null);
+      refetchCpm();
     }
   };
 
@@ -128,7 +148,35 @@ const AVECalculator = () => {
     setFinalAVE(totalAVE);
     setShowResults(true);
 
-    // Save to database if campaign is selected
+    // Save calculation log to database
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("calculation_logs").insert({
+          user_id: user.id,
+          calculation_type: "AVE",
+          brand_id: selectedBrand && selectedBrand !== "none" ? selectedBrand : null,
+          campaign_id: selectedCampaign || null,
+          inputs: {
+            channels: selectedChannels,
+            impressions: impressionsData,
+            multipliers: {
+              platform: includePlatform,
+              engagement: includeEngagement ? engagementLevel : null,
+              sentiment: includeSentiment ? sentimentType : null,
+            }
+          },
+          results: {
+            breakdown: channelBreakdown,
+            final_ave: totalAVE,
+          }
+        });
+      }
+    } catch (error: any) {
+      console.error("Failed to log calculation:", error);
+    }
+
+    // Save to ave_results if campaign is selected
     if (selectedCampaign) {
       try {
         const { data: { user } } = await supabase.auth.getUser();
@@ -349,13 +397,56 @@ const AVECalculator = () => {
                 {selectedChannels.map((channelId) => {
                   const channel = channels?.find((c) => c.id === channelId);
                   const cpm = cpmRates?.find((r) => r.channel_id === channelId);
+                  const isEditingThisCpm = editingCpm === channelId;
+                  
                   return (
                     <div key={channelId} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <Label className="text-base font-semibold">{channel?.name}</Label>
-                        <span className="text-sm text-muted-foreground">
-                          CPM: IDR {cpm?.cpm_value.toLocaleString() || 0}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          {isEditingThisCpm ? (
+                            <>
+                              <Input
+                                type="number"
+                                value={editCpmValue}
+                                onChange={(e) => setEditCpmValue(e.target.value)}
+                                className="w-24 h-8"
+                              />
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleUpdateCpm(channelId)}
+                              >
+                                <Save className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setEditingCpm(null)}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-sm text-muted-foreground">
+                                CPM: IDR {cpm?.cpm_value.toLocaleString() || 0}
+                              </span>
+                              {userRole === "MasterAdmin" && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    setEditingCpm(channelId);
+                                    setEditCpmValue(cpm?.cpm_value.toString() || "0");
+                                  }}
+                                >
+                                  <Edit2 className="h-3 w-3" />
+                                </Button>
+                              )}
+                            </>
+                          )}
+                        </div>
                       </div>
                       <div className="flex gap-2">
                         <Input

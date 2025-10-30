@@ -6,11 +6,14 @@ import { toast } from "sonner";
 import { LogOut } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { useActivityLogger } from "@/hooks/useActivityLogger";
 
 export const DashboardLayout = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  
+  useActivityLogger();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
