@@ -23,6 +23,7 @@ export type Database = {
           created_by: string
           final_ave: number
           id: string
+          updated_at: string | null
           weighted_components: Json
         }
         Insert: {
@@ -33,6 +34,7 @@ export type Database = {
           created_by: string
           final_ave: number
           id?: string
+          updated_at?: string | null
           weighted_components: Json
         }
         Update: {
@@ -43,6 +45,7 @@ export type Database = {
           created_by?: string
           final_ave?: number
           id?: string
+          updated_at?: string | null
           weighted_components?: Json
         }
         Relationships: [
@@ -102,6 +105,7 @@ export type Database = {
           id: string
           name: string
           objective_id: string | null
+          updated_at: string | null
         }
         Insert: {
           channel_id?: string | null
@@ -110,6 +114,7 @@ export type Database = {
           id?: string
           name: string
           objective_id?: string | null
+          updated_at?: string | null
         }
         Update: {
           channel_id?: string | null
@@ -118,6 +123,7 @@ export type Database = {
           id?: string
           name?: string
           objective_id?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -145,6 +151,7 @@ export type Database = {
           id: string
           inputs: Json
           results: Json
+          updated_at: string | null
           user_id: string
         }
         Insert: {
@@ -155,6 +162,7 @@ export type Database = {
           id?: string
           inputs: Json
           results: Json
+          updated_at?: string | null
           user_id: string
         }
         Update: {
@@ -165,6 +173,7 @@ export type Database = {
           id?: string
           inputs?: Json
           results?: Json
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -293,18 +302,21 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          updated_at: string | null
         }
         Insert: {
           channel_type: Database["public"]["Enums"]["channel_type"]
           created_at?: string
           id?: string
           name: string
+          updated_at?: string | null
         }
         Update: {
           channel_type?: Database["public"]["Enums"]["channel_type"]
           created_at?: string
           id?: string
           name?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -341,6 +353,7 @@ export type Database = {
           effective_from: string
           effective_to: string | null
           id: string
+          updated_at: string | null
         }
         Insert: {
           channel_id: string
@@ -350,6 +363,7 @@ export type Database = {
           effective_from?: string
           effective_to?: string | null
           id?: string
+          updated_at?: string | null
         }
         Update: {
           channel_id?: string
@@ -359,6 +373,7 @@ export type Database = {
           effective_from?: string
           effective_to?: string | null
           id?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -376,18 +391,21 @@ export type Database = {
           id: string
           level: Database["public"]["Enums"]["engagement_level"]
           multiplier: number
+          updated_at: string | null
         }
         Insert: {
           created_at?: string
           id?: string
           level: Database["public"]["Enums"]["engagement_level"]
           multiplier: number
+          updated_at?: string | null
         }
         Update: {
           created_at?: string
           id?: string
           level?: Database["public"]["Enums"]["engagement_level"]
           multiplier?: number
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -405,6 +423,7 @@ export type Database = {
           reach: number | null
           sentiment_score: number | null
           spend: number | null
+          updated_at: string | null
           video_views: number | null
         }
         Insert: {
@@ -420,6 +439,7 @@ export type Database = {
           reach?: number | null
           sentiment_score?: number | null
           spend?: number | null
+          updated_at?: string | null
           video_views?: number | null
         }
         Update: {
@@ -435,6 +455,7 @@ export type Database = {
           reach?: number | null
           sentiment_score?: number | null
           spend?: number | null
+          updated_at?: string | null
           video_views?: number | null
         }
         Relationships: [
@@ -462,6 +483,7 @@ export type Database = {
           funnel_type: Database["public"]["Enums"]["funnel_type"] | null
           id: string
           name: string
+          updated_at: string | null
         }
         Insert: {
           channel_id?: string | null
@@ -470,6 +492,7 @@ export type Database = {
           funnel_type?: Database["public"]["Enums"]["funnel_type"] | null
           id?: string
           name: string
+          updated_at?: string | null
         }
         Update: {
           channel_id?: string | null
@@ -478,6 +501,7 @@ export type Database = {
           funnel_type?: Database["public"]["Enums"]["funnel_type"] | null
           id?: string
           name?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -495,18 +519,21 @@ export type Database = {
           created_at: string
           id: string
           multiplier: number
+          updated_at: string | null
         }
         Insert: {
           channel_id: string
           created_at?: string
           id?: string
           multiplier: number
+          updated_at?: string | null
         }
         Update: {
           channel_id?: string
           created_at?: string
           id?: string
           multiplier?: number
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -594,18 +621,21 @@ export type Database = {
           id: string
           multiplier: number
           sentiment: Database["public"]["Enums"]["sentiment_type"]
+          updated_at: string | null
         }
         Insert: {
           created_at?: string
           id?: string
           multiplier: number
           sentiment: Database["public"]["Enums"]["sentiment_type"]
+          updated_at?: string | null
         }
         Update: {
           created_at?: string
           id?: string
           multiplier?: number
           sentiment?: Database["public"]["Enums"]["sentiment_type"]
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -618,6 +648,7 @@ export type Database = {
           period_end: string
           period_start: string
           share_of_voice_value: number
+          updated_at: string | null
         }
         Insert: {
           basis_json: Json
@@ -627,6 +658,7 @@ export type Database = {
           period_end: string
           period_start: string
           share_of_voice_value: number
+          updated_at?: string | null
         }
         Update: {
           basis_json?: Json
@@ -636,6 +668,7 @@ export type Database = {
           period_end?: string
           period_start?: string
           share_of_voice_value?: number
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -654,6 +687,7 @@ export type Database = {
           id: string
           metadata: Json | null
           page_path: string
+          updated_at: string | null
           user_id: string
         }
         Insert: {
@@ -662,6 +696,7 @@ export type Database = {
           id?: string
           metadata?: Json | null
           page_path: string
+          updated_at?: string | null
           user_id: string
         }
         Update: {
@@ -670,6 +705,7 @@ export type Database = {
           id?: string
           metadata?: Json | null
           page_path?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -679,18 +715,21 @@ export type Database = {
           created_at: string
           id: string
           role: Database["public"]["Enums"]["app_role"]
+          updated_at: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
           role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: [
