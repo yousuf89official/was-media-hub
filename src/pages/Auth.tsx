@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,19 @@ const Auth = () => {
   const [signupPassword, setSignupPassword] = useState("");
   const [signupName, setSignupName] = useState("");
 
+  useEffect(() => {
+    // Detect email verification success from URL hash
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = hashParams.get('access_token');
+    const type = hashParams.get('type');
+    
+    if (accessToken && type === 'signup') {
+      toast.success("Email Successfully Verified! You can now login.");
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -28,6 +41,15 @@ const Auth = () => {
       });
 
       if (error) throw error;
+
+      // Check if email is verified
+      if (!data.user?.email_confirmed_at) {
+        // Sign out the user immediately
+        await supabase.auth.signOut();
+        toast.error("Please verify your email before logging in. Check your inbox for the verification link.");
+        setIsLoading(false);
+        return;
+      }
 
       toast.success("Welcome back!");
       navigate("/dashboard");
@@ -47,7 +69,7 @@ const Auth = () => {
         email: signupEmail,
         password: signupPassword,
         options: {
-          emailRedirectTo: `${window.location.origin}/verify-email?type=signup&email=${encodeURIComponent(signupEmail)}`,
+          emailRedirectTo: `${window.location.origin}/auth`,
           data: {
             name: signupName,
           },
@@ -56,8 +78,7 @@ const Auth = () => {
 
       if (error) throw error;
 
-      toast.success("Account created! Please check your email for the verification code.");
-      navigate(`/verify-email?type=signup&email=${encodeURIComponent(signupEmail)}`);
+      toast.success("Account created! Please check your email and click 'Verify Email' to activate your account.");
     } catch (error: any) {
       toast.error(error.message || "Failed to sign up");
       setIsLoading(false);
