@@ -7,10 +7,13 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { useOnboarding } from "@/hooks/useOnboarding";
+import { RefreshCw } from "lucide-react";
 
 export default function Profile() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { resetOnboarding } = useOnboarding();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -177,6 +180,37 @@ export default function Profile() {
             <Button variant="outline" onClick={handlePasswordReset}>
               Send Password Reset Email
             </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Preferences</CardTitle>
+            <CardDescription>Manage your application preferences</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Reset Onboarding</p>
+                <p className="text-sm text-muted-foreground">
+                  Show the welcome wizard again next time you visit the dashboard
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  resetOnboarding();
+                  toast({
+                    title: "Success",
+                    description: "Onboarding reset. Visit the dashboard to see the wizard.",
+                  });
+                }}
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Reset
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

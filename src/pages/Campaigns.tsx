@@ -2,11 +2,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, BarChart3 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { Badge } from "@/components/ui/badge";
 import AdvancedFilters, { FilterState } from "@/components/AdvancedFilters";
+import { CampaignGridSkeleton } from "@/components/skeletons/CampaignSkeleton";
+import EmptyState from "@/components/EmptyState";
 
 const Campaigns = () => {
   const navigate = useNavigate();
@@ -55,8 +57,24 @@ const Campaigns = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="bg-background min-h-full">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-bold">Campaigns</h1>
+            <div className="flex gap-2">
+              <Button disabled>
+                <Plus className="w-4 h-4 mr-2" />
+                New Campaign
+              </Button>
+            </div>
+          </div>
+          <div className="mb-6">
+            <div className="relative max-w-md">
+              <Input placeholder="Search campaigns..." disabled />
+            </div>
+          </div>
+          <CampaignGridSkeleton />
+        </div>
       </div>
     );
   }
@@ -119,12 +137,17 @@ const Campaigns = () => {
         </div>
 
         {filteredCampaigns?.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">No campaigns found</p>
-            <Button onClick={() => navigate("/campaigns/new")}>
-              Create your first campaign
-            </Button>
-          </div>
+          <EmptyState
+            icon={BarChart3}
+            title="No campaigns found"
+            description={
+              searchTerm || Object.values(filters).some((v) => v)
+                ? "Try adjusting your search or filters to find what you're looking for."
+                : "Get started by creating your first campaign to track media performance and calculate AVE."
+            }
+            actionLabel={!searchTerm && !Object.values(filters).some((v) => v) ? "Create Campaign" : undefined}
+            onAction={!searchTerm && !Object.values(filters).some((v) => v) ? () => navigate("/campaigns/new") : undefined}
+          />
         )}
       </div>
     </div>

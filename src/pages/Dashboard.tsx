@@ -14,6 +14,9 @@ import PerformanceChart from "@/components/dashboard/PerformanceChart";
 import TopCampaigns from "@/components/dashboard/TopCampaigns";
 import ChannelComparison from "@/components/dashboard/ChannelComparison";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
+import WelcomeWizard from "@/components/onboarding/WelcomeWizard";
+import { useOnboarding } from "@/hooks/useOnboarding";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -23,11 +26,14 @@ const Dashboard = () => {
   const { data: performanceData, isLoading: performanceLoading } = usePerformanceTrend(30);
   const { data: channelData, isLoading: channelLoading } = useChannelPerformance();
   const { data: activityData, isLoading: activityLoading } = useRecentActivity(10);
+  const { showOnboarding, completeOnboarding } = useOnboarding();
 
   const hasNoCampaigns = !campaigns || campaigns.length === 0;
 
   return (
     <div className="bg-background min-h-full">
+      {showOnboarding && <WelcomeWizard onComplete={completeOnboarding} />}
+      
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold mb-2">
@@ -47,15 +53,22 @@ const Dashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="text-3xl font-bold">
-                  {statsLoading ? "..." : stats?.activeCampaigns || 0}
+              {statsLoading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-8 w-16" />
+                  <Skeleton className="h-3 w-20" />
                 </div>
-                <BarChart3 className="w-8 h-8 text-primary/60" />
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                of {stats?.totalCampaigns || 0} total
-              </p>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div className="text-3xl font-bold">{stats?.activeCampaigns || 0}</div>
+                    <BarChart3 className="w-8 h-8 text-primary/60" />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    of {stats?.totalCampaigns || 0} total
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
 
