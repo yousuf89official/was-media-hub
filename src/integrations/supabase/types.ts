@@ -409,6 +409,69 @@ export type Database = {
         }
         Relationships: []
       }
+      landing_features: {
+        Row: {
+          created_at: string
+          description: string
+          display_order: number
+          icon_name: string
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          display_order?: number
+          icon_name: string
+          id?: string
+          is_active?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          display_order?: number
+          icon_name?: string
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      landing_sections: {
+        Row: {
+          content: Json
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          section_key: string
+          updated_at: string
+        }
+        Insert: {
+          content: Json
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          section_key: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          section_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       metrics: {
         Row: {
           campaign_id: string
@@ -636,6 +699,78 @@ export type Database = {
           multiplier?: number
           sentiment?: Database["public"]["Enums"]["sentiment_type"]
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      site_images: {
+        Row: {
+          alt_text: string | null
+          created_at: string
+          file_size: number | null
+          height: number | null
+          id: string
+          name: string
+          storage_path: string
+          updated_at: string
+          url: string
+          usage_location: string | null
+          width: number | null
+        }
+        Insert: {
+          alt_text?: string | null
+          created_at?: string
+          file_size?: number | null
+          height?: number | null
+          id?: string
+          name: string
+          storage_path: string
+          updated_at?: string
+          url: string
+          usage_location?: string | null
+          width?: number | null
+        }
+        Update: {
+          alt_text?: string | null
+          created_at?: string
+          file_size?: number | null
+          height?: number | null
+          id?: string
+          name?: string
+          storage_path?: string
+          updated_at?: string
+          url?: string
+          usage_location?: string | null
+          width?: number | null
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: Json
         }
         Relationships: []
       }
