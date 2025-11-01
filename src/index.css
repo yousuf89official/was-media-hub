@@ -40,7 +40,7 @@ All colors MUST be HSL.
     --radius: 0.75rem;
 
     /* Sidebar tokens */
-    --sidebar: 0 0% 98%;
+    --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 0 0% 0%;
     --sidebar-border: 0 0% 90%;
     --sidebar-accent: 357 100% 44%;
@@ -83,7 +83,7 @@ All colors MUST be HSL.
     --ring: 357 100% 54%;
 
     /* Sidebar tokens for dark mode */
-    --sidebar: 0 0% 10%;
+    --sidebar-background: 0 0% 10%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-border: 0 0% 15%;
     --sidebar-accent: 357 100% 54%;
