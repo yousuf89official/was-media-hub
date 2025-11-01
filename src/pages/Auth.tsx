@@ -47,6 +47,7 @@ const Auth = () => {
         email: signupEmail,
         password: signupPassword,
         options: {
+          emailRedirectTo: `${window.location.origin}/verify-email?type=signup&email=${encodeURIComponent(signupEmail)}`,
           data: {
             name: signupName,
           },
