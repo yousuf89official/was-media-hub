@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useCampaign } from "@/hooks/useCampaigns";
 import { useDeleteCampaign } from "@/hooks/useUpdateCampaign";
 import { useMetrics } from "@/hooks/useMetrics";
+import { useRealtimeMetrics } from "@/hooks/useRealtimeMetrics";
 import { ArrowLeft, Edit, Trash2, Plus, TrendingUp } from "lucide-react";
 import {
   AlertDialog,
@@ -26,6 +27,9 @@ const CampaignDetail = () => {
   const { data: campaign, isLoading } = useCampaign(id || "");
   const { data: metrics, isLoading: loadingMetrics } = useMetrics(id);
   const deleteCampaign = useDeleteCampaign();
+  
+  // Enable real-time metrics updates
+  useRealtimeMetrics(id);
 
   const handleDelete = async () => {
     if (id) {

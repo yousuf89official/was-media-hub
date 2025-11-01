@@ -6,17 +6,41 @@ import { Plus, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { Badge } from "@/components/ui/badge";
+import AdvancedFilters, { FilterState } from "@/components/AdvancedFilters";
 
 const Campaigns = () => {
   const navigate = useNavigate();
   const { data: campaigns, isLoading } = useCampaigns();
   const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState<FilterState>({});
 
-  const filteredCampaigns = campaigns?.filter(
-    (campaign) =>
+  const filteredCampaigns = campaigns?.filter((campaign) => {
+    // Text search
+    const matchesSearch =
       campaign.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      campaign.brand?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      campaign.brand?.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // Brand filter
+    const matchesBrand = !filters.brandId || filters.brandId === "all" || campaign.brand_id === filters.brandId;
+
+    // Channel filter
+    const matchesChannel = !filters.channelId || filters.channelId === "all" || campaign.channel_id === filters.channelId;
+
+    // Status filter
+    const matchesStatus = !filters.status || filters.status === "all" || campaign.status === filters.status;
+
+    // Date filters
+    const campaignStart = new Date(campaign.start_date);
+    const campaignEnd = new Date(campaign.end_date);
+    const filterStart = filters.startDate ? new Date(filters.startDate) : null;
+    const filterEnd = filters.endDate ? new Date(filters.endDate) : null;
+
+    const matchesDateRange =
+      (!filterStart || campaignEnd >= filterStart) &&
+      (!filterEnd || campaignStart <= filterEnd);
+
+    return matchesSearch && matchesBrand && matchesChannel && matchesStatus && matchesDateRange;
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -40,12 +64,15 @@ const Campaigns = () => {
   return (
     <div className="bg-background min-h-full">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">Campaigns</h1>
-          <Button onClick={() => navigate("/campaigns/new")}>
-            <Plus className="w-4 h-4 mr-2" />
-            New Campaign
-          </Button>
+          <div className="flex gap-2">
+            <AdvancedFilters onFiltersChange={setFilters} initialFilters={filters} />
+            <Button onClick={() => navigate("/campaigns/new")}>
+              <Plus className="w-4 h-4 mr-2" />
+              New Campaign
+            </Button>
+          </div>
         </div>
         <div className="mb-6">
           <div className="relative max-w-md">

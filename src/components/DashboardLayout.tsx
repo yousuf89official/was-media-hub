@@ -3,17 +3,22 @@ import { useNavigate, Outlet } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LogOut } from "lucide-react";
+import { LogOut, Search } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useActivityLogger } from "@/hooks/useActivityLogger";
+import { useRealtimeCampaigns } from "@/hooks/useRealtimeMetrics";
+import GlobalSearch from "@/components/GlobalSearch";
+import NotificationCenter from "@/components/notifications/NotificationCenter";
 
 export const DashboardLayout = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [searchOpen, setSearchOpen] = useState(false);
   
   useActivityLogger();
+  useRealtimeCampaigns();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -68,13 +73,22 @@ export const DashboardLayout = () => {
           <header className="border-b border-border bg-card h-16 flex items-center px-4">
             <SidebarTrigger />
             <div className="flex-1" />
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground hidden sm:inline">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSearchOpen(true)}
+                className="hidden sm:flex"
+              >
+                <Search className="h-5 w-5" />
+              </Button>
+              <NotificationCenter />
+              <span className="text-sm text-muted-foreground hidden md:inline">
                 {user?.email}
               </span>
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
-                Logout
+                <span className="hidden sm:inline">Logout</span>
               </Button>
             </div>
           </header>
@@ -83,6 +97,9 @@ export const DashboardLayout = () => {
           <main className="flex-1 overflow-auto">
             <Outlet />
           </main>
+          
+          {/* Global Search Dialog */}
+          <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
         </div>
       </div>
     </SidebarProvider>

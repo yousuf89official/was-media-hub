@@ -1,8 +1,10 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { createQueryClient } from "@/utils/queryConfig";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import EmailVerification from "./pages/EmailVerification";
@@ -20,41 +22,43 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import { DashboardLayout } from "./components/DashboardLayout";
 
-const queryClient = new QueryClient();
+const queryClient = createQueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/verify-email" element={<EmailVerification />} />
-          
-          {/* Protected routes with sidebar */}
-          <Route element={<DashboardLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/campaigns" element={<Campaigns />} />
-            <Route path="/campaigns/new" element={<CampaignForm />} />
-            <Route path="/campaigns/:id" element={<CampaignDetail />} />
-            <Route path="/campaigns/:id/edit" element={<CampaignForm />} />
-            <Route path="/campaigns/:id/metrics" element={<MetricsEntry />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/brands" element={<Brands />} />
-            <Route path="/ave-calculator" element={<AVECalculator />} />
-            <Route path="/calculation-logs" element={<CalculationLogs />} />
-            <Route path="/admin-settings" element={<AdminSettings />} />
-            <Route path="/profile" element={<Profile />} />
-          </Route>
-          
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/verify-email" element={<EmailVerification />} />
+            
+            {/* Protected routes with sidebar */}
+            <Route element={<DashboardLayout />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/campaigns" element={<Campaigns />} />
+              <Route path="/campaigns/new" element={<CampaignForm />} />
+              <Route path="/campaigns/:id" element={<CampaignDetail />} />
+              <Route path="/campaigns/:id/edit" element={<CampaignForm />} />
+              <Route path="/campaigns/:id/metrics" element={<MetricsEntry />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/brands" element={<Brands />} />
+              <Route path="/ave-calculator" element={<AVECalculator />} />
+              <Route path="/calculation-logs" element={<CalculationLogs />} />
+              <Route path="/admin-settings" element={<AdminSettings />} />
+              <Route path="/profile" element={<Profile />} />
+            </Route>
+            
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
