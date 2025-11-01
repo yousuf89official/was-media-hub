@@ -8,6 +8,9 @@ import Auth from "./pages/Auth";
 import EmailVerification from "./pages/EmailVerification";
 import Dashboard from "./pages/Dashboard";
 import Campaigns from "./pages/Campaigns";
+import CampaignForm from "./pages/CampaignForm";
+import CampaignDetail from "./pages/CampaignDetail";
+import MetricsEntry from "./pages/MetricsEntry";
 import Brands from "./pages/Brands";
 import AVECalculator from "./pages/AVECalculator";
 import CalculationLogs from "./pages/CalculationLogs";
@@ -33,6 +36,10 @@ const App = () => (
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/campaigns" element={<Campaigns />} />
+            <Route path="/campaigns/new" element={<CampaignForm />} />
+            <Route path="/campaigns/:id" element={<CampaignDetail />} />
+            <Route path="/campaigns/:id/edit" element={<CampaignForm />} />
+            <Route path="/campaigns/:id/metrics" element={<MetricsEntry />} />
             <Route path="/brands" element={<Brands />} />
             <Route path="/ave-calculator" element={<AVECalculator />} />
             <Route path="/calculation-logs" element={<CalculationLogs />} />
