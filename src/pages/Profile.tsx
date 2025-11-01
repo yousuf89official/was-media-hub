@@ -188,7 +188,7 @@ export default function Profile() {
             <CardTitle>Preferences</CardTitle>
             <CardDescription>Manage your application preferences</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">Reset Onboarding</p>
@@ -211,6 +211,21 @@ export default function Profile() {
                 Reset
               </Button>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Data & Privacy</CardTitle>
+            <CardDescription>Manage your personal data and privacy settings</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/profile/data-export")}
+            >
+              Manage Data & Privacy
+            </Button>
           </CardContent>
         </Card>
       </div>

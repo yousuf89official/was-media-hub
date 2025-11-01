@@ -5,6 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { createQueryClient } from "@/utils/queryConfig";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import CookieConsent from "@/components/CookieConsent";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import EmailVerification from "./pages/EmailVerification";
@@ -19,6 +20,8 @@ import AVECalculator from "./pages/AVECalculator";
 import CalculationLogs from "./pages/CalculationLogs";
 import AdminSettings from "./pages/AdminSettings";
 import Profile from "./pages/Profile";
+import DataExport from "./pages/DataExport";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotFound from "./pages/NotFound";
 import { DashboardLayout } from "./components/DashboardLayout";
 
@@ -30,11 +33,13 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <CookieConsent />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/verify-email" element={<EmailVerification />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             
             {/* Protected routes with sidebar */}
             <Route element={<DashboardLayout />}>
@@ -50,6 +55,7 @@ const App = () => (
               <Route path="/calculation-logs" element={<CalculationLogs />} />
               <Route path="/admin-settings" element={<AdminSettings />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/data-export" element={<DataExport />} />
             </Route>
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
