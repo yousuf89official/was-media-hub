@@ -44,10 +44,18 @@ export default function EmailVerification() {
     setIsVerifying(true);
 
     try {
+      // Determine the OTP type based on the flow
+      let otpType: "signup" | "recovery" | "email_change" = "signup";
+      if (type === "reset") {
+        otpType = "recovery";
+      } else if (type === "email_change") {
+        otpType = "email_change";
+      }
+
       const { error } = await supabase.auth.verifyOtp({
         email,
         token: otp,
-        type: type === "signup" ? "signup" : "recovery",
+        type: otpType,
       });
 
       if (error) throw error;
@@ -55,6 +63,17 @@ export default function EmailVerification() {
       if (type === "signup") {
         toast.success("Email verified! Redirecting to dashboard...");
         setTimeout(() => navigate("/dashboard"), 1500);
+      } else if (type === "email_change") {
+        // Update profiles table with new email
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.email) {
+          await supabase
+            .from("profiles")
+            .update({ email: user.email })
+            .eq("id", user.id);
+        }
+        toast.success("Email changed successfully! Redirecting to profile...");
+        setTimeout(() => navigate("/profile"), 1500);
       } else {
         toast.success("Code verified! Now set your new password.");
         setShowPasswordForm(true);
@@ -176,11 +195,17 @@ export default function EmailVerification() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>
-            {type === "signup" ? "Verify Your Email" : "Reset Your Password"}
+            {type === "signup"
+              ? "Verify Your Email"
+              : type === "email_change"
+              ? "Verify New Email"
+              : "Reset Your Password"}
           </CardTitle>
           <CardDescription>
             {type === "signup"
               ? "We've sent a 6-digit verification code to your email"
+              : type === "email_change"
+              ? "Enter the 6-digit code sent to your new email address"
               : "Enter the 6-digit code sent to your email to reset your password"}
           </CardDescription>
         </CardHeader>

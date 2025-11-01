@@ -645,28 +645,85 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address_line1: string | null
+          address_line2: string | null
+          bio: string | null
+          city: string | null
           company_id: string | null
+          company_name: string | null
+          country: string | null
           created_at: string
+          date_of_birth: string | null
           email: string
+          gender: string | null
           id: string
+          industry: string | null
+          job_title: string | null
+          language_preference: string | null
+          linkedin_url: string | null
           name: string
+          phone_number: string | null
+          postal_code: string | null
+          profile_picture_url: string | null
+          state: string | null
+          timezone: string | null
           updated_at: string
+          username: string | null
+          website_url: string | null
         }
         Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
+          bio?: string | null
+          city?: string | null
           company_id?: string | null
+          company_name?: string | null
+          country?: string | null
           created_at?: string
+          date_of_birth?: string | null
           email: string
+          gender?: string | null
           id: string
+          industry?: string | null
+          job_title?: string | null
+          language_preference?: string | null
+          linkedin_url?: string | null
           name: string
+          phone_number?: string | null
+          postal_code?: string | null
+          profile_picture_url?: string | null
+          state?: string | null
+          timezone?: string | null
           updated_at?: string
+          username?: string | null
+          website_url?: string | null
         }
         Update: {
+          address_line1?: string | null
+          address_line2?: string | null
+          bio?: string | null
+          city?: string | null
           company_id?: string | null
+          company_name?: string | null
+          country?: string | null
           created_at?: string
+          date_of_birth?: string | null
           email?: string
+          gender?: string | null
           id?: string
+          industry?: string | null
+          job_title?: string | null
+          language_preference?: string | null
+          linkedin_url?: string | null
           name?: string
+          phone_number?: string | null
+          postal_code?: string | null
+          profile_picture_url?: string | null
+          state?: string | null
+          timezone?: string | null
           updated_at?: string
+          username?: string | null
+          website_url?: string | null
         }
         Relationships: [
           {
