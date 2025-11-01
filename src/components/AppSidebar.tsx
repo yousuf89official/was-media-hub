@@ -1,4 +1,4 @@
-import { BarChart3, Home, Package, TrendingUp, Settings, History, User } from "lucide-react";
+import { BarChart3, Home, Package, TrendingUp, Settings, History, User, FileText } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -17,6 +17,7 @@ const menuItems = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "Campaigns", url: "/campaigns", icon: BarChart3 },
   { title: "Brands", url: "/brands", icon: Package },
+  { title: "Reports", url: "/reports", icon: FileText },
   { title: "AVE Calculator", url: "/ave-calculator", icon: TrendingUp },
   { title: "Calculation Logs", url: "/calculation-logs", icon: History },
   { title: "Profile", url: "/profile", icon: User },
