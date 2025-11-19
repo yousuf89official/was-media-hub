@@ -15,6 +15,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
 import { Calculator, Download, Edit2, Save, X } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import { AVEResultsPDF } from '@/components/pdf/AVEResultsPDF';
 
 const AVECalculator = () => {
   const [selectedBrand, setSelectedBrand] = useState<string>("");
@@ -33,6 +35,7 @@ const AVECalculator = () => {
   const [editCpmValue, setEditCpmValue] = useState<string>("");
   const [selectedMediaOutlets, setSelectedMediaOutlets] = useState<Record<string, string[]>>({});
   const [currentECPM, setCurrentECPM] = useState<number>(45000);
+  const [calculationDate, setCalculationDate] = useState<string>("");
 
   const { data: brands } = useBrands();
   const { data: campaigns } = useCampaigns();
@@ -210,7 +213,9 @@ const AVECalculator = () => {
 
     setBreakdown(channelBreakdown);
     setFinalAVE(totalAVE);
+    setCalculationDate(new Date().toISOString());
     setShowResults(true);
+    toast.success("AVE calculated successfully!");
 
     // Save calculation log to database
     try {
@@ -277,6 +282,7 @@ const AVECalculator = () => {
     setIncludeSentiment(false);
     setEngagementLevel("");
     setSentimentType("");
+    setCalculationDate("");
   };
 
   if (showResults) {
@@ -285,9 +291,31 @@ const AVECalculator = () => {
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-3xl font-bold">AVE Results</h1>
-            <Button variant="outline" onClick={resetCalculator}>
-              New Calculation
-            </Button>
+            <div className="flex gap-2">
+              <PDFDownloadLink
+                document={
+                  <AVEResultsPDF
+                    finalAVE={finalAVE}
+                    breakdown={breakdown}
+                    brandName={brands?.find(b => b.id === selectedBrand)?.name}
+                    campaignName={campaigns?.find(c => c.id === selectedCampaign)?.name}
+                    calculationDate={calculationDate}
+                  />
+                }
+                fileName={`AVE-Report-${new Date().toISOString().split('T')[0]}.pdf`}
+              >
+                {({ loading }) => (
+                  <Button disabled={loading}>
+                    <Download className="h-4 w-4 mr-2" />
+                    {loading ? 'Generating PDF...' : 'Export as PDF'}
+                  </Button>
+                )}
+              </PDFDownloadLink>
+              
+              <Button variant="outline" onClick={resetCalculator}>
+                New Calculation
+              </Button>
+            </div>
           </div>
 
           <div className="space-y-6">
