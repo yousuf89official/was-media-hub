@@ -1,4 +1,4 @@
-import { BarChart3, Home, Package, TrendingUp, Settings, History, User, FileText, Layout } from "lucide-react";
+import { BarChart3, Home, Package, TrendingUp, Settings, History, User, FileText, Layout, Newspaper } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -26,6 +26,7 @@ const menuItems = [
 const adminMenuItems = [
   { title: "Admin Settings", url: "/admin-settings", icon: Settings },
   { title: "Content Management", url: "/content-management", icon: Layout },
+  { title: "Media Outlets", url: "/media-outlets", icon: Newspaper },
 ];
 
 export function AppSidebar() {

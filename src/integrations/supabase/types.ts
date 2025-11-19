@@ -472,6 +472,36 @@ export type Database = {
         }
         Relationships: []
       }
+      media_outlets: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          pr_value_per_article: number
+          tier: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          pr_value_per_article: number
+          tier: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          pr_value_per_article?: number
+          tier?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       metrics: {
         Row: {
           campaign_id: string
@@ -607,6 +637,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pr_settings: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          setting_key: string
+          setting_value: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_value: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: number
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       products: {
         Row: {
