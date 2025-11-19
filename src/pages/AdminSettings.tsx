@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { PRSettingsEditor } from "@/components/admin/PRSettingsEditor";
 
 export default function AdminSettings() {
   const navigate = useNavigate();
@@ -103,12 +104,13 @@ export default function AdminSettings() {
       </div>
 
       <Tabs defaultValue="cpm" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="cpm">CPM Rates</TabsTrigger>
           <TabsTrigger value="platform">Platform Multipliers</TabsTrigger>
           <TabsTrigger value="engagement">Engagement Multipliers</TabsTrigger>
           <TabsTrigger value="sentiment">Sentiment Multipliers</TabsTrigger>
           <TabsTrigger value="channels">Channels</TabsTrigger>
+          <TabsTrigger value="pr">PR Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="cpm" className="mt-6">
@@ -281,6 +283,10 @@ export default function AdminSettings() {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="pr" className="mt-6">
+          <PRSettingsEditor />
         </TabsContent>
       </Tabs>
     </div>

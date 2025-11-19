@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useBrands } from "@/hooks/useBrands";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { useChannels, useCPMRates, useMultipliers } from "@/hooks/useChannels";
+import { useMediaOutlets } from "@/hooks/useMediaOutlets";
+import { useECPMValue } from "@/hooks/usePRSettings";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -29,6 +31,8 @@ const AVECalculator = () => {
   const [breakdown, setBreakdown] = useState<any[]>([]);
   const [editingCpm, setEditingCpm] = useState<string | null>(null);
   const [editCpmValue, setEditCpmValue] = useState<string>("");
+  const [selectedMediaOutlets, setSelectedMediaOutlets] = useState<Record<string, string[]>>({});
+  const [currentECPM, setCurrentECPM] = useState<number>(45000);
 
   const { data: brands } = useBrands();
   const { data: campaigns } = useCampaigns();
@@ -36,6 +40,8 @@ const AVECalculator = () => {
   const { data: cpmRates, refetch: refetchCpm } = useCPMRates();
   const { data: multipliers } = useMultipliers();
   const { data: userRole } = useUserRole();
+  const { data: mediaOutlets } = useMediaOutlets();
+  const { data: defaultECPM } = useECPMValue();
 
   const filteredCampaigns = campaigns?.filter((c) => 
     (!selectedBrand || c.brand_id === selectedBrand) && c.status === "finished"
@@ -94,10 +100,28 @@ const AVECalculator = () => {
       return;
     }
 
-    // Check if all channels have impressions
-    const missingImpressions = selectedChannels.filter(id => !impressionsData[id] || impressionsData[id] === 0);
+    // Check Media Relations channels
+    const mediaRelationsChannel = channels?.find(c => c.name === "Media Relations");
+    const isMediaRelationsSelected = selectedChannels.includes(mediaRelationsChannel?.id || "");
+    
+    // Check if Media Relations channels have media outlets selected
+    if (isMediaRelationsSelected && mediaRelationsChannel) {
+      const selectedOutlets = selectedMediaOutlets[mediaRelationsChannel.id] || [];
+      if (selectedOutlets.length === 0) {
+        toast.error("Please select at least one media outlet for Media Relations");
+        return;
+      }
+    }
+
+    // Check if non-PR channels have impressions
+    const nonPRChannels = selectedChannels.filter(id => {
+      const channel = channels?.find(c => c.id === id);
+      return channel?.name !== "Media Relations";
+    });
+    
+    const missingImpressions = nonPRChannels.filter(id => !impressionsData[id] || impressionsData[id] === 0);
     if (missingImpressions.length > 0) {
-      toast.error("Please enter impressions for all selected channels");
+      toast.error("Please enter impressions for all selected social channels");
       return;
     }
 
@@ -105,43 +129,83 @@ const AVECalculator = () => {
     let totalAVE = 0;
 
     for (const channelId of selectedChannels) {
-      const impressions = impressionsData[channelId] || 0;
-      const cpm = cpmRates.find((r) => r.channel_id === channelId)?.cpm_value || 0;
-      const baseAVE = (impressions / 1000) * Number(cpm);
+      const channel = channels?.find(c => c.id === channelId);
+      
+      if (channel?.name === "Media Relations") {
+        // ===== PR CALCULATION =====
+        const selectedOutletIds = selectedMediaOutlets[channelId] || [];
+        let prAVE = 0;
+        const outletDetails: any[] = [];
+        
+        for (const outletId of selectedOutletIds) {
+          const outlet = mediaOutlets?.find(o => o.id === outletId);
+          if (outlet) {
+            const outletAVE = (outlet.pr_value_per_article / 1000) * currentECPM;
+            prAVE += outletAVE;
+            
+            outletDetails.push({
+              name: outlet.name,
+              tier: outlet.tier,
+              pr_value: outlet.pr_value_per_article,
+              ave: outletAVE
+            });
+          }
+        }
+        
+        channelBreakdown.push({
+          channel: "Media Relations",
+          isPR: true,
+          baseAVE: prAVE,
+          platformMult: 1,
+          engagementMult: 1,
+          sentimentMult: 1,
+          finalAVE: prAVE,
+          outlets: outletDetails,
+          ecpm: currentECPM,
+          formula: "(PR Value / 1000) × eCPM"
+        });
+        
+        totalAVE += prAVE;
+      } else {
+        // ===== SOCIAL CHANNEL CALCULATION =====
+        const impressions = impressionsData[channelId] || 0;
+        const cpm = cpmRates.find((r) => r.channel_id === channelId)?.cpm_value || 0;
+        const baseAVE = (impressions / 1000) * Number(cpm);
 
-      let platformMult = 1;
-      let engagementMult = 1;
-      let sentimentMult = 1;
+        let platformMult = 1;
+        let engagementMult = 1;
+        let sentimentMult = 1;
 
-      if (includePlatform) {
-        const platMult = multipliers.platform.find((m) => m.channel_id === channelId);
-        platformMult = platMult ? Number(platMult.multiplier) : 1;
+        if (includePlatform) {
+          const platMult = multipliers.platform.find((m) => m.channel_id === channelId);
+          platformMult = platMult ? Number(platMult.multiplier) : 1;
+        }
+
+        if (includeEngagement && engagementLevel) {
+          const engMult = multipliers.engagement.find((m) => m.level === engagementLevel);
+          engagementMult = engMult ? Number(engMult.multiplier) : 1;
+        }
+
+        if (includeSentiment && sentimentType) {
+          const sentMult = multipliers.sentiment.find((m) => m.sentiment === sentimentType);
+          sentimentMult = sentMult ? Number(sentMult.multiplier) : 1;
+        }
+
+        const channelAVE = baseAVE * platformMult * engagementMult * sentimentMult;
+        totalAVE += channelAVE;
+
+        channelBreakdown.push({
+          channel: channel?.name,
+          isPR: false,
+          impressions,
+          cpm: Number(cpm),
+          baseAVE,
+          platformMult,
+          engagementMult,
+          sentimentMult,
+          finalAVE: channelAVE,
+        });
       }
-
-      if (includeEngagement && engagementLevel) {
-        const engMult = multipliers.engagement.find((m) => m.level === engagementLevel);
-        engagementMult = engMult ? Number(engMult.multiplier) : 1;
-      }
-
-      if (includeSentiment && sentimentType) {
-        const sentMult = multipliers.sentiment.find((m) => m.sentiment === sentimentType);
-        sentimentMult = sentMult ? Number(sentMult.multiplier) : 1;
-      }
-
-      const channelAVE = baseAVE * platformMult * engagementMult * sentimentMult;
-      totalAVE += channelAVE;
-
-      const channel = channels?.find((c) => c.id === channelId);
-      channelBreakdown.push({
-        channel: channel?.name,
-        impressions,
-        cpm: Number(cpm),
-        baseAVE,
-        platformMult,
-        engagementMult,
-        sentimentMult,
-        finalAVE: channelAVE,
-      });
     }
 
     setBreakdown(channelBreakdown);
@@ -160,6 +224,8 @@ const AVECalculator = () => {
           inputs: {
             channels: selectedChannels,
             impressions: impressionsData,
+            media_outlets: selectedMediaOutlets,
+            ecpm_used: currentECPM,
             multipliers: {
               platform: includePlatform,
               engagement: includeEngagement ? engagementLevel : null,
@@ -204,6 +270,8 @@ const AVECalculator = () => {
     setShowResults(false);
     setSelectedChannels([]);
     setImpressionsData({});
+    setSelectedMediaOutlets({});
+    setCurrentECPM(defaultECPM || 45000);
     setIncludePlatform(false);
     setIncludeEngagement(false);
     setIncludeSentiment(false);
@@ -244,38 +312,77 @@ const AVECalculator = () => {
                   {breakdown.map((item, idx) => (
                     <div key={idx} className="border-b pb-4 last:border-b-0">
                       <h3 className="font-semibold text-lg mb-3">{item.channel}</h3>
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div>
-                          <span className="text-muted-foreground">Impressions:</span>
-                          <div className="font-medium">{item.impressions.toLocaleString()}</div>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">CPM:</span>
-                          <div className="font-medium">IDR {item.cpm.toLocaleString()}</div>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Base AVE:</span>
-                          <div className="font-medium">IDR {item.baseAVE.toLocaleString()}</div>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Platform Multiplier:</span>
-                          <div className="font-medium">{item.platformMult}x</div>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Engagement Multiplier:</span>
-                          <div className="font-medium">{item.engagementMult}x</div>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Sentiment Multiplier:</span>
-                          <div className="font-medium">{item.sentimentMult}x</div>
-                        </div>
-                        <div className="col-span-2">
-                          <span className="text-muted-foreground">Channel AVE:</span>
-                          <div className="font-bold text-lg text-primary">
-                            IDR {item.finalAVE.toLocaleString()}
+                      
+                      {item.isPR ? (
+                        // PR Channel Display
+                        <div className="space-y-4">
+                          <div className="text-sm text-muted-foreground">
+                            <strong>Formula:</strong> {item.formula}
+                          </div>
+                          <div className="text-sm">
+                            <strong>eCPM Used:</strong> IDR {item.ecpm.toLocaleString()}
+                          </div>
+                          
+                          <div>
+                            <strong className="text-sm">Selected Media Outlets:</strong>
+                            <div className="mt-2 space-y-2">
+                              {item.outlets.map((outlet: any, outletIdx: number) => (
+                                <div key={outletIdx} className="flex justify-between text-sm p-2 bg-muted rounded">
+                                  <span>
+                                    {outlet.name} <span className="text-muted-foreground">(Tier {outlet.tier})</span>
+                                  </span>
+                                  <span className="font-medium">
+                                    IDR {outlet.ave.toLocaleString("id-ID", { maximumFractionDigits: 0 })}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <Separator />
+                          
+                          <div className="flex justify-between font-semibold">
+                            <span>Total PR AVE:</span>
+                            <span className="text-primary">
+                              IDR {item.finalAVE.toLocaleString("id-ID", { maximumFractionDigits: 0 })}
+                            </span>
                           </div>
                         </div>
-                      </div>
+                      ) : (
+                        // Social Channel Display
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">Impressions:</span>
+                            <div className="font-medium">{item.impressions.toLocaleString()}</div>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">CPM:</span>
+                            <div className="font-medium">IDR {item.cpm.toLocaleString()}</div>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Base AVE:</span>
+                            <div className="font-medium">IDR {item.baseAVE.toLocaleString()}</div>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Platform Multiplier:</span>
+                            <div className="font-medium">{item.platformMult}x</div>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Engagement Multiplier:</span>
+                            <div className="font-medium">{item.engagementMult}x</div>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Sentiment Multiplier:</span>
+                            <div className="font-medium">{item.sentimentMult}x</div>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-muted-foreground">Channel AVE:</span>
+                            <div className="font-bold text-lg text-primary">
+                              IDR {item.finalAVE.toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -396,6 +503,12 @@ const AVECalculator = () => {
               <CardContent className="space-y-4">
                 {selectedChannels.map((channelId) => {
                   const channel = channels?.find((c) => c.id === channelId);
+                  
+                  // Skip Media Relations channel (it doesn't use impressions)
+                  if (channel?.name === "Media Relations") {
+                    return null;
+                  }
+                  
                   const cpm = cpmRates?.find((r) => r.channel_id === channelId);
                   const isEditingThisCpm = editingCpm === channelId;
                   
@@ -471,6 +584,79 @@ const AVECalculator = () => {
                           </Button>
                         )}
                       </div>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Media Relations Outlets Selection */}
+          {selectedChannels.some(id => channels?.find(c => c.id === id)?.name === "Media Relations") && mediaOutlets && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Media Relations - Select Media Outlets</CardTitle>
+                <CardDescription>
+                  Choose media outlets for PR Value calculation. Grouped by tier.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* eCPM Editor */}
+                <div className="space-y-2">
+                  <Label htmlFor="ecpm-input">eCPM Value (IDR)</Label>
+                  <Input
+                    id="ecpm-input"
+                    type="number"
+                    value={currentECPM}
+                    onChange={(e) => setCurrentECPM(parseFloat(e.target.value) || 0)}
+                    className="max-w-xs"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Default: IDR {defaultECPM?.toLocaleString() || "45,000"}. Formula: (PR Value / 1000) × eCPM
+                  </p>
+                </div>
+
+                <Separator />
+
+                {/* Media Outlets by Tier */}
+                {[1, 2, 3].map(tier => {
+                  const tierOutlets = mediaOutlets.filter(o => o.tier === tier);
+                  if (tierOutlets.length === 0) return null;
+                  
+                  const mediaRelationsChannel = channels?.find(c => c.name === "Media Relations");
+                  const mrChannelId = mediaRelationsChannel?.id || "";
+                  
+                  return (
+                    <div key={tier} className="space-y-3">
+                      <h4 className="font-semibold">Tier {tier}</h4>
+                      <div className="space-y-2">
+                        {tierOutlets.map(outlet => (
+                          <div key={outlet.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={outlet.id}
+                              checked={selectedMediaOutlets[mrChannelId]?.includes(outlet.id)}
+                              onCheckedChange={(checked) => {
+                                setSelectedMediaOutlets(prev => {
+                                  const current = prev[mrChannelId] || [];
+                                  return {
+                                    ...prev,
+                                    [mrChannelId]: checked
+                                      ? [...current, outlet.id]
+                                      : current.filter(id => id !== outlet.id)
+                                  };
+                                });
+                              }}
+                            />
+                            <Label htmlFor={outlet.id} className="flex-1 cursor-pointer">
+                              <span className="font-medium">{outlet.name}</span>
+                              <span className="ml-2 text-sm text-muted-foreground">
+                                (IDR {outlet.pr_value_per_article.toLocaleString()})
+                              </span>
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                      <Separator />
                     </div>
                   );
                 })}
