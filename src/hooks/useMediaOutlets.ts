@@ -6,7 +6,9 @@ interface MediaOutlet {
   id: string;
   name: string;
   tier: number;
-  pr_value_per_article: number;
+  average_monthly_visits: number;
+  average_page_views_per_article: number;
+  ecpm: number;
   is_active: boolean;
   created_at: string;
   updated_at: string;

@@ -474,29 +474,35 @@ export type Database = {
       }
       media_outlets: {
         Row: {
+          average_monthly_visits: number
+          average_page_views_per_article: number
           created_at: string | null
+          ecpm: number
           id: string
           is_active: boolean | null
           name: string
-          pr_value_per_article: number
           tier: number
           updated_at: string | null
         }
         Insert: {
+          average_monthly_visits?: number
+          average_page_views_per_article?: number
           created_at?: string | null
+          ecpm?: number
           id?: string
           is_active?: boolean | null
           name: string
-          pr_value_per_article: number
           tier: number
           updated_at?: string | null
         }
         Update: {
+          average_monthly_visits?: number
+          average_page_views_per_article?: number
           created_at?: string | null
+          ecpm?: number
           id?: string
           is_active?: boolean | null
           name?: string
-          pr_value_per_article?: number
           tier?: number
           updated_at?: string | null
         }

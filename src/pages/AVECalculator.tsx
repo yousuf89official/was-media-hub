@@ -5,7 +5,6 @@ import { useBrands } from "@/hooks/useBrands";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { useChannels, useCPMRates, useMultipliers } from "@/hooks/useChannels";
 import { useMediaOutlets } from "@/hooks/useMediaOutlets";
-import { useECPMValue } from "@/hooks/usePRSettings";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -34,7 +33,7 @@ const AVECalculator = () => {
   const [editingCpm, setEditingCpm] = useState<string | null>(null);
   const [editCpmValue, setEditCpmValue] = useState<string>("");
   const [selectedMediaOutlets, setSelectedMediaOutlets] = useState<Record<string, string[]>>({});
-  const [currentECPM, setCurrentECPM] = useState<number>(45000);
+  const [publicationCounts, setPublicationCounts] = useState<Record<string, number>>({});
   const [calculationDate, setCalculationDate] = useState<string>("");
 
   const { data: brands } = useBrands();
@@ -44,7 +43,6 @@ const AVECalculator = () => {
   const { data: multipliers } = useMultipliers();
   const { data: userRole } = useUserRole();
   const { data: mediaOutlets } = useMediaOutlets();
-  const { data: defaultECPM } = useECPMValue();
 
   const filteredCampaigns = campaigns?.filter((c) => 
     (!selectedBrand || c.brand_id === selectedBrand) && c.status === "finished"
@@ -128,6 +126,9 @@ const AVECalculator = () => {
       return;
     }
 
+    // Set calculation date
+    setCalculationDate(new Date().toISOString());
+
     const channelBreakdown: any[] = [];
     let totalAVE = 0;
 
@@ -135,7 +136,7 @@ const AVECalculator = () => {
       const channel = channels?.find(c => c.id === channelId);
       
       if (channel?.name === "Media Relations") {
-        // ===== PR CALCULATION =====
+        // ===== NEW PR CALCULATION =====
         const selectedOutletIds = selectedMediaOutlets[channelId] || [];
         let prAVE = 0;
         const outletDetails: any[] = [];
@@ -143,13 +144,17 @@ const AVECalculator = () => {
         for (const outletId of selectedOutletIds) {
           const outlet = mediaOutlets?.find(o => o.id === outletId);
           if (outlet) {
-            const outletAVE = (outlet.pr_value_per_article / 1000) * currentECPM;
+            const publicationCount = publicationCounts[outletId] || 1;
+            // New formula: (Average Page Views × eCPM) × Publication Count
+            const outletAVE = (outlet.average_page_views_per_article * outlet.ecpm) * publicationCount;
             prAVE += outletAVE;
             
             outletDetails.push({
               name: outlet.name,
               tier: outlet.tier,
-              pr_value: outlet.pr_value_per_article,
+              average_page_views: outlet.average_page_views_per_article,
+              ecpm: outlet.ecpm,
+              publicationCount,
               ave: outletAVE
             });
           }
@@ -164,8 +169,7 @@ const AVECalculator = () => {
           sentimentMult: 1,
           finalAVE: prAVE,
           outlets: outletDetails,
-          ecpm: currentECPM,
-          formula: "(PR Value / 1000) × eCPM"
+          formula: "(Avg Page Views × eCPM) × Publication Count"
         });
         
         totalAVE += prAVE;
@@ -211,41 +215,9 @@ const AVECalculator = () => {
       }
     }
 
-    setBreakdown(channelBreakdown);
     setFinalAVE(totalAVE);
-    setCalculationDate(new Date().toISOString());
+    setBreakdown(channelBreakdown);
     setShowResults(true);
-    toast.success("AVE calculated successfully!");
-
-    // Save calculation log to database
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from("calculation_logs").insert({
-          user_id: user.id,
-          calculation_type: "AVE",
-          brand_id: selectedBrand && selectedBrand !== "none" ? selectedBrand : null,
-          campaign_id: selectedCampaign || null,
-          inputs: {
-            channels: selectedChannels,
-            impressions: impressionsData,
-            media_outlets: selectedMediaOutlets,
-            ecpm_used: currentECPM,
-            multipliers: {
-              platform: includePlatform,
-              engagement: includeEngagement ? engagementLevel : null,
-              sentiment: includeSentiment ? sentimentType : null,
-            }
-          },
-          results: {
-            breakdown: channelBreakdown,
-            final_ave: totalAVE,
-          }
-        });
-      }
-    } catch (error: any) {
-      console.error("Failed to log calculation:", error);
-    }
 
     // Save to ave_results if campaign is selected
     if (selectedCampaign) {
@@ -269,6 +241,8 @@ const AVECalculator = () => {
         console.error("Failed to save AVE result:", error);
       }
     }
+
+    toast.success("AVE calculated successfully!");
   };
 
   const resetCalculator = () => {
@@ -276,7 +250,7 @@ const AVECalculator = () => {
     setSelectedChannels([]);
     setImpressionsData({});
     setSelectedMediaOutlets({});
-    setCurrentECPM(defaultECPM || 45000);
+    setPublicationCounts({});
     setIncludePlatform(false);
     setIncludeEngagement(false);
     setIncludeSentiment(false);
@@ -284,6 +258,14 @@ const AVECalculator = () => {
     setSentimentType("");
     setCalculationDate("");
   };
+
+  // Group media outlets by tier
+  const groupedMediaOutlets = mediaOutlets?.reduce((acc, outlet) => {
+    const tier = outlet.tier;
+    if (!acc[tier]) acc[tier] = [];
+    acc[tier].push(outlet);
+    return acc;
+  }, {} as Record<number, typeof mediaOutlets>);
 
   if (showResults) {
     return (
@@ -347,67 +329,67 @@ const AVECalculator = () => {
                           <div className="text-sm text-muted-foreground">
                             <strong>Formula:</strong> {item.formula}
                           </div>
-                          <div className="text-sm">
-                            <strong>eCPM Used:</strong> IDR {item.ecpm.toLocaleString()}
-                          </div>
                           
-                          <div>
-                            <strong className="text-sm">Selected Media Outlets:</strong>
-                            <div className="mt-2 space-y-2">
-                              {item.outlets.map((outlet: any, outletIdx: number) => (
-                                <div key={outletIdx} className="flex justify-between text-sm p-2 bg-muted rounded">
-                                  <span>
-                                    {outlet.name} <span className="text-muted-foreground">(Tier {outlet.tier})</span>
-                                  </span>
-                                  <span className="font-medium">
-                                    IDR {outlet.ave.toLocaleString("id-ID", { maximumFractionDigits: 0 })}
-                                  </span>
+                          <div className="space-y-2">
+                            <p className="text-sm font-semibold">Selected Media Outlets:</p>
+                            {item.outlets.map((outlet: any, outletIdx: number) => (
+                              <div key={outletIdx} className="flex justify-between items-center p-3 bg-muted rounded-lg">
+                                <div>
+                                  <p className="font-medium">{outlet.name} (Tier {outlet.tier})</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {outlet.average_page_views.toLocaleString()} page views × IDR {outlet.ecpm.toLocaleString()} eCPM × {outlet.publicationCount} publication{outlet.publicationCount > 1 ? 's' : ''}
+                                  </p>
                                 </div>
-                              ))}
-                            </div>
+                                <div className="text-right">
+                                  <p className="font-semibold text-primary">
+                                    IDR {outlet.ave.toLocaleString("id-ID", { maximumFractionDigits: 0 })}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
                           </div>
                           
-                          <Separator />
-                          
-                          <div className="flex justify-between font-semibold">
-                            <span>Total PR AVE:</span>
-                            <span className="text-primary">
+                          <div className="flex justify-between items-center pt-2 border-t">
+                            <span className="font-semibold">Total PR AVE:</span>
+                            <span className="text-xl font-bold text-primary">
                               IDR {item.finalAVE.toLocaleString("id-ID", { maximumFractionDigits: 0 })}
                             </span>
                           </div>
                         </div>
                       ) : (
                         // Social Channel Display
-                        <div className="grid grid-cols-2 gap-3 text-sm">
-                          <div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Impressions:</span>
-                            <div className="font-medium">{item.impressions.toLocaleString()}</div>
+                            <span className="font-medium">{item.impressions.toLocaleString()}</span>
                           </div>
-                          <div>
+                          <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">CPM:</span>
-                            <div className="font-medium">IDR {item.cpm.toLocaleString()}</div>
+                            <span className="font-medium">IDR {item.cpm.toLocaleString()}</span>
                           </div>
-                          <div>
+                          <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Base AVE:</span>
-                            <div className="font-medium">IDR {item.baseAVE.toLocaleString()}</div>
+                            <span className="font-medium">IDR {item.baseAVE.toLocaleString()}</span>
                           </div>
-                          <div>
+                          <Separator className="my-2" />
+                          <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Platform Multiplier:</span>
-                            <div className="font-medium">{item.platformMult}x</div>
+                            <span className="font-medium">{item.platformMult}x</span>
                           </div>
-                          <div>
+                          <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Engagement Multiplier:</span>
-                            <div className="font-medium">{item.engagementMult}x</div>
+                            <span className="font-medium">{item.engagementMult}x</span>
                           </div>
-                          <div>
+                          <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Sentiment Multiplier:</span>
-                            <div className="font-medium">{item.sentimentMult}x</div>
+                            <span className="font-medium">{item.sentimentMult}x</span>
                           </div>
-                          <div className="col-span-2">
-                            <span className="text-muted-foreground">Channel AVE:</span>
-                            <div className="font-bold text-lg text-primary">
+                          <Separator className="my-2" />
+                          <div className="flex justify-between items-center pt-1">
+                            <span className="font-semibold">Channel AVE:</span>
+                            <span className="text-xl font-bold text-primary">
                               IDR {item.finalAVE.toLocaleString()}
-                            </div>
+                            </span>
                           </div>
                         </div>
                       )}
@@ -423,372 +405,353 @@ const AVECalculator = () => {
   }
 
   return (
-    <div className="bg-background min-h-full">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">AVE Calculator</h1>
-          <p className="text-muted-foreground">
-            Calculate Advertising Value Equivalence for your campaigns
-          </p>
-        </div>
+    <div className="container mx-auto px-4 py-6 space-y-6">
+      <div className="flex items-center gap-3 mb-6">
+        <Calculator className="h-8 w-8" />
+        <h1 className="text-3xl font-bold">AVE Calculator</h1>
+      </div>
 
-        <div className="space-y-6">
-          {/* Campaign Selection (Optional) */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Campaign Selection (Optional)</CardTitle>
-              <CardDescription>
-                Select a brand and campaign to load metrics, or skip to enter manually
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Brand</Label>
-                  <Select value={selectedBrand} onValueChange={(value) => {
-                    setSelectedBrand(value);
-                    setSelectedCampaign("");
-                  }}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select brand (optional)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">None (Manual Input)</SelectItem>
-                      {brands?.map((brand) => (
-                        <SelectItem key={brand.id} value={brand.id}>
-                          {brand.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+      {/* Campaign Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Campaign Selection (Optional)</CardTitle>
+          <CardDescription>
+            Select a campaign to auto-load metrics or calculate manually
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="brand">Brand</Label>
+              <Select value={selectedBrand} onValueChange={setSelectedBrand}>
+                <SelectTrigger id="brand">
+                  <SelectValue placeholder="Select brand" />
+                </SelectTrigger>
+                <SelectContent>
+                  {brands?.map((brand) => (
+                    <SelectItem key={brand.id} value={brand.id}>
+                      {brand.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="campaign">Campaign</Label>
+              <Select
+                value={selectedCampaign}
+                onValueChange={setSelectedCampaign}
+                disabled={!selectedBrand}
+              >
+                <SelectTrigger id="campaign">
+                  <SelectValue placeholder="Select campaign" />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredCampaigns?.map((campaign) => (
+                    <SelectItem key={campaign.id} value={campaign.id}>
+                      {campaign.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-                <div className="space-y-2">
-                  <Label>Campaign</Label>
-                  <Select 
-                    value={selectedCampaign} 
-                    onValueChange={setSelectedCampaign}
-                    disabled={!selectedBrand || selectedBrand === "none"}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select finished campaign" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {filteredCampaigns?.map((campaign) => (
-                        <SelectItem key={campaign.id} value={campaign.id}>
-                          {campaign.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+      {/* Channel Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Channel Selection</CardTitle>
+          <CardDescription>Select channels to include in AVE calculation</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {channels?.map((channel) => (
+              <div key={channel.id} className="flex items-center space-x-2">
+                <Checkbox
+                  id={channel.id}
+                  checked={selectedChannels.includes(channel.id)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setSelectedChannels([...selectedChannels, channel.id]);
+                    } else {
+                      setSelectedChannels(selectedChannels.filter((id) => id !== channel.id));
+                      if (channel.name === "Media Relations") {
+                        setSelectedMediaOutlets({});
+                        setPublicationCounts({});
+                      }
+                    }
+                  }}
+                />
+                <Label htmlFor={channel.id} className="cursor-pointer">
+                  {channel.name}
+                </Label>
               </div>
-            </CardContent>
-          </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
-          {/* Channel Selection */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Select Channels</CardTitle>
-              <CardDescription>Choose the channels to include in the calculation</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid sm:grid-cols-3 gap-4">
-                {channels?.map((channel) => (
-                  <div key={channel.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={channel.id}
-                      checked={selectedChannels.includes(channel.id)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setSelectedChannels([...selectedChannels, channel.id]);
-                        } else {
-                          setSelectedChannels(selectedChannels.filter((id) => id !== channel.id));
-                          const newData = { ...impressionsData };
-                          delete newData[channel.id];
-                          setImpressionsData(newData);
-                        }
-                      }}
-                    />
-                    <Label htmlFor={channel.id} className="cursor-pointer">
-                      {channel.name}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+      {/* Impressions Input for Social Channels */}
+      {selectedChannels.some(id => {
+        const channel = channels?.find(c => c.id === id);
+        return channel?.name !== "Media Relations";
+      }) && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Impressions Input</CardTitle>
+            <CardDescription>Enter impressions for each social channel</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {selectedChannels.map((channelId) => {
+              const channel = channels?.find((c) => c.id === channelId);
+              if (channel?.name === "Media Relations") return null;
 
-          {/* Impressions Input */}
-          {selectedChannels.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Impressions</CardTitle>
-                <CardDescription>
-                  Enter impressions manually or load from selected campaign
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {selectedChannels.map((channelId) => {
-                  const channel = channels?.find((c) => c.id === channelId);
-                  
-                  // Skip Media Relations channel (it doesn't use impressions)
-                  if (channel?.name === "Media Relations") {
-                    return null;
-                  }
-                  
-                  const cpm = cpmRates?.find((r) => r.channel_id === channelId);
-                  const isEditingThisCpm = editingCpm === channelId;
-                  
-                  return (
-                    <div key={channelId} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-base font-semibold">{channel?.name}</Label>
-                        <div className="flex items-center gap-2">
-                          {isEditingThisCpm ? (
-                            <>
-                              <Input
-                                type="number"
-                                value={editCpmValue}
-                                onChange={(e) => setEditCpmValue(e.target.value)}
-                                className="w-24 h-8"
-                              />
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => handleUpdateCpm(channelId)}
-                              >
-                                <Save className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => setEditingCpm(null)}
-                              >
-                                <X className="h-3 w-3" />
-                              </Button>
-                            </>
-                          ) : (
-                            <>
-                              <span className="text-sm text-muted-foreground">
-                                CPM: IDR {cpm?.cpm_value.toLocaleString() || 0}
-                              </span>
-                              {userRole === "MasterAdmin" && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => {
-                                    setEditingCpm(channelId);
-                                    setEditCpmValue(cpm?.cpm_value.toString() || "0");
-                                  }}
-                                >
-                                  <Edit2 className="h-3 w-3" />
-                                </Button>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
+              const cpm = cpmRates?.find((r) => r.channel_id === channelId);
+              return (
+                <div key={channelId} className="space-y-2">
+                  <Label>{channel?.name}</Label>
+                  <div className="flex items-center gap-2 mb-2">
+                    {editingCpm === channelId ? (
+                      <>
                         <Input
                           type="number"
-                          placeholder="Enter impressions"
-                          value={impressionsData[channelId] || ""}
-                          onChange={(e) =>
-                            setImpressionsData((prev) => ({
-                              ...prev,
-                              [channelId]: parseInt(e.target.value) || 0,
-                            }))
-                          }
-                          className="flex-1"
+                          value={editCpmValue}
+                          onChange={(e) => setEditCpmValue(e.target.value)}
+                          className="w-24 h-8"
                         />
-                        {selectedCampaign && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleUpdateCpm(channelId)}
+                        >
+                          <Save className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setEditingCpm(null)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-sm text-muted-foreground">
+                          CPM: IDR {cpm?.cpm_value.toLocaleString() || 0}
+                        </span>
+                        {userRole === "MasterAdmin" && (
                           <Button
-                            variant="outline"
-                            onClick={() => loadImpressions(channelId)}
                             size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setEditingCpm(channelId);
+                              setEditCpmValue(cpm?.cpm_value.toString() || "0");
+                            }}
                           >
-                            Load from DB
+                            <Edit2 className="h-3 w-3" />
                           </Button>
                         )}
+                      </>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      placeholder="Enter impressions"
+                      value={impressionsData[channelId] || ""}
+                      onChange={(e) =>
+                        setImpressionsData((prev) => ({
+                          ...prev,
+                          [channelId]: parseInt(e.target.value) || 0,
+                        }))
+                      }
+                      className="flex-1"
+                    />
+                    {selectedCampaign && (
+                      <Button
+                        variant="outline"
+                        onClick={() => loadImpressions(channelId)}
+                        size="sm"
+                      >
+                        Load from DB
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Media Relations Outlets Selection */}
+      {selectedChannels.some(id => channels?.find(c => c.id === id)?.name === "Media Relations") && mediaOutlets && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Media Relations - Select Media Outlets</CardTitle>
+            <CardDescription>
+              Choose media outlets for PR Value calculation. Grouped by tier.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {groupedMediaOutlets && Object.keys(groupedMediaOutlets).length > 0 && (
+              <div className="space-y-4">
+                {Object.entries(groupedMediaOutlets)
+                  .sort(([a], [b]) => parseInt(a) - parseInt(b))
+                  .map(([tier, outlets]) => (
+                    <div key={tier} className="border rounded-lg p-4">
+                      <h3 className="font-semibold mb-3">Tier {tier}</h3>
+                      <div className="space-y-3">
+                        {outlets?.map((outlet) => {
+                          const mediaRelationsChannel = channels?.find(c => c.name === "Media Relations");
+                          const isSelected = selectedMediaOutlets[mediaRelationsChannel?.id || ""]?.includes(outlet.id) || false;
+                          const estimatedAVE = outlet.average_page_views_per_article * outlet.ecpm;
+                          
+                          return (
+                            <div key={outlet.id} className="flex items-start space-x-3 p-3 bg-muted rounded-lg">
+                              <Checkbox
+                                id={outlet.id}
+                                checked={isSelected}
+                                onCheckedChange={(checked) => {
+                                  const channelId = mediaRelationsChannel?.id || "";
+                                  if (checked) {
+                                    setSelectedMediaOutlets((prev) => ({
+                                      ...prev,
+                                      [channelId]: [...(prev[channelId] || []), outlet.id],
+                                    }));
+                                    setPublicationCounts((prev) => ({
+                                      ...prev,
+                                      [outlet.id]: 1,
+                                    }));
+                                  } else {
+                                    setSelectedMediaOutlets((prev) => ({
+                                      ...prev,
+                                      [channelId]: (prev[channelId] || []).filter(id => id !== outlet.id),
+                                    }));
+                                    setPublicationCounts((prev) => {
+                                      const newCounts = { ...prev };
+                                      delete newCounts[outlet.id];
+                                      return newCounts;
+                                    });
+                                  }
+                                }}
+                              />
+                              <div className="flex-1">
+                                <Label htmlFor={outlet.id} className="cursor-pointer font-medium">
+                                  {outlet.name}
+                                </Label>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {outlet.average_page_views_per_article.toLocaleString()} page views × IDR {outlet.ecpm.toLocaleString()} eCPM = 
+                                  <span className="font-semibold text-foreground"> IDR {estimatedAVE.toLocaleString('id-ID', { maximumFractionDigits: 0 })}</span> per article
+                                </div>
+                                {isSelected && (
+                                  <div className="mt-2">
+                                    <Label htmlFor={`pub-${outlet.id}`} className="text-xs">Number of Publications</Label>
+                                    <Input
+                                      id={`pub-${outlet.id}`}
+                                      type="number"
+                                      min="1"
+                                      value={publicationCounts[outlet.id] || 1}
+                                      onChange={(e) => {
+                                        const value = parseInt(e.target.value) || 1;
+                                        setPublicationCounts((prev) => ({
+                                          ...prev,
+                                          [outlet.id]: value,
+                                        }));
+                                      }}
+                                      className="w-24 h-8 mt-1"
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          )}
+                  ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
-          {/* Media Relations Outlets Selection */}
-          {selectedChannels.some(id => channels?.find(c => c.id === id)?.name === "Media Relations") && mediaOutlets && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Media Relations - Select Media Outlets</CardTitle>
-                <CardDescription>
-                  Choose media outlets for PR Value calculation. Grouped by tier.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* eCPM Editor */}
-                <div className="space-y-2">
-                  <Label htmlFor="ecpm-input">eCPM Value (IDR)</Label>
-                  <Input
-                    id="ecpm-input"
-                    type="number"
-                    value={currentECPM}
-                    onChange={(e) => setCurrentECPM(parseFloat(e.target.value) || 0)}
-                    className="max-w-xs"
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Default: IDR {defaultECPM?.toLocaleString() || "45,000"}. Formula: (PR Value / 1000) × eCPM
-                  </p>
-                </div>
+      {/* Multiplier Options */}
+      {selectedChannels.some(id => channels?.find(c => c.id === id)?.name !== "Media Relations") && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Multiplier Options (Social Channels Only)</CardTitle>
+            <CardDescription>Apply optional multipliers to social channel calculations</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="platform"
+                checked={includePlatform}
+                onCheckedChange={(checked) => setIncludePlatform(!!checked)}
+              />
+              <Label htmlFor="platform">Include Platform Multiplier</Label>
+            </div>
 
-                <Separator />
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="engagement"
+                  checked={includeEngagement}
+                  onCheckedChange={(checked) => setIncludeEngagement(!!checked)}
+                />
+                <Label htmlFor="engagement">Include Engagement Multiplier</Label>
+              </div>
+              {includeEngagement && (
+                <Select value={engagementLevel} onValueChange={setEngagementLevel}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select engagement level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {multipliers?.engagement.map((m) => (
+                      <SelectItem key={m.id} value={m.level}>
+                        {m.level.charAt(0).toUpperCase() + m.level.slice(1)} ({m.multiplier}x)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
 
-                {/* Media Outlets by Tier */}
-                {[1, 2, 3].map(tier => {
-                  const tierOutlets = mediaOutlets.filter(o => o.tier === tier);
-                  if (tierOutlets.length === 0) return null;
-                  
-                  const mediaRelationsChannel = channels?.find(c => c.name === "Media Relations");
-                  const mrChannelId = mediaRelationsChannel?.id || "";
-                  
-                  return (
-                    <div key={tier} className="space-y-3">
-                      <h4 className="font-semibold">Tier {tier}</h4>
-                      <div className="space-y-2">
-                        {tierOutlets.map(outlet => (
-                          <div key={outlet.id} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={outlet.id}
-                              checked={selectedMediaOutlets[mrChannelId]?.includes(outlet.id)}
-                              onCheckedChange={(checked) => {
-                                setSelectedMediaOutlets(prev => {
-                                  const current = prev[mrChannelId] || [];
-                                  return {
-                                    ...prev,
-                                    [mrChannelId]: checked
-                                      ? [...current, outlet.id]
-                                      : current.filter(id => id !== outlet.id)
-                                  };
-                                });
-                              }}
-                            />
-                            <Label htmlFor={outlet.id} className="flex-1 cursor-pointer">
-                              <span className="font-medium">{outlet.name}</span>
-                              <span className="ml-2 text-sm text-muted-foreground">
-                                (IDR {outlet.pr_value_per_article.toLocaleString()})
-                              </span>
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                      <Separator />
-                    </div>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          )}
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="sentiment"
+                  checked={includeSentiment}
+                  onCheckedChange={(checked) => setIncludeSentiment(!!checked)}
+                />
+                <Label htmlFor="sentiment">Include Sentiment Multiplier</Label>
+              </div>
+              {includeSentiment && (
+                <Select value={sentimentType} onValueChange={setSentimentType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select sentiment type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {multipliers?.sentiment.map((m) => (
+                      <SelectItem key={m.id} value={m.sentiment}>
+                        {m.sentiment.charAt(0).toUpperCase() + m.sentiment.slice(1)} ({m.multiplier}x)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-          {/* Multipliers */}
-          {selectedChannels.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Multipliers (Optional)</CardTitle>
-                <CardDescription>Apply additional multipliers to the base AVE</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="platform"
-                    checked={includePlatform}
-                    onCheckedChange={(checked) => setIncludePlatform(checked as boolean)}
-                  />
-                  <Label htmlFor="platform" className="cursor-pointer">
-                    Include Platform Multipliers (varies by channel)
-                  </Label>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="engagement"
-                      checked={includeEngagement}
-                      onCheckedChange={(checked) => {
-                        setIncludeEngagement(checked as boolean);
-                        if (!checked) setEngagementLevel("");
-                      }}
-                    />
-                    <Label htmlFor="engagement" className="cursor-pointer">
-                      Include Engagement Multiplier
-                    </Label>
-                  </div>
-                  {includeEngagement && (
-                    <Select value={engagementLevel} onValueChange={setEngagementLevel}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select engagement level" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Low">Low (1.5x)</SelectItem>
-                        <SelectItem value="Moderate">Moderate (1.8x)</SelectItem>
-                        <SelectItem value="High">High (2.5x)</SelectItem>
-                        <SelectItem value="Viral">Viral / Influencer (4.0x)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-
-                <Separator />
-
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="sentiment"
-                      checked={includeSentiment}
-                      onCheckedChange={(checked) => {
-                        setIncludeSentiment(checked as boolean);
-                        if (!checked) setSentimentType("");
-                      }}
-                    />
-                    <Label htmlFor="sentiment" className="cursor-pointer">
-                      Include Sentiment Multiplier
-                    </Label>
-                  </div>
-                  {includeSentiment && (
-                    <Select value={sentimentType} onValueChange={setSentimentType}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select sentiment" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Positive">Positive (1.5x)</SelectItem>
-                        <SelectItem value="Neutral">Neutral (1.0x)</SelectItem>
-                        <SelectItem value="Negative">Negative (0.8x)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Calculate Button */}
-          {selectedChannels.length > 0 && (
-            <Button
-              onClick={calculateAVE}
-              size="lg"
-              className="w-full"
-              disabled={selectedChannels.length === 0}
-            >
-              <Calculator className="w-5 h-5 mr-2" />
-              Calculate AVE
-            </Button>
-          )}
-        </div>
-      </div>
+      <Button onClick={calculateAVE} size="lg" className="w-full">
+        <Calculator className="h-5 w-5 mr-2" />
+        Calculate AVE
+      </Button>
     </div>
   );
 };

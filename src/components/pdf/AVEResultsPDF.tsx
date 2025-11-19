@@ -177,16 +177,21 @@ export const AVEResultsPDF: React.FC<AVEResultsPDFProps> = ({
                 <View style={styles.outletSection}>
                   <Text style={styles.outletLabel}>Selected Media Outlets:</Text>
                   
-                  {item.outlets.map((outlet: any, outletIdx: number) => (
-                    <View key={outletIdx} style={styles.outletCard}>
+                {item.outlets.map((outlet: any, outletIdx: number) => (
+                  <View key={outletIdx} style={styles.outletCard}>
+                    <View>
                       <Text>
                         {outlet.name} (Tier {outlet.tier})
                       </Text>
-                      <Text style={styles.dataValue}>
-                        IDR {outlet.ave.toLocaleString('id-ID', { maximumFractionDigits: 0 })}
+                      <Text style={{ fontSize: 8, color: '#666', marginTop: 2 }}>
+                        {outlet.average_page_views.toLocaleString()} page views × IDR {outlet.ecpm.toLocaleString()} eCPM × {outlet.publicationCount} publication{outlet.publicationCount > 1 ? 's' : ''}
                       </Text>
                     </View>
-                  ))}
+                    <Text style={styles.dataValue}>
+                      IDR {outlet.ave.toLocaleString('id-ID', { maximumFractionDigits: 0 })}
+                    </Text>
+                  </View>
+                ))}
                 </View>
                 
                 <View style={styles.totalRow}>
