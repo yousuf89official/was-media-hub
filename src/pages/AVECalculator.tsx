@@ -17,6 +17,29 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { AVEResultsPDF } from '@/components/pdf/AVEResultsPDF';
 
+interface PROutletDetail {
+  name: string;
+  tier: number;
+  average_page_views: number;
+  ecpm: number;
+  publicationCount: number;
+  ave: number;
+}
+
+interface BreakdownItem {
+  channel: string;
+  isPR: boolean;
+  finalAVE: number;
+  outlets?: PROutletDetail[];
+  formula?: string;
+  impressions?: number;
+  cpm?: number;
+  baseAVE?: number;
+  platformMult?: number;
+  engagementMult?: number;
+  sentimentMult?: number;
+}
+
 const AVECalculator = () => {
   const [selectedBrand, setSelectedBrand] = useState<string>("");
   const [selectedCampaign, setSelectedCampaign] = useState<string>("");
@@ -29,7 +52,7 @@ const AVECalculator = () => {
   const [sentimentType, setSentimentType] = useState<string>("");
   const [showResults, setShowResults] = useState(false);
   const [finalAVE, setFinalAVE] = useState<number>(0);
-  const [breakdown, setBreakdown] = useState<any[]>([]);
+  const [breakdown, setBreakdown] = useState<BreakdownItem[]>([]);
   const [editingCpm, setEditingCpm] = useState<string | null>(null);
   const [editCpmValue, setEditCpmValue] = useState<string>("");
   const [selectedMediaOutlets, setSelectedMediaOutlets] = useState<Record<string, string[]>>({});
@@ -38,11 +61,11 @@ const AVECalculator = () => {
 
   const { data: brands } = useBrands();
   const { data: campaigns } = useCampaigns();
-  const { data: channels } = useChannels();
-  const { data: cpmRates, refetch: refetchCpm } = useCPMRates();
+  const { data: channels, isLoading: isLoadingChannels } = useChannels();
+  const { data: cpmRates, isLoading: isLoadingCpm, refetch: refetchCpm } = useCPMRates();
   const { data: multipliers } = useMultipliers();
   const { data: userRole } = useUserRole();
-  const { data: mediaOutlets } = useMediaOutlets();
+  const { data: mediaOutlets, isLoading: isLoadingMediaOutlets } = useMediaOutlets();
 
   const filteredCampaigns = campaigns?.filter((c) => 
     (!selectedBrand || c.brand_id === selectedBrand) && c.status === "finished"
@@ -96,6 +119,27 @@ const AVECalculator = () => {
       return;
     }
 
+    // Validate that media outlets data is loaded if Media Relations is selected
+    const hasMediaRelations = selectedChannels.some(channelId => {
+      const channel = channels?.find(c => c.id === channelId);
+      return channel?.name === "Media Relations";
+    });
+
+    if (hasMediaRelations && !mediaOutlets) {
+      toast.error("Media outlets data is still loading. Please wait...");
+      return;
+    }
+
+    if (hasMediaRelations) {
+      const mediaRelationsChannel = channels?.find(c => c.name === "Media Relations");
+      const selectedOutlets = selectedMediaOutlets[mediaRelationsChannel?.id || ""] || [];
+      
+      if (selectedOutlets.length === 0) {
+        toast.error("Please select at least one media outlet for Media Relations");
+        return;
+      }
+    }
+
     if (!cpmRates || !multipliers) {
       toast.error("Loading multipliers data...");
       return;
@@ -129,7 +173,7 @@ const AVECalculator = () => {
     // Set calculation date
     setCalculationDate(new Date().toISOString());
 
-    const channelBreakdown: any[] = [];
+    const channelBreakdown: BreakdownItem[] = [];
     let totalAVE = 0;
 
     for (const channelId of selectedChannels) {
@@ -139,23 +183,40 @@ const AVECalculator = () => {
         // ===== NEW PR CALCULATION =====
         const selectedOutletIds = selectedMediaOutlets[channelId] || [];
         let prAVE = 0;
-        const outletDetails: any[] = [];
+        const outletDetails: PROutletDetail[] = [];
         
         for (const outletId of selectedOutletIds) {
           const outlet = mediaOutlets?.find(o => o.id === outletId);
+          
+          // DEBUG: Log outlet data
+          console.log('Processing outlet:', {
+            outletId,
+            found: !!outlet,
+            hasPageViews: outlet?.average_page_views_per_article !== undefined,
+            hasECPM: outlet?.ecpm !== undefined,
+            outlet
+          });
+          
           if (outlet) {
+            // Validate required properties
+            if (!outlet.average_page_views_per_article || !outlet.ecpm) {
+              console.warn(`Media outlet ${outlet.name} is missing required data`, outlet);
+              toast.error(`Media outlet "${outlet.name}" has incomplete data. Please update it in Media Outlets Management.`);
+              continue; // Skip this outlet
+            }
+            
             const publicationCount = publicationCounts[outletId] || 1;
             // New formula: (Average Page Views × eCPM) × Publication Count
             const outletAVE = (outlet.average_page_views_per_article * outlet.ecpm) * publicationCount;
             prAVE += outletAVE;
             
             outletDetails.push({
-              name: outlet.name,
-              tier: outlet.tier,
-              average_page_views: outlet.average_page_views_per_article,
-              ecpm: outlet.ecpm,
-              publicationCount,
-              ave: outletAVE
+              name: outlet.name || "Unknown Outlet",
+              tier: outlet.tier || 0,
+              average_page_views: outlet.average_page_views_per_article || 0,
+              ecpm: outlet.ecpm || 0,
+              publicationCount: publicationCount || 1,
+              ave: outletAVE || 0
             });
           }
         }
@@ -227,7 +288,7 @@ const AVECalculator = () => {
           await supabase.from("ave_results").insert([{
             campaign_id: selectedCampaign,
             channels_used: selectedChannels,
-            base_ave_per_channel: channelBreakdown,
+            base_ave_per_channel: channelBreakdown as any,
             weighted_components: {
               platform: includePlatform,
               engagement: includeEngagement ? engagementLevel : null,
@@ -336,15 +397,15 @@ const AVECalculator = () => {
                               <div key={outletIdx} className="flex justify-between items-center p-3 bg-muted rounded-lg">
                                 <div>
                                   <p className="font-medium">{outlet.name} (Tier {outlet.tier})</p>
-                                  <p className="text-xs text-muted-foreground">
-                                    {outlet.average_page_views.toLocaleString()} page views × IDR {outlet.ecpm.toLocaleString()} eCPM × {outlet.publicationCount} publication{outlet.publicationCount > 1 ? 's' : ''}
-                                  </p>
-                                </div>
-                                <div className="text-right">
-                                  <p className="font-semibold text-primary">
-                                    IDR {outlet.ave.toLocaleString("id-ID", { maximumFractionDigits: 0 })}
-                                  </p>
-                                </div>
+                          <p className="text-xs text-muted-foreground">
+                            {(outlet.average_page_views || 0).toLocaleString()} page views × IDR {(outlet.ecpm || 0).toLocaleString()} eCPM × {outlet.publicationCount || 1} publication{(outlet.publicationCount || 1) > 1 ? 's' : ''}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold text-primary">
+                            IDR {(outlet.ave || 0).toLocaleString("id-ID", { maximumFractionDigits: 0 })}
+                          </p>
+                        </div>
                               </div>
                             ))}
                           </div>
@@ -748,9 +809,16 @@ const AVECalculator = () => {
         </Card>
       )}
 
-      <Button onClick={calculateAVE} size="lg" className="w-full">
+      <Button 
+        onClick={calculateAVE} 
+        size="lg" 
+        className="w-full"
+        disabled={isLoadingMediaOutlets || isLoadingChannels || isLoadingCpm}
+      >
         <Calculator className="h-5 w-5 mr-2" />
-        Calculate AVE
+        {isLoadingMediaOutlets || isLoadingChannels || isLoadingCpm 
+          ? "Loading data..." 
+          : "Calculate AVE"}
       </Button>
     </div>
   );

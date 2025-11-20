@@ -184,11 +184,11 @@ export const AVEResultsPDF: React.FC<AVEResultsPDFProps> = ({
                         {outlet.name} (Tier {outlet.tier})
                       </Text>
                       <Text style={{ fontSize: 8, color: '#666', marginTop: 2 }}>
-                        {outlet.average_page_views.toLocaleString()} page views × IDR {outlet.ecpm.toLocaleString()} eCPM × {outlet.publicationCount} publication{outlet.publicationCount > 1 ? 's' : ''}
+                        {(outlet.average_page_views || 0).toLocaleString()} page views × IDR {(outlet.ecpm || 0).toLocaleString()} eCPM × {outlet.publicationCount || 1} publication{(outlet.publicationCount || 1) > 1 ? 's' : ''}
                       </Text>
                     </View>
                     <Text style={styles.dataValue}>
-                      IDR {outlet.ave.toLocaleString('id-ID', { maximumFractionDigits: 0 })}
+                      IDR {(outlet.ave || 0).toLocaleString('id-ID', { maximumFractionDigits: 0 })}
                     </Text>
                   </View>
                 ))}
