@@ -1,5 +1,28 @@
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 
+interface PROutletDetail {
+  name: string;
+  tier: number;
+  average_page_views: number;
+  ecpm: number;
+  publicationCount: number;
+  ave: number;
+}
+
+interface BreakdownItem {
+  channel: string;
+  isPR: boolean;
+  finalAVE: number;
+  formula?: string;
+  outlets?: PROutletDetail[];
+  impressions?: number;
+  cpm?: number;
+  baseAVE?: number;
+  platformMult?: number;
+  engagementMult?: number;
+  sentimentMult?: number;
+}
+
 const styles = StyleSheet.create({
   page: {
     padding: 40,
@@ -113,7 +136,7 @@ const styles = StyleSheet.create({
 
 interface AVEResultsPDFProps {
   finalAVE: number;
-  breakdown: any[];
+  breakdown: BreakdownItem[];
   brandName?: string;
   campaignName?: string;
   calculationDate: string;
@@ -169,15 +192,11 @@ export const AVEResultsPDF: React.FC<AVEResultsPDFProps> = ({
                   <Text style={styles.dataLabel}>Formula:</Text>
                   <Text style={styles.dataValue}>{item.formula}</Text>
                 </View>
-                <View style={styles.dataRow}>
-                  <Text style={styles.dataLabel}>eCPM Used:</Text>
-                  <Text style={styles.dataValue}>IDR {item.ecpm.toLocaleString()}</Text>
-                </View>
                 
                 <View style={styles.outletSection}>
                   <Text style={styles.outletLabel}>Selected Media Outlets:</Text>
                   
-                {item.outlets.map((outlet: any, outletIdx: number) => (
+                {item.outlets.map((outlet: PROutletDetail, outletIdx: number) => (
                   <View key={outletIdx} style={styles.outletCard}>
                     <View>
                       <Text>
@@ -206,15 +225,15 @@ export const AVEResultsPDF: React.FC<AVEResultsPDFProps> = ({
               <View>
                 <View style={styles.dataRow}>
                   <Text style={styles.dataLabel}>Impressions:</Text>
-                  <Text style={styles.dataValue}>{item.impressions.toLocaleString()}</Text>
+                  <Text style={styles.dataValue}>{(item.impressions || 0).toLocaleString()}</Text>
                 </View>
                 <View style={styles.dataRow}>
                   <Text style={styles.dataLabel}>CPM:</Text>
-                  <Text style={styles.dataValue}>IDR {item.cpm.toLocaleString()}</Text>
+                  <Text style={styles.dataValue}>IDR {(item.cpm || 0).toLocaleString()}</Text>
                 </View>
                 <View style={styles.dataRow}>
                   <Text style={styles.dataLabel}>Base AVE:</Text>
-                  <Text style={styles.dataValue}>IDR {item.baseAVE.toLocaleString()}</Text>
+                  <Text style={styles.dataValue}>IDR {(item.baseAVE || 0).toLocaleString()}</Text>
                 </View>
                 <View style={styles.dataRow}>
                   <Text style={styles.dataLabel}>Platform Multiplier:</Text>
