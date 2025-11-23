@@ -3,19 +3,20 @@ import { useNavigate } from "react-router-dom";
 import * as Icons from "lucide-react";
 import { useSiteContent } from "@/contexts/SiteContentContext";
 import { DEFAULT_HERO, DEFAULT_CTA, DEFAULT_SETTINGS } from "@/utils/contentDefaults";
-
 const Landing = () => {
   const navigate = useNavigate();
-  const { getSetting, getSection, features, isLoading } = useSiteContent();
-
+  const {
+    getSetting,
+    getSection,
+    features,
+    isLoading
+  } = useSiteContent();
   const heroContent = getSection("hero") as any || DEFAULT_HERO;
   const ctaContent = getSection("cta") as any || DEFAULT_CTA;
   const siteTitle = getSetting("site_title") || DEFAULT_SETTINGS.site_title;
   const footerText = getSetting("footer_text") || DEFAULT_SETTINGS.footer_text;
   const loginText = getSetting("header_login_text") || DEFAULT_SETTINGS.header_login_text;
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -36,26 +37,20 @@ const Landing = () => {
             <p className="text-xl text-muted-foreground">
               {heroContent.subtitle}
             </p>
-            <div className="flex gap-4 justify-center pt-4">
-              <Button 
-                size="lg" 
-                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-[var(--shadow-glow)]"
-                onClick={() => navigate(heroContent.primaryCtaAction || "/auth")}
-              >
+            <div className="gap-4 pt-4 flex items-start justify-center">
+              <Button size="lg" onClick={() => navigate(heroContent.primaryCtaAction || "/auth")} className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-[var(--shadow-glow)] text-lg">
                 {heroContent.primaryCtaText}
               </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                onClick={() => {
-                  const action = heroContent.secondaryCtaAction;
-                  if (action?.startsWith("#")) {
-                    document.querySelector(action)?.scrollIntoView({ behavior: "smooth" });
-                  } else {
-                    navigate(action || "#features");
-                  }
-                }}
-              >
+              <Button size="lg" variant="outline" onClick={() => {
+              const action = heroContent.secondaryCtaAction;
+              if (action?.startsWith("#")) {
+                document.querySelector(action)?.scrollIntoView({
+                  behavior: "smooth"
+                });
+              } else {
+                navigate(action || "#features");
+              }
+            }}>
                 {heroContent.secondaryCtaText}
               </Button>
             </div>
@@ -69,29 +64,16 @@ const Landing = () => {
           <h3 className="text-3xl font-bold text-center mb-12">
             {getSection("features")?.title || "Powerful Features for Modern Teams"}
           </h3>
-          {isLoading ? (
-            <div className="text-center text-muted-foreground">Loading features...</div>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {features
-                .filter((f: any) => f.is_active)
-                .map((feature: any) => {
-                  const IconComponent = (Icons as any)[feature.icon_name];
-                  return (
-                    <div
-                      key={feature.id}
-                      className="bg-card p-6 rounded-lg border border-border hover:shadow-lg transition-all"
-                    >
-                      {IconComponent && (
-                        <IconComponent className="w-12 h-12 text-primary mb-4" />
-                      )}
+          {isLoading ? <div className="text-center text-muted-foreground">Loading features...</div> : <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {features.filter((f: any) => f.is_active).map((feature: any) => {
+            const IconComponent = (Icons as any)[feature.icon_name];
+            return <div key={feature.id} className="bg-card p-6 rounded-lg border border-border hover:shadow-lg transition-all">
+                      {IconComponent && <IconComponent className="w-12 h-12 text-primary mb-4" />}
                       <h4 className="text-lg font-semibold mb-2">{feature.title}</h4>
                       <p className="text-sm text-muted-foreground">{feature.description}</p>
-                    </div>
-                  );
-                })}
-            </div>
-          )}
+                    </div>;
+          })}
+            </div>}
         </div>
       </section>
 
@@ -105,11 +87,7 @@ const Landing = () => {
             <p className="text-lg text-muted-foreground mb-8">
               {ctaContent.description}
             </p>
-            <Button 
-              size="lg" 
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
-              onClick={() => navigate(ctaContent.buttonAction || "/auth")}
-            >
+            <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => navigate(ctaContent.buttonAction || "/auth")}>
               {ctaContent.buttonText}
             </Button>
           </div>
@@ -122,8 +100,6 @@ const Landing = () => {
           <p>{footerText}</p>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Landing;
