@@ -64,6 +64,30 @@ This project is built with:
 
 Simply open [Lovable](https://lovable.dev/projects/5788c368-4b5e-4d02-8da5-927fba3f42bd) and click on Share -> Publish.
 
+### Deploy with Docker
+
+You can also build and run the app locally in a container:
+
+```sh
+# Build the image
+docker build -t was-media-hub .
+
+# Run the production preview server on port 8080
+docker run -p 8080:8080 was-media-hub
+```
+
+### Run in this environment (ChatGPT)
+
+To serve the production build directly in this workspace, use the hosted preview script on port 8080:
+
+```sh
+npm ci
+npm run build
+npm run start
+```
+
+Then open the forwarded port 8080 to view the app.
+
 ## Can I connect a custom domain to my Lovable project?
 
 Yes, you can!
