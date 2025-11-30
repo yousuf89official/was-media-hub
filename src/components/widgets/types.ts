@@ -4,6 +4,7 @@ export type WidgetType =
   | 'line-chart'
   | 'bar-chart'
   | 'pie-chart'
+  | 'area-chart'
   | 'progress-bar'
   | 'data-table'
   | 'funnel'
@@ -34,6 +35,7 @@ export interface WidgetConfig {
     target?: number;
     format?: 'number' | 'currency' | 'percentage';
     currencyCode?: string;
+    channel?: string;
   };
 }
 
@@ -47,16 +49,17 @@ export interface WidgetData {
 }
 
 export const WIDGET_TYPES: { type: WidgetType; label: string; description: string }[] = [
-  { type: 'metric-card', label: 'Metric Card', description: 'Display a single KPI value' },
-  { type: 'premium-stat', label: 'Premium Stat', description: 'Enhanced stat with icon and color' },
-  { type: 'line-chart', label: 'Line Chart', description: 'Trend visualization over time' },
-  { type: 'bar-chart', label: 'Bar Chart', description: 'Compare values across categories' },
-  { type: 'pie-chart', label: 'Pie Chart', description: 'Show distribution/composition' },
+  { type: 'metric-card', label: 'Metric Card', description: 'Display a single KPI value with sparkline' },
+  { type: 'premium-stat', label: 'Premium Stat', description: 'Enhanced stat with icon and channel branding' },
+  { type: 'line-chart', label: 'Line Chart', description: 'Trend visualization with gradients' },
+  { type: 'bar-chart', label: 'Bar Chart', description: 'Compare values with channel colors' },
+  { type: 'pie-chart', label: 'Pie Chart', description: 'Show distribution with platform colors' },
+  { type: 'area-chart', label: 'Stacked Area Chart', description: 'Multi-channel trend comparison' },
   { type: 'progress-bar', label: 'Progress Bar', description: 'Track progress toward goals' },
-  { type: 'data-table', label: 'Data Table', description: 'Tabular data display' },
-  { type: 'funnel', label: 'Marketing Funnel', description: 'Funnel stage visualization' },
-  { type: 'speedometer', label: 'Speedometer', description: 'Gauge for rates/performance' },
-  { type: 'channel-performance', label: 'Channel Performance', description: 'Channel metrics with branding' },
+  { type: 'data-table', label: 'Data Table', description: 'Tabular data with channel indicators' },
+  { type: 'funnel', label: 'Marketing Funnel', description: 'Animated funnel visualization' },
+  { type: 'speedometer', label: 'Speedometer', description: 'Animated gauge for performance rates' },
+  { type: 'channel-performance', label: 'Channel Performance', description: 'Horizontal bar chart by channel' },
 ];
 
 export const WIDGET_SIZES: { size: WidgetSize; label: string; cols: number }[] = [
