@@ -15,6 +15,7 @@ import { useUpdateCampaign } from "@/hooks/useUpdateCampaign";
 import { useBrands } from "@/hooks/useBrands";
 import { useProducts, useCreateProduct } from "@/hooks/useProducts";
 import { useChannels } from "@/hooks/useChannels";
+import { useCampaignChannelConfigs } from "@/hooks/useCampaignChannelConfigs";
 import { ChannelBudgetSelector, type ChannelBudget } from "@/components/brand-dashboard/ChannelBudgetSelector";
 import { ArrowLeft, Plus, Info } from "lucide-react";
 import { toast } from "sonner";
@@ -44,6 +45,7 @@ const CampaignForm = () => {
   const [newProductCategory, setNewProductCategory] = useState("");
 
   const { data: campaign, isLoading: loadingCampaign } = useCampaign(id || "");
+  const { data: existingChannelConfigs, isLoading: loadingConfigs } = useCampaignChannelConfigs(id);
   const createCampaign = useCreateCampaign();
   const updateCampaign = useUpdateCampaign();
   const { data: brands } = useBrands();
@@ -78,19 +80,32 @@ const CampaignForm = () => {
         end_date: campaign.end_date,
         status: campaign.status,
       });
-      // Load existing channel configurations
+    }
+  }, [campaign, isEdit, form]);
+
+  // Load existing channel configurations from campaign_channel_configs
+  useEffect(() => {
+    if (existingChannelConfigs && existingChannelConfigs.length > 0 && isEdit) {
+      setSelectedChannels(
+        existingChannelConfigs.map((config) => ({
+          channel_id: config.channel_id,
+          budget: config.budget || 0,
+        }))
+      );
+    } else if (campaign && isEdit && !loadingConfigs) {
+      // Fallback to campaign.channel_ids if no configs exist
       if (campaign.channel_ids && campaign.channel_ids.length > 0) {
         setSelectedChannels(
           campaign.channel_ids.map((ch_id: string) => ({
             channel_id: ch_id,
-            budget: 0, // We'd load from campaign_channel_configs in a real scenario
+            budget: 0,
           }))
         );
       } else if (campaign.channel_id) {
         setSelectedChannels([{ channel_id: campaign.channel_id, budget: 0 }]);
       }
     }
-  }, [campaign, isEdit, form]);
+  }, [existingChannelConfigs, campaign, isEdit, loadingConfigs]);
 
   const handleCreateProduct = async () => {
     if (!newProductName.trim() || !brandId) return;
@@ -140,11 +155,16 @@ const CampaignForm = () => {
 
     try {
       if (isEdit) {
-        await updateCampaign.mutateAsync({ id, ...payload });
-        toast.success("Campaign updated! Complete setup in Data Sources tab.");
+        await updateCampaign.mutateAsync({ 
+          id, 
+          ...payload,
+          channelBudgets: selectedChannels,
+        });
       } else {
-        await createCampaign.mutateAsync(payload);
-        toast.success("Campaign created as draft. Complete setup in Data Sources tab.");
+        await createCampaign.mutateAsync({
+          ...payload,
+          channelBudgets: selectedChannels,
+        });
       }
       navigate("/campaigns");
     } catch (error) {
@@ -152,7 +172,7 @@ const CampaignForm = () => {
     }
   };
 
-  if (isEdit && loadingCampaign) {
+  if (isEdit && (loadingCampaign || loadingConfigs)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
