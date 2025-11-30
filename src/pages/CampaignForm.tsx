@@ -1,34 +1,33 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { useCampaign, useCreateCampaign } from "@/hooks/useCampaigns";
 import { useUpdateCampaign } from "@/hooks/useUpdateCampaign";
 import { useBrands } from "@/hooks/useBrands";
-import { useProducts } from "@/hooks/useProducts";
+import { useProducts, useCreateProduct } from "@/hooks/useProducts";
 import { useChannels } from "@/hooks/useChannels";
-import { useObjectives } from "@/hooks/useObjectives";
-import { useBuyingModels } from "@/hooks/useBuyingModels";
-import { ArrowLeft } from "lucide-react";
+import { ChannelBudgetSelector, type ChannelBudget } from "@/components/brand-dashboard/ChannelBudgetSelector";
+import { ArrowLeft, Plus, Info } from "lucide-react";
+import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
 
 const campaignSchema = z.object({
   name: z.string().min(1, "Campaign name is required"),
   brand_id: z.string().min(1, "Brand is required"),
   product_id: z.string().optional(),
-  channel_id: z.string().min(1, "Channel is required"),
   funnel_type: z.enum(["TOP", "MID", "BOTTOM"]),
-  objective_id: z.string().optional(),
-  buying_model_id: z.string().optional(),
   start_date: z.string().min(1, "Start date is required"),
   end_date: z.string().min(1, "End date is required"),
-  primary_kpi: z.string().optional(),
-  secondary_kpi: z.string().optional(),
   status: z.enum(["draft", "running", "finished"]),
 });
 
@@ -39,11 +38,17 @@ const CampaignForm = () => {
   const { id } = useParams();
   const isEdit = !!id;
 
+  const [selectedChannels, setSelectedChannels] = useState<ChannelBudget[]>([]);
+  const [showProductDialog, setShowProductDialog] = useState(false);
+  const [newProductName, setNewProductName] = useState("");
+  const [newProductCategory, setNewProductCategory] = useState("");
+
   const { data: campaign, isLoading: loadingCampaign } = useCampaign(id || "");
   const createCampaign = useCreateCampaign();
   const updateCampaign = useUpdateCampaign();
   const { data: brands } = useBrands();
   const { data: channels } = useChannels();
+  const createProduct = useCreateProduct();
 
   const form = useForm<CampaignFormData>({
     resolver: zodResolver(campaignSchema),
@@ -51,61 +56,100 @@ const CampaignForm = () => {
       name: "",
       brand_id: "",
       product_id: "",
-      channel_id: "",
       funnel_type: "TOP",
-      objective_id: "",
-      buying_model_id: "",
       start_date: "",
       end_date: "",
-      primary_kpi: "",
-      secondary_kpi: "",
       status: "draft",
     },
   });
 
   const brandId = form.watch("brand_id");
-  const channelId = form.watch("channel_id");
-  const objectiveId = form.watch("objective_id");
+  const { data: products, refetch: refetchProducts } = useProducts(brandId);
 
-  const { data: products } = useProducts(brandId);
-  const { data: objectives } = useObjectives(channelId);
-  const { data: buyingModels } = useBuyingModels(channelId, objectiveId);
-
+  // Load existing campaign data for edit mode
   useEffect(() => {
     if (campaign && isEdit) {
       form.reset({
         name: campaign.name,
         brand_id: campaign.brand_id,
         product_id: campaign.product_id || "",
-        channel_id: campaign.channel_id,
         funnel_type: campaign.funnel_type,
-        objective_id: campaign.objective_id || "",
-        buying_model_id: campaign.buying_model_id || "",
         start_date: campaign.start_date,
         end_date: campaign.end_date,
-        primary_kpi: campaign.primary_kpi || "",
-        secondary_kpi: campaign.secondary_kpi || "",
         status: campaign.status,
       });
+      // Load existing channel configurations
+      if (campaign.channel_ids && campaign.channel_ids.length > 0) {
+        setSelectedChannels(
+          campaign.channel_ids.map((ch_id: string) => ({
+            channel_id: ch_id,
+            budget: 0, // We'd load from campaign_channel_configs in a real scenario
+          }))
+        );
+      } else if (campaign.channel_id) {
+        setSelectedChannels([{ channel_id: campaign.channel_id, budget: 0 }]);
+      }
     }
   }, [campaign, isEdit, form]);
 
+  const handleCreateProduct = async () => {
+    if (!newProductName.trim() || !brandId) return;
+
+    try {
+      await createProduct.mutateAsync({
+        name: newProductName.trim(),
+        brand_id: brandId,
+        category: newProductCategory.trim() || undefined,
+      });
+      setShowProductDialog(false);
+      setNewProductName("");
+      setNewProductCategory("");
+      refetchProducts();
+      toast.success("Product created successfully");
+    } catch (error) {
+      toast.error("Failed to create product");
+    }
+  };
+
   const onSubmit = async (data: CampaignFormData) => {
+    if (selectedChannels.length === 0) {
+      toast.error("Please select at least one channel");
+      return;
+    }
+
+    const hasZeroBudget = selectedChannels.some((c) => c.budget <= 0);
+    if (hasZeroBudget) {
+      toast.error("Please set a budget for all selected channels");
+      return;
+    }
+
+    // Use first channel as primary channel_id for backward compatibility
+    const primaryChannelId = selectedChannels[0].channel_id;
+    const channelIds = selectedChannels.map((c) => c.channel_id);
+
     const payload = {
       ...data,
+      channel_id: primaryChannelId,
+      channel_ids: channelIds,
       product_id: data.product_id || null,
-      objective_id: data.objective_id || null,
-      buying_model_id: data.buying_model_id || null,
-      primary_kpi: data.primary_kpi || null,
-      secondary_kpi: data.secondary_kpi || null,
+      objective_id: null,
+      buying_model_id: null,
+      primary_kpi: null,
+      secondary_kpi: null,
     };
 
-    if (isEdit) {
-      await updateCampaign.mutateAsync({ id, ...payload });
-    } else {
-      await createCampaign.mutateAsync(payload);
+    try {
+      if (isEdit) {
+        await updateCampaign.mutateAsync({ id, ...payload });
+        toast.success("Campaign updated! Complete setup in Data Sources tab.");
+      } else {
+        await createCampaign.mutateAsync(payload);
+        toast.success("Campaign created as draft. Complete setup in Data Sources tab.");
+      }
+      navigate("/campaigns");
+    } catch (error) {
+      toast.error("Failed to save campaign");
     }
-    navigate("/campaigns");
   };
 
   if (isEdit && loadingCampaign) {
@@ -116,21 +160,28 @@ const CampaignForm = () => {
     );
   }
 
+  const hasNoProducts = brandId && products && products.length === 0;
+
   return (
     <div className="bg-background min-h-full">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <Button
           variant="ghost"
-          onClick={() => navigate("/campaigns")}
+          onClick={() => navigate(-1)}
           className="mb-6"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Campaigns
+          Back
         </Button>
 
         <Card>
           <CardHeader>
             <CardTitle>{isEdit ? "Edit Campaign" : "Create New Campaign"}</CardTitle>
+            <CardDescription>
+              {isEdit 
+                ? "Update campaign details. Additional settings can be configured in the Data Sources tab."
+                : "Set up basic campaign details. You can complete additional setup in the Data Sources tab after creation."}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -181,127 +232,84 @@ const CampaignForm = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Product (Optional)</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value} disabled={!brandId}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select product" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {products?.map((product) => (
-                              <SelectItem key={product.id} value={product.id}>
-                                {product.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <div className="flex gap-2">
+                          <Select 
+                            onValueChange={field.onChange} 
+                            value={field.value} 
+                            disabled={!brandId}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="flex-1">
+                                <SelectValue placeholder={hasNoProducts ? "No products available" : "Select product"} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {products?.map((product) => (
+                                <SelectItem key={product.id} value={product.id}>
+                                  {product.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {brandId && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              onClick={() => setShowProductDialog(true)}
+                              title="Add new product"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                        {hasNoProducts && (
+                          <p className="text-sm text-muted-foreground">
+                            No products for this brand. Click + to create one.
+                          </p>
+                        )}
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="channel_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Channel</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select channel" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {channels?.map((channel) => (
-                              <SelectItem key={channel.id} value={channel.id}>
-                                {channel.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                <div className="space-y-2">
+                  <FormLabel>Channels & Budget</FormLabel>
+                <ChannelBudgetSelector
+                    channels={channels || []}
+                    selectedChannels={selectedChannels}
+                    onSelectionChange={setSelectedChannels}
                   />
-
-                  <FormField
-                    control={form.control}
-                    name="funnel_type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Funnel Type</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select funnel type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="TOP">Top (Awareness)</SelectItem>
-                            <SelectItem value="MID">Mid (Consideration)</SelectItem>
-                            <SelectItem value="BOTTOM">Bottom (Conversion)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {selectedChannels.length === 0 && (
+                    <p className="text-sm text-destructive">
+                      At least one channel is required
+                    </p>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="objective_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Objective (Optional)</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value} disabled={!channelId}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select objective" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {objectives?.map((objective) => (
-                              <SelectItem key={objective.id} value={objective.id}>
-                                {objective.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="buying_model_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Buying Model (Optional)</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value} disabled={!channelId}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select buying model" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {buyingModels?.map((model) => (
-                              <SelectItem key={model.id} value={model.id}>
-                                {model.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="funnel_type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Funnel Type</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select funnel type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="TOP">Top (Awareness)</SelectItem>
+                          <SelectItem value="MID">Mid (Consideration)</SelectItem>
+                          <SelectItem value="BOTTOM">Bottom (Conversion)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
@@ -333,70 +341,24 @@ const CampaignForm = () => {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="primary_kpi"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Primary KPI (Optional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., Impressions" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="secondary_kpi"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Secondary KPI (Optional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., Engagement Rate" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="draft">Draft</SelectItem>
-                          <SelectItem value="running">Running</SelectItem>
-                          <SelectItem value="finished">Finished</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertDescription>
+                    Campaign will be created as <strong>Draft</strong>. Complete objectives, buying models, KPIs, and ad setup in the Data Sources tab to set it Live.
+                  </AlertDescription>
+                </Alert>
 
                 <div className="flex gap-4 justify-end">
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => navigate("/campaigns")}
+                    onClick={() => navigate(-1)}
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
-                    disabled={createCampaign.isPending || updateCampaign.isPending}
+                    disabled={createCampaign.isPending || updateCampaign.isPending || selectedChannels.length === 0}
                   >
                     {isEdit ? "Update Campaign" : "Create Campaign"}
                   </Button>
@@ -406,6 +368,46 @@ const CampaignForm = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Inline Product Creation Dialog */}
+      <Dialog open={showProductDialog} onOpenChange={setShowProductDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Product</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="product-name">Product Name</Label>
+              <Input
+                id="product-name"
+                placeholder="Enter product name"
+                value={newProductName}
+                onChange={(e) => setNewProductName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="product-category">Category (Optional)</Label>
+              <Input
+                id="product-category"
+                placeholder="e.g., Electronics, Beauty"
+                value={newProductCategory}
+                onChange={(e) => setNewProductCategory(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowProductDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleCreateProduct}
+              disabled={!newProductName.trim() || createProduct.isPending}
+            >
+              {createProduct.isPending ? "Creating..." : "Create Product"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
