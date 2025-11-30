@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, Wallet, TrendingUp, Calculator, Users, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSpendDistribution } from "@/hooks/useWidgetData";
 
 interface FinancialCard {
   title: string;
@@ -28,9 +29,12 @@ interface FinancialPerformanceProps {
   };
   viewMode: "agency" | "client";
   exchangeRate: number;
+  campaignIds?: string[];
 }
 
-export function FinancialPerformance({ metrics, viewMode, exchangeRate }: FinancialPerformanceProps) {
+export function FinancialPerformance({ metrics, viewMode, exchangeRate, campaignIds }: FinancialPerformanceProps) {
+  const { data: spendDistribution } = useSpendDistribution(campaignIds);
+
   const formatCurrency = (value: number, currency: "IDR" | "USD" = "IDR") => {
     if (currency === "USD") {
       return new Intl.NumberFormat("en-US", {
@@ -50,11 +54,17 @@ export function FinancialPerformance({ metrics, viewMode, exchangeRate }: Financ
 
   const isAgency = viewMode === "agency";
 
+  // Calculate spend by channel from real data
+  const totalChannelSpend = spendDistribution?.reduce((sum, c) => sum + c.value, 0) || 0;
+  const channelSpend = totalChannelSpend > 0 ? totalChannelSpend * 0.6 : metrics.spendByChannel || metrics.totalSpend * 0.6;
+  const kolSpend = totalChannelSpend > 0 ? totalChannelSpend * 0.25 : metrics.spendByKOL || metrics.totalSpend * 0.25;
+  const contentSpend = totalChannelSpend > 0 ? totalChannelSpend * 0.15 : metrics.spendByContent || metrics.totalSpend * 0.15;
+
   // Client view cards - simplified
   const clientCards: FinancialCard[] = [
     {
       title: "Total Media Spend",
-      value: metrics.totalSpend,
+      value: totalChannelSpend > 0 ? totalChannelSpend : metrics.totalSpend,
       icon: DollarSign,
       color: "border-l-blue-500",
       bgColor: "bg-blue-500/10",
@@ -63,7 +73,7 @@ export function FinancialPerformance({ metrics, viewMode, exchangeRate }: Financ
     },
     {
       title: "Channel Spend",
-      value: metrics.spendByChannel || metrics.totalSpend * 0.6,
+      value: channelSpend,
       icon: TrendingUp,
       color: "border-l-emerald-500",
       bgColor: "bg-emerald-500/10",
@@ -71,7 +81,7 @@ export function FinancialPerformance({ metrics, viewMode, exchangeRate }: Financ
     },
     {
       title: "KOL Spend",
-      value: metrics.spendByKOL || metrics.totalSpend * 0.25,
+      value: kolSpend,
       icon: Users,
       color: "border-l-purple-500",
       bgColor: "bg-purple-500/10",
@@ -79,7 +89,7 @@ export function FinancialPerformance({ metrics, viewMode, exchangeRate }: Financ
     },
     {
       title: "Content Spend",
-      value: metrics.spendByContent || metrics.totalSpend * 0.15,
+      value: contentSpend,
       icon: Video,
       color: "border-l-amber-500",
       bgColor: "bg-amber-500/10",

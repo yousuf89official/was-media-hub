@@ -8,6 +8,8 @@ import {
   AreaChart, Area, Legend
 } from 'recharts';
 import { cn } from '@/lib/utils';
+import { useChannelPerformance, useFunnelMetrics, useDailyMetrics } from '@/hooks/useMetricTrends';
+import { useCampaignTableData, useSpendDistribution } from '@/hooks/useWidgetData';
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Eye,
@@ -142,10 +144,11 @@ export function WidgetRenderer({ widget, data }: WidgetRendererProps) {
 }
 
 function MetricCardWidget({ widget, data }: { widget: WidgetConfig; data: WidgetData }) {
+  const { data: dailyMetrics } = useDailyMetrics();
   const IconComponent = widget.config.icon ? ICONS[widget.config.icon] : Eye;
   const trend = data.trend || 0;
   const isPositive = trend >= 0;
-  const sparklineData = data.data || generateChartData();
+  const sparklineData = dailyMetrics || data.data || generateChartData();
 
   const formatValue = (value: number) => {
     if (widget.config.format === 'currency') {
@@ -191,7 +194,7 @@ function MetricCardWidget({ widget, data }: { widget: WidgetConfig; data: Widget
                 </defs>
                 <Area
                   type="monotone"
-                  dataKey="value"
+                  dataKey="impressions"
                   stroke={isPositive ? '#22c55e' : '#ef4444'}
                   strokeWidth={1.5}
                   fill={`url(#spark-${widget.id})`}
@@ -250,7 +253,8 @@ function PremiumStatWidget({ widget, data }: { widget: WidgetConfig; data: Widge
 }
 
 function LineChartWidget({ widget, data }: { widget: WidgetConfig; data: WidgetData }) {
-  const chartData = data.data || generateChartData();
+  const { data: dailyMetrics } = useDailyMetrics();
+  const chartData = dailyMetrics || data.data || generateChartData();
   const channel = widget.config.channel || 'default';
   const colors = CHANNEL_COLORS[channel] || CHANNEL_COLORS.default;
 
@@ -277,8 +281,8 @@ function LineChartWidget({ widget, data }: { widget: WidgetConfig; data: WidgetD
               <Tooltip content={<CustomTooltip />} />
               <Line 
                 type="monotone" 
-                dataKey="value" 
-                name="Value"
+                dataKey="impressions" 
+                name="Impressions"
                 stroke={colors.primary}
                 strokeWidth={2.5}
                 dot={{ fill: colors.primary, strokeWidth: 2, r: 4 }}
@@ -295,8 +299,8 @@ function LineChartWidget({ widget, data }: { widget: WidgetConfig; data: WidgetD
 }
 
 function AreaChartWidget({ widget, data }: { widget: WidgetConfig; data: WidgetData }) {
-  const chartData = data.data || generateMultiSeriesData();
-  const channels = ['instagram', 'facebook', 'youtube'];
+  const { data: dailyMetrics } = useDailyMetrics();
+  const chartData = dailyMetrics || data.data || generateMultiSeriesData();
 
   return (
     <Card className="h-full">
@@ -319,22 +323,26 @@ function AreaChartWidget({ widget, data }: { widget: WidgetConfig; data: WidgetD
                 wrapperStyle={{ fontSize: '11px' }}
                 iconType="circle"
               />
-              {channels.map((channel, index) => {
-                const colors = CHANNEL_COLORS[channel];
-                return (
-                  <Area
-                    key={channel}
-                    type="monotone"
-                    dataKey={channel}
-                    name={channel.charAt(0).toUpperCase() + channel.slice(1)}
-                    stackId="1"
-                    stroke={colors.primary}
-                    fill={colors.gradient}
-                    animationDuration={1500 + index * 200}
-                    animationEasing="ease-out"
-                  />
-                );
-              })}
+              <Area
+                type="monotone"
+                dataKey="impressions"
+                name="Impressions"
+                stackId="1"
+                stroke={CHANNEL_COLORS.instagram.primary}
+                fill={CHANNEL_COLORS.instagram.gradient}
+                animationDuration={1500}
+                animationEasing="ease-out"
+              />
+              <Area
+                type="monotone"
+                dataKey="engagements"
+                name="Engagements"
+                stackId="2"
+                stroke={CHANNEL_COLORS.facebook.primary}
+                fill={CHANNEL_COLORS.facebook.gradient}
+                animationDuration={1700}
+                animationEasing="ease-out"
+              />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -344,7 +352,8 @@ function AreaChartWidget({ widget, data }: { widget: WidgetConfig; data: WidgetD
 }
 
 function BarChartWidget({ widget, data }: { widget: WidgetConfig; data: WidgetData }) {
-  const chartData = data.data || generateChartData();
+  const { data: dailyMetrics } = useDailyMetrics();
+  const chartData = dailyMetrics || data.data || generateChartData();
   const channel = widget.config.channel || 'default';
   const colors = CHANNEL_COLORS[channel] || CHANNEL_COLORS.default;
 
@@ -366,14 +375,14 @@ function BarChartWidget({ widget, data }: { widget: WidgetConfig; data: WidgetDa
               <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
               <Tooltip content={<CustomTooltip />} />
               <Bar 
-                dataKey="value" 
-                name="Value"
+                dataKey="impressions" 
+                name="Impressions"
                 fill={colors.gradient}
                 radius={[6, 6, 0, 0]}
                 animationDuration={1200}
                 animationEasing="ease-out"
               >
-                {chartData.map((_, index) => (
+                {chartData.map((_: any, index: number) => (
                   <Cell 
                     key={`cell-${index}`} 
                     fill={CHART_COLORS[index % CHART_COLORS.length]}
@@ -390,12 +399,13 @@ function BarChartWidget({ widget, data }: { widget: WidgetConfig; data: WidgetDa
 }
 
 function PieChartWidget({ widget, data }: { widget: WidgetConfig; data: WidgetData }) {
-  const chartData = data.data || [
+  const { data: spendData } = useSpendDistribution();
+  const chartData = spendData?.length ? spendData : (data.data || [
     { name: 'Instagram', value: 40 },
     { name: 'Facebook', value: 30 },
     { name: 'YouTube', value: 20 },
     { name: 'TikTok', value: 10 },
-  ];
+  ]);
 
   return (
     <Card className="h-full">
@@ -419,9 +429,9 @@ function PieChartWidget({ widget, data }: { widget: WidgetConfig; data: WidgetDa
                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 labelLine={{ stroke: 'hsl(var(--muted-foreground))', strokeWidth: 1 }}
               >
-                {chartData.map((entry, index) => {
-                  const channelKey = entry.name.toLowerCase();
-                  const colors = CHANNEL_COLORS[channelKey] || { primary: CHART_COLORS[index % CHART_COLORS.length] };
+                {chartData.map((entry: any, index: number) => {
+                  const channelKey = entry.name?.toLowerCase() || '';
+                  const colors = CHANNEL_COLORS[channelKey] || { primary: entry.color || CHART_COLORS[index % CHART_COLORS.length] };
                   return (
                     <Cell 
                       key={`cell-${index}`} 
@@ -442,7 +452,14 @@ function PieChartWidget({ widget, data }: { widget: WidgetConfig; data: WidgetDa
 }
 
 function ChannelPerformanceWidget({ widget, data }: { widget: WidgetConfig; data: WidgetData }) {
-  const channelData = [
+  const { data: channelData } = useChannelPerformance();
+  
+  const displayData = channelData?.length ? channelData.map(c => ({
+    name: c.name,
+    impressions: c.impressions,
+    engagements: c.engagements,
+    color: c.color,
+  })) : [
     { name: 'Instagram', impressions: 450000, engagements: 12500, color: '#E4405F' },
     { name: 'Facebook', impressions: 320000, engagements: 8900, color: '#1877F2' },
     { name: 'YouTube', impressions: 280000, engagements: 7200, color: '#FF0000' },
@@ -457,7 +474,7 @@ function ChannelPerformanceWidget({ widget, data }: { widget: WidgetConfig; data
       <CardContent>
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={channelData} layout="vertical">
+            <BarChart data={displayData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" opacity={0.5} horizontal={false} />
               <XAxis type="number" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
               <YAxis 
@@ -474,7 +491,7 @@ function ChannelPerformanceWidget({ widget, data }: { widget: WidgetConfig; data
                 radius={[0, 4, 4, 0]}
                 animationDuration={1200}
               >
-                {channelData.map((entry, index) => (
+                {displayData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} opacity={0.8} />
                 ))}
               </Bar>
@@ -484,7 +501,7 @@ function ChannelPerformanceWidget({ widget, data }: { widget: WidgetConfig; data
                 radius={[0, 4, 4, 0]}
                 animationDuration={1400}
               >
-                {channelData.map((entry, index) => (
+                {displayData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} opacity={0.5} />
                 ))}
               </Bar>
@@ -534,14 +551,16 @@ function ProgressBarWidget({ widget, data }: { widget: WidgetConfig; data: Widge
 }
 
 function FunnelWidget({ widget, data }: { widget: WidgetConfig; data: WidgetData }) {
-  const funnelData = [
+  const { data: funnelData } = useFunnelMetrics();
+  
+  const displayData = funnelData?.length ? funnelData : [
     { stage: 'Awareness', value: 100000, color: '#E4405F' },
     { stage: 'Consideration', value: 50000, color: '#1877F2' },
     { stage: 'Conversion', value: 10000, color: '#4285F4' },
     { stage: 'Retention', value: 5000, color: '#34A853' },
   ];
 
-  const maxValue = funnelData[0].value;
+  const maxValue = displayData[0]?.value || 1;
 
   return (
     <Card className="h-full">
@@ -550,7 +569,7 @@ function FunnelWidget({ widget, data }: { widget: WidgetConfig; data: WidgetData
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {funnelData.map((stage, index) => {
+          {displayData.map((stage, index) => {
             const width = (stage.value / maxValue) * 100;
             return (
               <div key={stage.stage} className="flex items-center gap-3 group">
@@ -648,7 +667,9 @@ function SpeedometerWidget({ widget, data }: { widget: WidgetConfig; data: Widge
 }
 
 function DataTableWidget({ widget, data }: { widget: WidgetConfig; data: WidgetData }) {
-  const tableData = [
+  const { data: tableData } = useCampaignTableData();
+  
+  const displayData = tableData?.length ? tableData : [
     { campaign: 'Summer Sale', impressions: 125000, clicks: 3200, ctr: '2.56%', channel: 'instagram' },
     { campaign: 'Brand Awareness', impressions: 89000, clicks: 1800, ctr: '2.02%', channel: 'facebook' },
     { campaign: 'Product Launch', impressions: 67000, clicks: 2100, ctr: '3.13%', channel: 'youtube' },
@@ -671,7 +692,7 @@ function DataTableWidget({ widget, data }: { widget: WidgetConfig; data: WidgetD
               </tr>
             </thead>
             <tbody>
-              {tableData.map((row, i) => {
+              {displayData.map((row, i) => {
                 const colors = CHANNEL_COLORS[row.channel] || CHANNEL_COLORS.default;
                 return (
                   <tr 
@@ -737,6 +758,7 @@ function generateChartData() {
   return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(name => ({
     name,
     value: Math.floor(Math.random() * 10000) + 5000,
+    impressions: Math.floor(Math.random() * 10000) + 5000,
   }));
 }
 

@@ -82,10 +82,13 @@ export function PlatformChannelsTab() {
   );
 }
 
-// Platforms & Channels Section
+// Platforms & Channels Section - Hierarchical View
 function PlatformsSection() {
   const { data: categories } = useChannelCategories();
   const { data: channels } = useExtendedChannels();
+  const { data: objectives } = useExtendedObjectives();
+  const { data: buyingModels } = useExtendedBuyingModels();
+  const { data: placements } = usePlacements();
   const createCategory = useCreateChannelCategory();
   const updateCategory = useUpdateChannelCategory();
   const deleteCategory = useDeleteChannelCategory();
@@ -94,6 +97,7 @@ function PlatformsSection() {
   const deleteChannel = useDeleteExtendedChannel();
 
   const [expandedPlatforms, setExpandedPlatforms] = useState<Set<string>>(new Set());
+  const [expandedChannels, setExpandedChannels] = useState<Set<string>>(new Set());
   const [dialogType, setDialogType] = useState<"category" | "channel" | null>(null);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
@@ -119,8 +123,29 @@ function PlatformsSection() {
     });
   };
 
+  const toggleChannel = (channelId: string) => {
+    setExpandedChannels(prev => {
+      const next = new Set(prev);
+      if (next.has(channelId)) next.delete(channelId);
+      else next.add(channelId);
+      return next;
+    });
+  };
+
   const getChannelsByCategory = (categoryId: string) => {
     return channels?.filter(c => c.channel_category_id === categoryId) || [];
+  };
+
+  const getObjectivesByChannel = (channelId: string) => {
+    return objectives?.filter(o => o.channel_id === channelId) || [];
+  };
+
+  const getBuyingModelsByChannel = (channelId: string) => {
+    return buyingModels?.filter(b => b.channel_id === channelId) || [];
+  };
+
+  const getPlacementsByChannel = (channelId: string) => {
+    return placements?.filter(p => p.channel_id === channelId) || [];
   };
 
   const handleSubmitCategory = async () => {
@@ -172,6 +197,15 @@ function PlatformsSection() {
     setSelectedCategoryId(categoryId);
     setChannelForm(prev => ({ ...prev, channel_category_id: categoryId }));
     setDialogType("channel");
+  };
+
+  const getFunnelBadgeColor = (funnel: string | null) => {
+    switch (funnel) {
+      case "TOP": return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+      case "MID": return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+      case "BOTTOM": return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      default: return "bg-muted text-muted-foreground";
+    }
   };
 
   return (
@@ -228,26 +262,108 @@ function PlatformsSection() {
                     {categoryChannels.length === 0 ? (
                       <p className="text-muted-foreground text-sm py-4 text-center">No channels in this platform.</p>
                     ) : (
-                      <div className="grid gap-2">
-                        {categoryChannels.map((channel) => (
-                          <div key={channel.id} className="flex items-center justify-between p-3 rounded-lg border bg-card">
-                            <div className="flex items-center gap-3">
-                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: channel.brand_color || "#666" }} />
-                              <div>
-                                <span className="font-medium">{channel.name}</span>
-                                <Badge variant="outline" className="ml-2 text-xs">{channel.channel_type}</Badge>
+                      <div className="grid gap-3">
+                        {categoryChannels.map((channel) => {
+                          const channelObjectives = getObjectivesByChannel(channel.id);
+                          const channelBuyingModels = getBuyingModelsByChannel(channel.id);
+                          const channelPlacements = getPlacementsByChannel(channel.id);
+                          const isChannelExpanded = expandedChannels.has(channel.id);
+
+                          return (
+                            <Collapsible 
+                              key={channel.id} 
+                              open={isChannelExpanded} 
+                              onOpenChange={() => toggleChannel(channel.id)}
+                            >
+                              <div className="border rounded-lg bg-card">
+                                <CollapsibleTrigger asChild>
+                                  <div className="flex items-center justify-between p-3 cursor-pointer hover:bg-muted/30 transition-colors">
+                                    <div className="flex items-center gap-3">
+                                      {isChannelExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: channel.brand_color || "#666" }} />
+                                      <div>
+                                        <span className="font-medium">{channel.name}</span>
+                                        <Badge variant="outline" className="ml-2 text-xs">{channel.channel_type}</Badge>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                                      <Badge variant="secondary" className="text-[10px]">{channelObjectives.length} obj</Badge>
+                                      <Badge variant="secondary" className="text-[10px]">{channelBuyingModels.length} models</Badge>
+                                      <Badge variant="secondary" className="text-[10px]">{channelPlacements.length} placements</Badge>
+                                      <Button variant="ghost" size="icon" onClick={() => openEditChannel(channel)}>
+                                        <Pencil className="h-4 w-4" />
+                                      </Button>
+                                      <Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ type: "channel", id: channel.id })}>
+                                        <Trash2 className="h-4 w-4 text-destructive" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </CollapsibleTrigger>
+                                <CollapsibleContent>
+                                  <div className="px-4 pb-4 pt-1 space-y-4 border-t bg-muted/20">
+                                    {/* Objectives */}
+                                    {channelObjectives.length > 0 && (
+                                      <div>
+                                        <p className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+                                          <Target className="h-3 w-3" /> Objectives
+                                        </p>
+                                        <div className="flex flex-wrap gap-1.5">
+                                          {channelObjectives.map(obj => (
+                                            <Badge 
+                                              key={obj.id} 
+                                              variant="outline" 
+                                              className={`text-[10px] ${getFunnelBadgeColor(obj.funnel_type)}`}
+                                            >
+                                              {obj.name}
+                                              {obj.funnel_type && <span className="ml-1 opacity-70">({obj.funnel_type})</span>}
+                                            </Badge>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Buying Models */}
+                                    {channelBuyingModels.length > 0 && (
+                                      <div>
+                                        <p className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+                                          <DollarSign className="h-3 w-3" /> Buying Models
+                                        </p>
+                                        <div className="flex flex-wrap gap-1.5">
+                                          {channelBuyingModels.map(bm => (
+                                            <Badge key={bm.id} variant="secondary" className="text-[10px]">
+                                              {bm.name}
+                                            </Badge>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Placements */}
+                                    {channelPlacements.length > 0 && (
+                                      <div>
+                                        <p className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+                                          <Layout className="h-3 w-3" /> Placements
+                                        </p>
+                                        <div className="flex flex-wrap gap-1.5">
+                                          {channelPlacements.map(pl => (
+                                            <Badge key={pl.id} variant="outline" className="text-[10px]">
+                                              {pl.name}
+                                              {pl.aspect_ratio && <span className="ml-1 opacity-70">({pl.aspect_ratio})</span>}
+                                            </Badge>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {channelObjectives.length === 0 && channelBuyingModels.length === 0 && channelPlacements.length === 0 && (
+                                      <p className="text-xs text-muted-foreground italic">No objectives, buying models, or placements configured for this channel.</p>
+                                    )}
+                                  </div>
+                                </CollapsibleContent>
                               </div>
-                            </div>
-                            <div className="flex gap-1">
-                              <Button variant="ghost" size="icon" onClick={() => openEditChannel(channel)}>
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ type: "channel", id: channel.id })}>
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
+                            </Collapsible>
+                          );
+                        })}
                       </div>
                     )}
                   </CardContent>
