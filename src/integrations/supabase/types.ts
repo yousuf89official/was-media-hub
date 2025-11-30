@@ -928,6 +928,81 @@ export type Database = {
           },
         ]
       }
+      creatives: {
+        Row: {
+          campaign_id: string
+          created_at: string | null
+          cta_text: string | null
+          description: string | null
+          display_url: string | null
+          headline: string | null
+          id: string
+          image_url: string | null
+          is_boosted: boolean | null
+          is_collaboration: boolean | null
+          metrics: Json | null
+          name: string
+          placement_id: string | null
+          source: string
+          storage_path: string | null
+          updated_at: string | null
+          video_url: string | null
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string | null
+          cta_text?: string | null
+          description?: string | null
+          display_url?: string | null
+          headline?: string | null
+          id?: string
+          image_url?: string | null
+          is_boosted?: boolean | null
+          is_collaboration?: boolean | null
+          metrics?: Json | null
+          name: string
+          placement_id?: string | null
+          source?: string
+          storage_path?: string | null
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string | null
+          cta_text?: string | null
+          description?: string | null
+          display_url?: string | null
+          headline?: string | null
+          id?: string
+          image_url?: string | null
+          is_boosted?: boolean | null
+          is_collaboration?: boolean | null
+          metrics?: Json | null
+          name?: string
+          placement_id?: string | null
+          source?: string
+          storage_path?: string | null
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creatives_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creatives_placement_id_fkey"
+            columns: ["placement_id"]
+            isOneToOne: false
+            referencedRelation: "placements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       data_source_mappings: {
         Row: {
           cell_range: string
