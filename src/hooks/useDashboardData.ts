@@ -62,6 +62,7 @@ export const useTopCampaigns = (limit = 5) => {
           id,
           name,
           status,
+          brand_id,
           brand:brands(name)
         `);
       

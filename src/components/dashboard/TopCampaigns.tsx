@@ -79,7 +79,7 @@ const TopCampaigns = ({ data, isLoading }: TopCampaignsProps) => {
               <TableRow
                 key={campaign.id}
                 className="cursor-pointer hover:bg-accent"
-                onClick={() => navigate(`/campaigns/${campaign.id}`)}
+                onClick={() => navigate(`/brands/${campaign.brand_id}/dashboard`)}
               >
                 <TableCell className="font-medium">{campaign.name}</TableCell>
                 <TableCell>{campaign.brand?.name || "N/A"}</TableCell>

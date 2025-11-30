@@ -196,7 +196,7 @@ const Dashboard = () => {
                 <Button 
                   className="w-full justify-start" 
                   variant="outline"
-                  onClick={() => navigate("/admin-settings")}
+                  onClick={() => navigate("/brand-campaign-management")}
                 >
                   <BarChart3 className="w-4 h-4 mr-2" />
                   Configure Settings

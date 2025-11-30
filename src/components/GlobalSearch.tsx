@@ -44,7 +44,7 @@ const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
               <CommandItem
                 key={campaign.id}
                 value={campaign.name}
-                onSelect={() => handleSelect(`/campaigns/${campaign.id}`)}
+                onSelect={() => handleSelect(`/brands/${campaign.brand_id}/dashboard`)}
               >
                 <BarChart3 className="mr-2 h-4 w-4" />
                 <span>{campaign.name}</span>

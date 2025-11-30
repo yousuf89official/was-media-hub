@@ -166,7 +166,8 @@ const CampaignForm = () => {
           channelBudgets: selectedChannels,
         });
       }
-      navigate("/campaigns");
+      // Navigate back to brand dashboard
+      navigate(`/brands/${data.brand_id}/dashboard`);
     } catch (error) {
       toast.error("Failed to save campaign");
     }
