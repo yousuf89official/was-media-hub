@@ -8,6 +8,18 @@ import { Plus } from 'lucide-react';
 import { WidgetConfig, WidgetType, WidgetSize, WIDGET_TYPES, WIDGET_SIZES, METRIC_OPTIONS } from './types';
 import { useWidgets } from './WidgetContext';
 
+// Channel options with branding colors
+const CHANNEL_OPTIONS = [
+  { key: 'default', label: 'Default Theme', color: 'hsl(var(--primary))' },
+  { key: 'instagram', label: 'Instagram', color: '#E4405F' },
+  { key: 'facebook', label: 'Facebook', color: '#1877F2' },
+  { key: 'tiktok', label: 'TikTok', color: '#69C9D0' },
+  { key: 'youtube', label: 'YouTube', color: '#FF0000' },
+  { key: 'google', label: 'Google', color: '#4285F4' },
+  { key: 'linkedin', label: 'LinkedIn', color: '#0A66C2' },
+  { key: 'twitter', label: 'X (Twitter)', color: '#1DA1F2' },
+];
+
 interface AddWidgetDialogProps {
   editWidget?: WidgetConfig | null;
   onClose?: () => void;
@@ -20,10 +32,17 @@ export function AddWidgetDialog({ editWidget, onClose }: AddWidgetDialogProps) {
   const [title, setTitle] = useState(editWidget?.title || '');
   const [size, setSize] = useState<WidgetSize>(editWidget?.size || 'small');
   const [metric, setMetric] = useState(editWidget?.config.metric || 'impressions');
+  const [channel, setChannel] = useState(editWidget?.config.channel || 'default');
   const [format, setFormat] = useState<'number' | 'currency' | 'percentage'>(
     editWidget?.config.format || 'number'
   );
   const [target, setTarget] = useState(editWidget?.config.target?.toString() || '');
+
+  // Widget types that support channel branding
+  const supportsChannelBranding = [
+    'line-chart', 'bar-chart', 'pie-chart', 'area-chart', 
+    'premium-stat', 'channel-performance'
+  ].includes(type);
 
   const handleSubmit = () => {
     const widgetData = {
@@ -35,6 +54,7 @@ export function AddWidgetDialog({ editWidget, onClose }: AddWidgetDialogProps) {
         format,
         target: target ? parseInt(target) : undefined,
         icon: getIconForMetric(metric),
+        channel: supportsChannelBranding ? channel : undefined,
       },
     };
 
@@ -54,6 +74,7 @@ export function AddWidgetDialog({ editWidget, onClose }: AddWidgetDialogProps) {
     setTitle('');
     setSize('small');
     setMetric('impressions');
+    setChannel('default');
     setFormat('number');
     setTarget('');
   };
@@ -65,6 +86,8 @@ export function AddWidgetDialog({ editWidget, onClose }: AddWidgetDialogProps) {
       onClose?.();
     }
   };
+
+  const selectedChannel = CHANNEL_OPTIONS.find(c => c.key === channel);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -137,6 +160,42 @@ export function AddWidgetDialog({ editWidget, onClose }: AddWidgetDialogProps) {
             </Select>
           </div>
 
+          {/* Channel Branding Selector */}
+          {supportsChannelBranding && (
+            <div className="space-y-2">
+              <Label>Channel Branding</Label>
+              <Select value={channel} onValueChange={setChannel}>
+                <SelectTrigger>
+                  <SelectValue>
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-3 h-3 rounded-full border border-border"
+                        style={{ backgroundColor: selectedChannel?.color }}
+                      />
+                      <span>{selectedChannel?.label}</span>
+                    </div>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {CHANNEL_OPTIONS.map(c => (
+                    <SelectItem key={c.key} value={c.key}>
+                      <div className="flex items-center gap-3">
+                        <div 
+                          className="w-4 h-4 rounded-full border border-border shadow-sm"
+                          style={{ backgroundColor: c.color }}
+                        />
+                        <span>{c.label}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Apply platform-specific colors to charts and stats
+              </p>
+            </div>
+          )}
+
           {(type === 'metric-card' || type === 'premium-stat') && (
             <div className="space-y-2">
               <Label>Value Format</Label>
@@ -162,6 +221,30 @@ export function AddWidgetDialog({ editWidget, onClose }: AddWidgetDialogProps) {
                 value={target}
                 onChange={(e) => setTarget(e.target.value)}
               />
+            </div>
+          )}
+
+          {/* Preview of selected channel color */}
+          {supportsChannelBranding && channel !== 'default' && (
+            <div 
+              className="p-3 rounded-lg border border-border/50 flex items-center gap-3"
+              style={{ 
+                background: `linear-gradient(135deg, ${selectedChannel?.color}15 0%, ${selectedChannel?.color}05 100%)`,
+                borderColor: `${selectedChannel?.color}30`
+              }}
+            >
+              <div 
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                style={{ backgroundColor: selectedChannel?.color }}
+              >
+                {selectedChannel?.label.charAt(0)}
+              </div>
+              <div>
+                <p className="text-sm font-medium">{selectedChannel?.label} Branding</p>
+                <p className="text-xs text-muted-foreground">
+                  Widget will use {selectedChannel?.label} colors
+                </p>
+              </div>
             </div>
           )}
 
