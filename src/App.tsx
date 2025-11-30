@@ -17,7 +17,6 @@ import Dashboard from "./pages/Dashboard";
 import Campaigns from "./pages/Campaigns";
 import CampaignForm from "./pages/CampaignForm";
 import CampaignDetail from "./pages/CampaignDetail";
-import AdminSettings from "./pages/AdminSettings";
 import MetricsEntry from "./pages/MetricsEntry";
 import DataExport from "./pages/DataExport";
 import CalculationLogs from "./pages/CalculationLogs";
@@ -26,7 +25,6 @@ import Profile from "./pages/Profile";
 import Reports from "./pages/Reports";
 import Brands from "./pages/Brands";
 import AVECalculator from "./pages/AVECalculator";
-import MediaOutletsManagement from "./pages/MediaOutletsManagement";
 import BrandCampaignManagement from "./pages/BrandCampaignManagement";
 import BrandPerformanceDashboard from "./pages/BrandPerformanceDashboard";
 
@@ -60,9 +58,7 @@ const App = () => (
                 <Route path="/brands/:brandId/dashboard" element={<BrandPerformanceDashboard />} />
                 <Route path="/ave-calculator" element={<AVECalculator />} />
                 <Route path="/calculation-logs" element={<CalculationLogs />} />
-                <Route path="/admin-settings" element={<AdminSettings />} />
                 <Route path="/content-management" element={<ContentManagement />} />
-                <Route path="/media-outlets" element={<MediaOutletsManagement />} />
                 <Route path="/brand-campaign-management" element={<BrandCampaignManagement />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/profile/data-export" element={<DataExport />} />

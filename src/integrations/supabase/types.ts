@@ -14,6 +14,106 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_sets: {
+        Row: {
+          audience_targeting: Json | null
+          budget: number | null
+          campaign_channel_config_id: string
+          created_at: string | null
+          end_date: string | null
+          id: string
+          name: string
+          placements: string[] | null
+          start_date: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          audience_targeting?: Json | null
+          budget?: number | null
+          campaign_channel_config_id: string
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          name: string
+          placements?: string[] | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          audience_targeting?: Json | null
+          budget?: number | null
+          campaign_channel_config_id?: string
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string
+          placements?: string[] | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_sets_campaign_channel_config_id_fkey"
+            columns: ["campaign_channel_config_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_channel_configs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ads: {
+        Row: {
+          ad_set_id: string
+          created_at: string | null
+          creative_url: string | null
+          cta_text: string | null
+          description: string | null
+          destination_url: string | null
+          headline: string | null
+          id: string
+          name: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          ad_set_id: string
+          created_at?: string | null
+          creative_url?: string | null
+          cta_text?: string | null
+          description?: string | null
+          destination_url?: string | null
+          headline?: string | null
+          id?: string
+          name: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          ad_set_id?: string
+          created_at?: string | null
+          creative_url?: string | null
+          cta_text?: string | null
+          description?: string | null
+          destination_url?: string | null
+          headline?: string | null
+          id?: string
+          name?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ads_ad_set_id_fkey"
+            columns: ["ad_set_id"]
+            isOneToOne: false
+            referencedRelation: "ad_sets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ave_results: {
         Row: {
           base_ave_per_channel: Json
@@ -211,6 +311,196 @@ export type Database = {
           },
         ]
       }
+      campaign_channel_configs: {
+        Row: {
+          budget: number | null
+          buying_model_id: string | null
+          campaign_id: string
+          channel_id: string
+          created_at: string | null
+          id: string
+          objective_id: string | null
+          targeting: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          budget?: number | null
+          buying_model_id?: string | null
+          campaign_id: string
+          channel_id: string
+          created_at?: string | null
+          id?: string
+          objective_id?: string | null
+          targeting?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          budget?: number | null
+          buying_model_id?: string | null
+          campaign_id?: string
+          channel_id?: string
+          created_at?: string | null
+          id?: string
+          objective_id?: string | null
+          targeting?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_channel_configs_buying_model_id_fkey"
+            columns: ["buying_model_id"]
+            isOneToOne: false
+            referencedRelation: "buying_models"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_channel_configs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_channel_configs_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_channel_configs_objective_id_fkey"
+            columns: ["objective_id"]
+            isOneToOne: false
+            referencedRelation: "objectives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_service_assignments: {
+        Row: {
+          allocated_budget: number | null
+          campaign_id: string
+          created_at: string | null
+          deliverables: string[] | null
+          id: string
+          responsible_team: string | null
+          service_id: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          allocated_budget?: number | null
+          campaign_id: string
+          created_at?: string | null
+          deliverables?: string[] | null
+          id?: string
+          responsible_team?: string | null
+          service_id: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          allocated_budget?: number | null
+          campaign_id?: string
+          created_at?: string | null
+          deliverables?: string[] | null
+          id?: string
+          responsible_team?: string | null
+          service_id?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_service_assignments_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_service_assignments_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_service_categories: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          display_order: number
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      campaign_services: {
+        Row: {
+          category_id: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          category_id: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          category_id?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_services_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_service_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_types: {
         Row: {
           created_at: string | null
@@ -250,6 +540,7 @@ export type Database = {
           buying_model_id: string | null
           campaign_type_id: string | null
           channel_id: string
+          channel_ids: string[] | null
           cost_idr: number | null
           created_at: string
           created_by: string
@@ -276,6 +567,7 @@ export type Database = {
           buying_model_id?: string | null
           campaign_type_id?: string | null
           channel_id: string
+          channel_ids?: string[] | null
           cost_idr?: number | null
           created_at?: string
           created_by: string
@@ -302,6 +594,7 @@ export type Database = {
           buying_model_id?: string | null
           campaign_type_id?: string | null
           channel_id?: string
+          channel_ids?: string[] | null
           cost_idr?: number | null
           created_at?: string
           created_by?: string
