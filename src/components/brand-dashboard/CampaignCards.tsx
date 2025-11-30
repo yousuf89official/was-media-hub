@@ -1,10 +1,10 @@
-import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { Calendar, Target, TrendingUp, ExternalLink, Zap } from "lucide-react";
+import { Calendar, Target, Zap, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 interface Campaign {
   id: string;
@@ -32,9 +32,11 @@ interface Metric {
 interface CampaignCardsProps {
   campaigns: Campaign[];
   metrics: Metric[];
+  selectedCampaignId?: string | null;
+  onSelectCampaign?: (campaignId: string) => void;
 }
 
-export function CampaignCards({ campaigns, metrics }: CampaignCardsProps) {
+export function CampaignCards({ campaigns, metrics, selectedCampaignId, onSelectCampaign }: CampaignCardsProps) {
   const getMetricsForCampaign = (campaignId: string) => {
     const campaignMetrics = metrics.filter(m => m.campaign_id === campaignId);
     return campaignMetrics.reduce((acc, m) => ({
@@ -56,7 +58,7 @@ export function CampaignCards({ campaigns, metrics }: CampaignCardsProps) {
     return {
       current: currentValue,
       target: campaign.kpi_target,
-      percentage: Math.min(progress, 150), // Cap at 150% for display
+      percentage: Math.min(progress, 150),
       actualPercentage: progress,
     };
   };
@@ -86,11 +88,14 @@ export function CampaignCards({ campaigns, metrics }: CampaignCardsProps) {
   if (!campaigns.length) {
     return (
       <Card className="border-dashed">
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <Target className="h-12 w-12 text-muted-foreground mb-4" />
-          <p className="text-muted-foreground mb-4">No campaigns found</p>
-          <Button asChild>
-            <Link to="/campaigns/new">Create Campaign</Link>
+        <CardContent className="flex flex-col items-center justify-center py-8">
+          <Target className="h-10 w-10 text-muted-foreground mb-3" />
+          <p className="text-muted-foreground text-sm mb-3">No campaigns found</p>
+          <Button size="sm" asChild>
+            <Link to="/campaigns/new">
+              <Plus className="h-3.5 w-3.5 mr-1" />
+              Create Campaign
+            </Link>
           </Button>
         </CardContent>
       </Card>
@@ -98,58 +103,60 @@ export function CampaignCards({ campaigns, metrics }: CampaignCardsProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
       {campaigns.map((campaign) => {
         const campaignMetrics = getMetricsForCampaign(campaign.id);
         const progress = calculateProgress(campaign, campaignMetrics);
+        const isSelected = selectedCampaignId === campaign.id;
         
         return (
           <Card 
             key={campaign.id} 
+            onClick={() => onSelectCampaign?.(campaign.id)}
             className={cn(
-              "relative overflow-hidden transition-all hover:shadow-lg group",
-              campaign.status === "running" && "ring-2 ring-emerald-500/20"
+              "relative overflow-hidden transition-all cursor-pointer group",
+              "hover:shadow-md hover:border-primary/30",
+              campaign.status === "running" && "ring-1 ring-emerald-500/20",
+              isSelected && "ring-2 ring-primary border-primary"
             )}
           >
             {/* Status indicator */}
             {campaign.status === "running" && (
-              <div className="absolute top-3 right-3">
-                <span className="relative flex h-3 w-3">
+              <div className="absolute top-2 right-2">
+                <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
               </div>
             )}
 
-            <CardHeader className="pb-2">
-              <div className="flex items-start justify-between gap-2">
-                <div className="space-y-1">
-                  <CardTitle className="text-lg line-clamp-1">{campaign.name}</CardTitle>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="outline" className={getStatusColor(campaign.status)}>
-                      {campaign.status}
+            <CardHeader className="pb-1.5 pt-3 px-3">
+              <div className="space-y-1">
+                <CardTitle className="text-sm font-medium line-clamp-1">{campaign.name}</CardTitle>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0", getStatusColor(campaign.status))}>
+                    {campaign.status}
+                  </Badge>
+                  {campaign.channel && (
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{campaign.channel.name}</Badge>
+                  )}
+                  {campaign.campaign_type && (
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                      {campaign.campaign_type.name}
                     </Badge>
-                    {campaign.channel && (
-                      <Badge variant="secondary">{campaign.channel.name}</Badge>
-                    )}
-                    {campaign.campaign_type && (
-                      <Badge variant="outline" className="text-xs">
-                        {campaign.campaign_type.name}
-                      </Badge>
-                    )}
-                  </div>
+                  )}
                 </div>
               </div>
             </CardHeader>
 
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-2.5 pb-3 px-3">
               {/* KPI Progress Bar */}
               {progress && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground flex items-center gap-1">
-                      <Target className="h-3 w-3" />
-                      {campaign.primary_kpi || "Impressions"} Target
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-muted-foreground flex items-center gap-0.5">
+                      <Target className="h-2.5 w-2.5" />
+                      {campaign.primary_kpi || "Impressions"}
                     </span>
                     <span className={cn(
                       "font-medium",
@@ -157,68 +164,48 @@ export function CampaignCards({ campaigns, metrics }: CampaignCardsProps) {
                       progress.actualPercentage >= 75 ? "text-blue-600" : 
                       progress.actualPercentage >= 50 ? "text-amber-600" : "text-rose-600"
                     )}>
-                      {progress.actualPercentage.toFixed(1)}%
+                      {progress.actualPercentage.toFixed(0)}%
                     </span>
                   </div>
-                  <div className="relative">
-                    <Progress 
-                      value={Math.min(progress.percentage, 100)} 
-                      className="h-3"
-                    />
+                  <div className="relative h-1.5 bg-muted rounded-full overflow-hidden">
                     <div 
-                      className={cn(
-                        "absolute inset-y-0 left-0 rounded-full transition-all",
-                        getProgressColor(progress.actualPercentage)
-                      )}
+                      className={cn("absolute inset-y-0 left-0 rounded-full", getProgressColor(progress.actualPercentage))}
                       style={{ width: `${Math.min(progress.percentage, 100)}%` }}
                     />
                   </div>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{formatNumber(progress.current)} achieved</span>
-                    <span>Target: {formatNumber(progress.target)}</span>
+                  <div className="flex items-center justify-between text-[9px] text-muted-foreground">
+                    <span>{formatNumber(progress.current)}</span>
+                    <span>/ {formatNumber(progress.target)}</span>
                   </div>
                 </div>
               )}
 
               {/* Metrics Row */}
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="p-2 rounded-lg bg-muted/50">
-                  <p className="text-xs text-muted-foreground">Impressions</p>
-                  <p className="font-semibold">{formatNumber(campaignMetrics.impressions)}</p>
+              <div className="grid grid-cols-3 gap-1.5 text-center">
+                <div className="p-1.5 rounded bg-muted/50">
+                  <p className="text-[9px] text-muted-foreground">Impr</p>
+                  <p className="text-xs font-semibold">{formatNumber(campaignMetrics.impressions)}</p>
                 </div>
-                <div className="p-2 rounded-lg bg-muted/50">
-                  <p className="text-xs text-muted-foreground">Clicks</p>
-                  <p className="font-semibold">{formatNumber(campaignMetrics.clicks)}</p>
+                <div className="p-1.5 rounded bg-muted/50">
+                  <p className="text-[9px] text-muted-foreground">Clicks</p>
+                  <p className="text-xs font-semibold">{formatNumber(campaignMetrics.clicks)}</p>
                 </div>
-                <div className="p-2 rounded-lg bg-muted/50">
-                  <p className="text-xs text-muted-foreground">Engagements</p>
-                  <p className="font-semibold">{formatNumber(campaignMetrics.engagements)}</p>
+                <div className="p-1.5 rounded bg-muted/50">
+                  <p className="text-[9px] text-muted-foreground">Engage</p>
+                  <p className="text-xs font-semibold">{formatNumber(campaignMetrics.engagements)}</p>
                 </div>
               </div>
 
-              {/* Dates & Product */}
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  {new Date(campaign.start_date).toLocaleDateString()} - {new Date(campaign.end_date).toLocaleDateString()}
+              {/* Footer */}
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1.5 border-t">
+                <span className="flex items-center gap-0.5">
+                  <Calendar className="h-2.5 w-2.5" />
+                  {new Date(campaign.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(campaign.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </span>
-                {campaign.product && (
-                  <Badge variant="outline" className="text-xs">{campaign.product.name}</Badge>
-                )}
-              </div>
-
-              {/* Actions */}
-              <div className="pt-2 border-t flex items-center justify-between">
-                <Badge variant="outline" className="text-xs">
-                  <Zap className="h-3 w-3 mr-1" />
+                <Badge variant="outline" className="text-[9px] px-1 py-0">
+                  <Zap className="h-2 w-2 mr-0.5" />
                   {campaign.funnel_type}
                 </Badge>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to={`/campaigns/${campaign.id}`}>
-                    View Details
-                    <ExternalLink className="h-3 w-3 ml-1" />
-                  </Link>
-                </Button>
               </div>
             </CardContent>
           </Card>

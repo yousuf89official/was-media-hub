@@ -1,7 +1,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, Wallet, TrendingUp, Calculator, Lock } from "lucide-react";
+import { DollarSign, Wallet, TrendingUp, Calculator, Users, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+interface FinancialCard {
+  title: string;
+  value: number;
+  icon: React.ComponentType<{ className?: string }>;
+  color: string;
+  bgColor: string;
+  iconColor: string;
+  showBoth?: boolean;
+  subtitle?: string;
+  agencyOnly?: boolean;
+}
 
 interface FinancialPerformanceProps {
   metrics: {
@@ -10,6 +22,9 @@ interface FinancialPerformanceProps {
     margin: number;
     revenue: number;
     markup: number;
+    spendByChannel?: number;
+    spendByKOL?: number;
+    spendByContent?: number;
   };
   viewMode: "agency" | "client";
   exchangeRate: number;
@@ -35,111 +50,112 @@ export function FinancialPerformance({ metrics, viewMode, exchangeRate }: Financ
 
   const isAgency = viewMode === "agency";
 
-  const financialCards = [
+  // Client view cards - simplified
+  const clientCards: FinancialCard[] = [
     {
       title: "Total Media Spend",
       value: metrics.totalSpend,
       icon: DollarSign,
-      color: "border-blue-500",
+      color: "border-l-blue-500",
       bgColor: "bg-blue-500/10",
       iconColor: "text-blue-500",
-      showBadge: true,
-      badgeText: "Approved Budget",
-      visible: true,
+      showBoth: true,
     },
     {
-      title: "Internal Base Cost",
-      value: metrics.baseCost,
-      icon: Calculator,
-      color: "border-amber-500",
-      bgColor: "bg-amber-500/10",
-      iconColor: "text-amber-500",
-      subtitle: "IDR Only",
-      visible: isAgency,
-      locked: !isAgency,
-    },
-    {
-      title: "Margin & Markup",
-      value: metrics.margin,
+      title: "Channel Spend",
+      value: metrics.spendByChannel || metrics.totalSpend * 0.6,
       icon: TrendingUp,
-      color: "border-emerald-500",
+      color: "border-l-emerald-500",
       bgColor: "bg-emerald-500/10",
       iconColor: "text-emerald-500",
-      subtitle: `Net Profit: ${metrics.markup}%`,
-      visible: isAgency,
-      locked: !isAgency,
     },
     {
-      title: "Total Revenue",
-      value: metrics.revenue,
-      icon: Wallet,
-      color: "border-purple-500",
+      title: "KOL Spend",
+      value: metrics.spendByKOL || metrics.totalSpend * 0.25,
+      icon: Users,
+      color: "border-l-purple-500",
       bgColor: "bg-purple-500/10",
       iconColor: "text-purple-500",
-      showUSD: true,
-      visible: true,
+    },
+    {
+      title: "Content Spend",
+      value: metrics.spendByContent || metrics.totalSpend * 0.15,
+      icon: Video,
+      color: "border-l-amber-500",
+      bgColor: "bg-amber-500/10",
+      iconColor: "text-amber-500",
     },
   ];
 
-  const visibleCards = financialCards.filter(card => card.visible || card.locked);
+  // Agency view adds internal cost data
+  const agencyCards: FinancialCard[] = [
+    ...clientCards,
+    {
+      title: "Base Cost",
+      value: metrics.baseCost,
+      icon: Calculator,
+      color: "border-l-slate-500",
+      bgColor: "bg-slate-500/10",
+      iconColor: "text-slate-500",
+      agencyOnly: true,
+    },
+    {
+      title: "Margin",
+      value: metrics.margin,
+      icon: Wallet,
+      color: "border-l-rose-500",
+      bgColor: "bg-rose-500/10",
+      iconColor: "text-rose-500",
+      subtitle: `${metrics.markup}% markup`,
+      agencyOnly: true,
+    },
+  ];
+
+  const displayCards = isAgency ? agencyCards : clientCards;
 
   return (
-    <Card className="border-2 border-dashed border-destructive/30 bg-destructive/5">
-      <CardHeader className="pb-2">
+    <Card className="border-0 shadow-none bg-transparent">
+      <CardHeader className="pb-2 px-0 pt-0">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <DollarSign className="h-5 w-5 text-destructive" />
-            Financial Performance
+          <CardTitle className="text-sm font-medium flex items-center gap-1.5">
+            <DollarSign className="h-4 w-4 text-primary" />
+            Financial Overview
           </CardTitle>
           {isAgency && (
-            <Badge variant="outline" className="border-destructive/50 text-destructive">
-              Agency View Only
+            <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">
+              Agency View
             </Badge>
           )}
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {visibleCards.map((card) => (
+      <CardContent className="px-0">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
+          {displayCards.map((card) => (
             <Card 
               key={card.title} 
               className={cn(
-                "relative border-l-4 transition-all",
-                card.color,
-                card.locked && "opacity-50"
+                "relative border-l-2 transition-all hover:shadow-sm",
+                card.color
               )}
             >
-              {card.locked && (
-                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
-                  <div className="text-center">
-                    <Lock className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground">Agency Only</p>
-                  </div>
-                </div>
-              )}
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-muted-foreground">{card.title}</p>
-                      {card.showBadge && (
-                        <Badge variant="secondary" className="text-xs">{card.badgeText}</Badge>
-                      )}
-                    </div>
-                    <p className="text-2xl font-bold tracking-tight">
+              <CardContent className="p-2.5">
+                <div className="flex items-start justify-between gap-1">
+                  <div className="space-y-0.5 min-w-0 flex-1">
+                    <p className="text-[10px] font-medium text-muted-foreground truncate">{card.title}</p>
+                    <p className="text-sm font-bold tracking-tight truncate">
                       {formatCurrency(card.value)}
                     </p>
-                    {card.showUSD && (
-                      <p className="text-sm text-muted-foreground">
+                    {card.showBoth && (
+                      <p className="text-[10px] text-muted-foreground">
                         {formatCurrency(card.value, "USD")}
                       </p>
                     )}
                     {card.subtitle && (
-                      <p className="text-xs text-muted-foreground">{card.subtitle}</p>
+                      <p className="text-[9px] text-muted-foreground">{card.subtitle}</p>
                     )}
                   </div>
-                  <div className={cn("p-2 rounded-lg", card.bgColor)}>
-                    <card.icon className={cn("h-5 w-5", card.iconColor)} />
+                  <div className={cn("p-1.5 rounded-md shrink-0", card.bgColor)}>
+                    <card.icon className={cn("h-3.5 w-3.5", card.iconColor)} />
                   </div>
                 </div>
               </CardContent>

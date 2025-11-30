@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { WidgetConfig } from './types';
+import { WidgetConfig, WidgetLayout } from './types';
 
 interface WidgetContextType {
   widgets: WidgetConfig[];
   addWidget: (widget: Omit<WidgetConfig, 'id' | 'position'>) => void;
   updateWidget: (id: string, updates: Partial<WidgetConfig>) => void;
+  updateWidgetLayout: (id: string, layout: WidgetLayout) => void;
   removeWidget: (id: string) => void;
   reorderWidgets: (activeId: string, overId: string) => void;
   isEditing: boolean;
@@ -20,6 +21,7 @@ const DEFAULT_WIDGETS: WidgetConfig[] = [
     title: 'Total Impressions',
     size: 'small',
     position: 0,
+    layout: { x: 0, y: 0, w: 3, h: 2 },
     config: { metric: 'impressions', format: 'number', icon: 'Eye' },
   },
   {
@@ -28,6 +30,7 @@ const DEFAULT_WIDGETS: WidgetConfig[] = [
     title: 'Total Reach',
     size: 'small',
     position: 1,
+    layout: { x: 3, y: 0, w: 3, h: 2 },
     config: { metric: 'reach', format: 'number', icon: 'Users' },
   },
   {
@@ -36,6 +39,7 @@ const DEFAULT_WIDGETS: WidgetConfig[] = [
     title: 'Total Spend',
     size: 'small',
     position: 2,
+    layout: { x: 6, y: 0, w: 3, h: 2 },
     config: { metric: 'spend', format: 'currency', currencyCode: 'IDR', icon: 'DollarSign' },
   },
   {
@@ -44,6 +48,7 @@ const DEFAULT_WIDGETS: WidgetConfig[] = [
     title: 'Engagement Rate',
     size: 'small',
     position: 3,
+    layout: { x: 9, y: 0, w: 3, h: 2 },
     config: { metric: 'engagements', format: 'percentage', icon: 'Zap' },
   },
   {
@@ -52,6 +57,7 @@ const DEFAULT_WIDGETS: WidgetConfig[] = [
     title: 'Performance Trend',
     size: 'large',
     position: 4,
+    layout: { x: 0, y: 2, w: 8, h: 3 },
     config: { metric: 'impressions' },
   },
   {
@@ -60,6 +66,7 @@ const DEFAULT_WIDGETS: WidgetConfig[] = [
     title: 'Campaign Progress',
     size: 'small',
     position: 5,
+    layout: { x: 8, y: 2, w: 4, h: 3 },
     config: { metric: 'impressions', target: 1000000 },
   },
 ];
@@ -73,6 +80,7 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
       ...widget,
       id: `widget-${Date.now()}`,
       position: widgets.length,
+      layout: widget.layout || { x: 0, y: Infinity, w: 3, h: 2 },
     };
     setWidgets(prev => [...prev, newWidget]);
   }, [widgets.length]);
@@ -80,6 +88,12 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
   const updateWidget = useCallback((id: string, updates: Partial<WidgetConfig>) => {
     setWidgets(prev => 
       prev.map(w => w.id === id ? { ...w, ...updates } : w)
+    );
+  }, []);
+
+  const updateWidgetLayout = useCallback((id: string, layout: WidgetLayout) => {
+    setWidgets(prev => 
+      prev.map(w => w.id === id ? { ...w, layout } : w)
     );
   }, []);
 
@@ -107,6 +121,7 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
       widgets,
       addWidget,
       updateWidget,
+      updateWidgetLayout,
       removeWidget,
       reorderWidgets,
       isEditing,
