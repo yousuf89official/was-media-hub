@@ -67,25 +67,43 @@ export type Database = {
       }
       brands: {
         Row: {
+          categories: string[] | null
           company_id: string | null
           created_at: string
+          hero_products: string[] | null
           id: string
+          logo_url: string | null
+          markets: string[] | null
           name: string
+          social_handles: Json | null
           updated_at: string
+          website: string | null
         }
         Insert: {
+          categories?: string[] | null
           company_id?: string | null
           created_at?: string
+          hero_products?: string[] | null
           id?: string
+          logo_url?: string | null
+          markets?: string[] | null
           name: string
+          social_handles?: Json | null
           updated_at?: string
+          website?: string | null
         }
         Update: {
+          categories?: string[] | null
           company_id?: string | null
           created_at?: string
+          hero_products?: string[] | null
           id?: string
+          logo_url?: string | null
+          markets?: string[] | null
           name?: string
+          social_handles?: Json | null
           updated_at?: string
+          website?: string | null
         }
         Relationships: [
           {
@@ -193,22 +211,62 @@ export type Database = {
           },
         ]
       }
+      campaign_types: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          type_enum: Database["public"]["Enums"]["campaign_type_enum"]
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          type_enum: Database["public"]["Enums"]["campaign_type_enum"]
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          type_enum?: Database["public"]["Enums"]["campaign_type_enum"]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       campaigns: {
         Row: {
           brand_id: string
           buying_model_id: string | null
+          campaign_type_id: string | null
           channel_id: string
+          cost_idr: number | null
           created_at: string
           created_by: string
           end_date: string
+          exchange_rate: number | null
           funnel_type: Database["public"]["Enums"]["funnel_type"]
           id: string
+          kpi_target: number | null
+          markets: string[] | null
+          markup_percent: number | null
           metadata: Json | null
           name: string
           objective_id: string | null
           primary_kpi: string | null
           product_id: string | null
           secondary_kpi: string | null
+          services: string[] | null
           start_date: string
           status: Database["public"]["Enums"]["campaign_status"]
           updated_at: string
@@ -216,18 +274,25 @@ export type Database = {
         Insert: {
           brand_id: string
           buying_model_id?: string | null
+          campaign_type_id?: string | null
           channel_id: string
+          cost_idr?: number | null
           created_at?: string
           created_by: string
           end_date: string
+          exchange_rate?: number | null
           funnel_type: Database["public"]["Enums"]["funnel_type"]
           id?: string
+          kpi_target?: number | null
+          markets?: string[] | null
+          markup_percent?: number | null
           metadata?: Json | null
           name: string
           objective_id?: string | null
           primary_kpi?: string | null
           product_id?: string | null
           secondary_kpi?: string | null
+          services?: string[] | null
           start_date: string
           status?: Database["public"]["Enums"]["campaign_status"]
           updated_at?: string
@@ -235,18 +300,25 @@ export type Database = {
         Update: {
           brand_id?: string
           buying_model_id?: string | null
+          campaign_type_id?: string | null
           channel_id?: string
+          cost_idr?: number | null
           created_at?: string
           created_by?: string
           end_date?: string
+          exchange_rate?: number | null
           funnel_type?: Database["public"]["Enums"]["funnel_type"]
           id?: string
+          kpi_target?: number | null
+          markets?: string[] | null
+          markup_percent?: number | null
           metadata?: Json | null
           name?: string
           objective_id?: string | null
           primary_kpi?: string | null
           product_id?: string | null
           secondary_kpi?: string | null
+          services?: string[] | null
           start_date?: string
           status?: Database["public"]["Enums"]["campaign_status"]
           updated_at?: string
@@ -264,6 +336,13 @@ export type Database = {
             columns: ["buying_model_id"]
             isOneToOne: false
             referencedRelation: "buying_models"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaigns_campaign_type_id_fkey"
+            columns: ["campaign_type_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_types"
             referencedColumns: ["id"]
           },
           {
@@ -296,29 +375,200 @@ export type Database = {
           },
         ]
       }
-      channels: {
+      channel_buying_models: {
         Row: {
-          channel_type: Database["public"]["Enums"]["channel_type"]
-          created_at: string
+          buying_model_id: string
+          channel_id: string
+          created_at: string | null
           id: string
+        }
+        Insert: {
+          buying_model_id: string
+          channel_id: string
+          created_at?: string | null
+          id?: string
+        }
+        Update: {
+          buying_model_id?: string
+          channel_id?: string
+          created_at?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_buying_models_buying_model_id_fkey"
+            columns: ["buying_model_id"]
+            isOneToOne: false
+            referencedRelation: "buying_models"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channel_buying_models_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channel_categories: {
+        Row: {
+          brand_color: string | null
+          created_at: string | null
+          icon_url: string | null
+          id: string
+          is_active: boolean | null
           name: string
           updated_at: string | null
         }
         Insert: {
-          channel_type: Database["public"]["Enums"]["channel_type"]
-          created_at?: string
+          brand_color?: string | null
+          created_at?: string | null
+          icon_url?: string | null
           id?: string
+          is_active?: boolean | null
           name: string
           updated_at?: string | null
         }
         Update: {
-          channel_type?: Database["public"]["Enums"]["channel_type"]
-          created_at?: string
+          brand_color?: string | null
+          created_at?: string | null
+          icon_url?: string | null
           id?: string
+          is_active?: boolean | null
           name?: string
           updated_at?: string | null
         }
         Relationships: []
+      }
+      channel_metrics: {
+        Row: {
+          channel_id: string
+          created_at: string | null
+          id: string
+          is_primary: boolean | null
+          metric_id: string
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          metric_id: string
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          metric_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_metrics_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channel_metrics_metric_id_fkey"
+            columns: ["metric_id"]
+            isOneToOne: false
+            referencedRelation: "metric_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channel_objectives: {
+        Row: {
+          channel_id: string
+          created_at: string | null
+          id: string
+          objective_id: string
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string | null
+          id?: string
+          objective_id: string
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string | null
+          id?: string
+          objective_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_objectives_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channel_objectives_objective_id_fkey"
+            columns: ["objective_id"]
+            isOneToOne: false
+            referencedRelation: "objectives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channels: {
+        Row: {
+          brand_color: string | null
+          channel_category_id: string | null
+          channel_type: Database["public"]["Enums"]["channel_type"]
+          created_at: string
+          display_order: number | null
+          icon_url: string | null
+          id: string
+          name: string
+          parent_channel_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          brand_color?: string | null
+          channel_category_id?: string | null
+          channel_type: Database["public"]["Enums"]["channel_type"]
+          created_at?: string
+          display_order?: number | null
+          icon_url?: string | null
+          id?: string
+          name: string
+          parent_channel_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          brand_color?: string | null
+          channel_category_id?: string | null
+          channel_type?: Database["public"]["Enums"]["channel_type"]
+          created_at?: string
+          display_order?: number | null
+          icon_url?: string | null
+          id?: string
+          name?: string
+          parent_channel_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channels_channel_category_id_fkey"
+            columns: ["channel_category_id"]
+            isOneToOne: false
+            referencedRelation: "channel_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channels_parent_channel_id_fkey"
+            columns: ["parent_channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       companies: {
         Row: {
@@ -508,6 +758,57 @@ export type Database = {
         }
         Relationships: []
       }
+      metric_definitions: {
+        Row: {
+          aggregation_method: string | null
+          category: string
+          created_at: string | null
+          data_type: string | null
+          description: string | null
+          display_order: number | null
+          formula: string | null
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          is_system: boolean | null
+          key: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          aggregation_method?: string | null
+          category: string
+          created_at?: string | null
+          data_type?: string | null
+          description?: string | null
+          display_order?: number | null
+          formula?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_system?: boolean | null
+          key: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          aggregation_method?: string | null
+          category?: string
+          created_at?: string | null
+          data_type?: string | null
+          description?: string | null
+          display_order?: number | null
+          formula?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_system?: boolean | null
+          key?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       metrics: {
         Row: {
           campaign_id: string
@@ -605,6 +906,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "objectives_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      placements: {
+        Row: {
+          aspect_ratio: string | null
+          channel_id: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          mock_type: Database["public"]["Enums"]["placement_mock_type"]
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          aspect_ratio?: string | null
+          channel_id: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          mock_type: Database["public"]["Enums"]["placement_mock_type"]
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          aspect_ratio?: string | null
+          channel_id?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          mock_type?: Database["public"]["Enums"]["placement_mock_type"]
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "placements_channel_id_fkey"
             columns: ["channel_id"]
             isOneToOne: false
             referencedRelation: "channels"
@@ -822,6 +1167,39 @@ export type Database = {
         }
         Relationships: []
       }
+      service_types: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          type_enum: Database["public"]["Enums"]["service_type_enum"]
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          type_enum: Database["public"]["Enums"]["service_type_enum"]
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          type_enum?: Database["public"]["Enums"]["service_type_enum"]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       site_images: {
         Row: {
           alt_text: string | null
@@ -1013,6 +1391,11 @@ export type Database = {
     Enums: {
       app_role: "MasterAdmin" | "Director" | "Account" | "Client"
       campaign_status: "draft" | "running" | "finished"
+      campaign_type_enum:
+        | "Branding.Brand"
+        | "Branding.Category"
+        | "Branding.Product"
+        | "Performance.Product"
       channel_type:
         | "Social"
         | "Programmatic"
@@ -1022,7 +1405,30 @@ export type Database = {
         | "Owned"
       engagement_level: "Low" | "Moderate" | "High" | "Viral"
       funnel_type: "TOP" | "MID" | "BOTTOM"
+      metric_period_enum: "Daily" | "Weekly" | "Monthly" | "CampaignToDate"
+      metric_source_enum: "GoogleSheet" | "API" | "Manual"
+      placement_mock_type:
+        | "MobileFeedMock"
+        | "StoryMock"
+        | "ReelsMock"
+        | "InStreamMock"
+        | "BillboardMock"
+        | "SearchAdMock"
+        | "DisplayAdMock"
       sentiment_type: "Positive" | "Neutral" | "Negative"
+      service_type_enum:
+        | "SocialMediaManagement"
+        | "PaidMediaBuying"
+        | "InfluencerMarketing"
+        | "KOLManagement"
+        | "BrandActivation"
+        | "ProgrammaticDisplay"
+        | "ProgrammaticSocial"
+        | "RetailMedia"
+        | "SEO"
+        | "SEM"
+        | "CRO"
+        | "AnalyticsAndReporting"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1152,6 +1558,12 @@ export const Constants = {
     Enums: {
       app_role: ["MasterAdmin", "Director", "Account", "Client"],
       campaign_status: ["draft", "running", "finished"],
+      campaign_type_enum: [
+        "Branding.Brand",
+        "Branding.Category",
+        "Branding.Product",
+        "Performance.Product",
+      ],
       channel_type: [
         "Social",
         "Programmatic",
@@ -1162,7 +1574,32 @@ export const Constants = {
       ],
       engagement_level: ["Low", "Moderate", "High", "Viral"],
       funnel_type: ["TOP", "MID", "BOTTOM"],
+      metric_period_enum: ["Daily", "Weekly", "Monthly", "CampaignToDate"],
+      metric_source_enum: ["GoogleSheet", "API", "Manual"],
+      placement_mock_type: [
+        "MobileFeedMock",
+        "StoryMock",
+        "ReelsMock",
+        "InStreamMock",
+        "BillboardMock",
+        "SearchAdMock",
+        "DisplayAdMock",
+      ],
       sentiment_type: ["Positive", "Neutral", "Negative"],
+      service_type_enum: [
+        "SocialMediaManagement",
+        "PaidMediaBuying",
+        "InfluencerMarketing",
+        "KOLManagement",
+        "BrandActivation",
+        "ProgrammaticDisplay",
+        "ProgrammaticSocial",
+        "RetailMedia",
+        "SEO",
+        "SEM",
+        "CRO",
+        "AnalyticsAndReporting",
+      ],
     },
   },
 } as const

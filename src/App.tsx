@@ -27,6 +27,7 @@ import Reports from "./pages/Reports";
 import Brands from "./pages/Brands";
 import AVECalculator from "./pages/AVECalculator";
 import MediaOutletsManagement from "./pages/MediaOutletsManagement";
+import BrandCampaignManagement from "./pages/BrandCampaignManagement";
 
 const queryClient = createQueryClient();
 
@@ -60,6 +61,7 @@ const App = () => (
                 <Route path="/admin-settings" element={<AdminSettings />} />
                 <Route path="/content-management" element={<ContentManagement />} />
                 <Route path="/media-outlets" element={<MediaOutletsManagement />} />
+                <Route path="/brand-campaign-management" element={<BrandCampaignManagement />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/profile/data-export" element={<DataExport />} />
               </Route>
