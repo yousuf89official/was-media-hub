@@ -28,6 +28,7 @@ import Brands from "./pages/Brands";
 import AVECalculator from "./pages/AVECalculator";
 import MediaOutletsManagement from "./pages/MediaOutletsManagement";
 import BrandCampaignManagement from "./pages/BrandCampaignManagement";
+import BrandPerformanceDashboard from "./pages/BrandPerformanceDashboard";
 
 const queryClient = createQueryClient();
 
@@ -56,6 +57,7 @@ const App = () => (
                 <Route path="/campaigns/:id/metrics" element={<MetricsEntry />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/brands" element={<Brands />} />
+                <Route path="/brands/:brandId/dashboard" element={<BrandPerformanceDashboard />} />
                 <Route path="/ave-calculator" element={<AVECalculator />} />
                 <Route path="/calculation-logs" element={<CalculationLogs />} />
                 <Route path="/admin-settings" element={<AdminSettings />} />
