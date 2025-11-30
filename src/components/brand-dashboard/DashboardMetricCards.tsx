@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Eye, MousePointerClick, Users, Heart, TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useMetricTrends } from "@/hooks/useMetricTrends";
 
 interface MetricCardsProps {
   metrics: {
@@ -11,9 +12,12 @@ interface MetricCardsProps {
     ctr: number;
     spend?: number;
   };
+  campaignIds?: string[];
 }
 
-export function DashboardMetricCards({ metrics }: MetricCardsProps) {
+export function DashboardMetricCards({ metrics, campaignIds }: MetricCardsProps) {
+  const { data: trends } = useMetricTrends(campaignIds);
+
   const formatNumber = (num: number) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
@@ -28,7 +32,7 @@ export function DashboardMetricCards({ metrics }: MetricCardsProps) {
       color: "from-blue-500 to-blue-600",
       bgColor: "bg-blue-500/10",
       iconColor: "text-blue-500",
-      change: 12.5,
+      change: trends?.impressions?.changePercent ?? 0,
     },
     {
       title: "Total Clicks",
@@ -38,7 +42,7 @@ export function DashboardMetricCards({ metrics }: MetricCardsProps) {
       bgColor: "bg-emerald-500/10",
       iconColor: "text-emerald-500",
       subtitle: `CTR: ${metrics.ctr.toFixed(2)}%`,
-      change: 8.2,
+      change: trends?.clicks?.changePercent ?? 0,
     },
     {
       title: "Total Reach",
@@ -47,7 +51,7 @@ export function DashboardMetricCards({ metrics }: MetricCardsProps) {
       color: "from-purple-500 to-purple-600",
       bgColor: "bg-purple-500/10",
       iconColor: "text-purple-500",
-      change: -2.4,
+      change: trends?.reach?.changePercent ?? 0,
     },
     {
       title: "Engagements",
@@ -56,7 +60,7 @@ export function DashboardMetricCards({ metrics }: MetricCardsProps) {
       color: "from-rose-500 to-rose-600",
       bgColor: "bg-rose-500/10",
       iconColor: "text-rose-500",
-      change: 15.8,
+      change: trends?.engagements?.changePercent ?? 0,
     },
   ];
 
@@ -88,7 +92,7 @@ export function DashboardMetricCards({ metrics }: MetricCardsProps) {
                     ) : (
                       <TrendingDown className="h-4 w-4" />
                     )}
-                    <span>{Math.abs(card.change)}% vs last period</span>
+                    <span>{Math.abs(card.change).toFixed(1)}% vs last period</span>
                   </div>
                 )}
               </div>
