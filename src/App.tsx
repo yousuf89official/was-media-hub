@@ -24,7 +24,7 @@ import Brands from "./pages/Brands";
 import AVECalculator from "./pages/AVECalculator";
 import BrandCampaignManagement from "./pages/BrandCampaignManagement";
 import BrandPerformanceDashboard from "./pages/BrandPerformanceDashboard";
-
+import UserManagement from "./pages/UserManagement";
 const queryClient = createQueryClient();
 
 const App = () => (
@@ -54,6 +54,7 @@ const App = () => (
                 <Route path="/calculation-logs" element={<CalculationLogs />} />
                 <Route path="/content-management" element={<ContentManagement />} />
                 <Route path="/brand-campaign-management" element={<BrandCampaignManagement />} />
+                <Route path="/user-management" element={<UserManagement />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/profile/data-export" element={<DataExport />} />
               </Route>

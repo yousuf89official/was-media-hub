@@ -1,4 +1,4 @@
-import { Home, Package, TrendingUp, History, User, FileText, Layout } from "lucide-react";
+import { Home, Package, TrendingUp, History, User, FileText, Layout, Users } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -25,6 +25,7 @@ const menuItems = [
 const adminMenuItems = [
   { title: "Brand & Campaigns", url: "/brand-campaign-management", icon: Package },
   { title: "Content Management", url: "/content-management", icon: Layout },
+  { title: "User Management", url: "/user-management", icon: Users },
 ];
 
 export function AppSidebar() {

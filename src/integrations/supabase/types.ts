@@ -165,6 +165,64 @@ export type Database = {
           },
         ]
       }
+      brand_access_grants: {
+        Row: {
+          access_level: string
+          brand_id: string
+          created_at: string | null
+          expires_at: string | null
+          granted_by: string | null
+          id: string
+          is_active: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          access_level?: string
+          brand_id: string
+          created_at?: string | null
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          access_level?: string
+          brand_id?: string
+          created_at?: string | null
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_access_grants_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brand_access_grants_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brand_access_grants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brands: {
         Row: {
           categories: string[] | null
@@ -1120,6 +1178,39 @@ export type Database = {
           },
         ]
       }
+      departments: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       engagement_multipliers: {
         Row: {
           created_at: string
@@ -1143,6 +1234,163 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      feature_permissions: {
+        Row: {
+          can_create: boolean | null
+          can_delete: boolean | null
+          can_edit: boolean | null
+          can_export: boolean | null
+          can_view: boolean | null
+          created_at: string | null
+          custom_rules: Json | null
+          feature_id: string
+          id: string
+          job_title_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          can_create?: boolean | null
+          can_delete?: boolean | null
+          can_edit?: boolean | null
+          can_export?: boolean | null
+          can_view?: boolean | null
+          created_at?: string | null
+          custom_rules?: Json | null
+          feature_id: string
+          id?: string
+          job_title_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          can_create?: boolean | null
+          can_delete?: boolean | null
+          can_edit?: boolean | null
+          can_export?: boolean | null
+          can_view?: boolean | null
+          created_at?: string | null
+          custom_rules?: Json | null
+          feature_id?: string
+          id?: string
+          job_title_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_permissions_feature_id_fkey"
+            columns: ["feature_id"]
+            isOneToOne: false
+            referencedRelation: "features"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feature_permissions_job_title_id_fkey"
+            columns: ["job_title_id"]
+            isOneToOne: false
+            referencedRelation: "job_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      features: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          feature_type: string | null
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          parent_id: string | null
+          route_path: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          feature_type?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          parent_id?: string | null
+          route_path?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          feature_type?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          parent_id?: string | null
+          route_path?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "features_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "features"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_titles: {
+        Row: {
+          code: string
+          created_at: string | null
+          department_id: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          seniority_level: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          department_id?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          seniority_level?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          department_id?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          seniority_level?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_titles_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       landing_features: {
         Row: {
@@ -1828,6 +2076,61 @@ export type Database = {
         }
         Relationships: []
       }
+      user_job_assignments: {
+        Row: {
+          assigned_by: string | null
+          created_at: string | null
+          id: string
+          is_primary: boolean | null
+          job_title_id: string | null
+          updated_at: string | null
+          user_id: string
+          user_type: Database["public"]["Enums"]["user_type_enum"]
+        }
+        Insert: {
+          assigned_by?: string | null
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          job_title_id?: string | null
+          updated_at?: string | null
+          user_id: string
+          user_type?: Database["public"]["Enums"]["user_type_enum"]
+        }
+        Update: {
+          assigned_by?: string | null
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          job_title_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+          user_type?: Database["public"]["Enums"]["user_type_enum"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_job_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_job_assignments_job_title_id_fkey"
+            columns: ["job_title_id"]
+            isOneToOne: false
+            referencedRelation: "job_titles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_job_assignments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1865,6 +2168,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_brand: {
+        Args: { _access_level?: string; _brand_id: string; _user_id: string }
+        Returns: boolean
+      }
+      get_user_accessible_features: {
+        Args: { _user_id: string }
+        Returns: {
+          can_create: boolean
+          can_delete: boolean
+          can_edit: boolean
+          can_export: boolean
+          can_view: boolean
+          feature_code: string
+          feature_id: string
+          feature_name: string
+        }[]
+      }
+      get_user_type: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["user_type_enum"]
+      }
+      has_feature_permission: {
+        Args: { _feature_code: string; _permission: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1914,6 +2242,7 @@ export type Database = {
         | "SEM"
         | "CRO"
         | "AnalyticsAndReporting"
+      user_type_enum: "agency" | "client" | "guest"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2085,6 +2414,7 @@ export const Constants = {
         "CRO",
         "AnalyticsAndReporting",
       ],
+      user_type_enum: ["agency", "client", "guest"],
     },
   },
 } as const
