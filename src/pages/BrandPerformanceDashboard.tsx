@@ -15,6 +15,7 @@ import { useCampaignTypes } from "@/hooks/useCampaignTypes";
 import { useChannels } from "@/hooks/useChannels";
 import { WidgetProvider } from "@/components/widgets/WidgetContext";
 import { WidgetGrid } from "@/components/widgets/WidgetGrid";
+import { CreativeGallery } from "@/components/creative-gallery/CreativeGallery";
 
 export default function BrandPerformanceDashboard() {
   const { brandId } = useParams<{ brandId: string }>();
@@ -330,6 +331,9 @@ export default function BrandPerformanceDashboard() {
                   metrics={metrics || []}
                 />
               </div>
+
+              {/* Creative Gallery */}
+              <CreativeGallery brandName={brand.name} />
             </div>
           </WidgetProvider>
         ) : (
