@@ -635,6 +635,123 @@ export type Database = {
           },
         ]
       }
+      data_source_mappings: {
+        Row: {
+          cell_range: string
+          created_at: string
+          data_source_id: string
+          id: string
+          is_active: boolean | null
+          metric_key: string
+          sheet_tab: string | null
+          transform_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          cell_range: string
+          created_at?: string
+          data_source_id: string
+          id?: string
+          is_active?: boolean | null
+          metric_key: string
+          sheet_tab?: string | null
+          transform_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cell_range?: string
+          created_at?: string
+          data_source_id?: string
+          id?: string
+          is_active?: boolean | null
+          metric_key?: string
+          sheet_tab?: string | null
+          transform_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_source_mappings_data_source_id_fkey"
+            columns: ["data_source_id"]
+            isOneToOne: false
+            referencedRelation: "data_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_sources: {
+        Row: {
+          brand_id: string | null
+          campaign_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          last_synced_at: string | null
+          name: string
+          sheet_id: string | null
+          sheet_name: string | null
+          sheet_url: string | null
+          source_type: string
+          sync_frequency: string | null
+          updated_at: string
+        }
+        Insert: {
+          brand_id?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_synced_at?: string | null
+          name: string
+          sheet_id?: string | null
+          sheet_name?: string | null
+          sheet_url?: string | null
+          source_type?: string
+          sync_frequency?: string | null
+          updated_at?: string
+        }
+        Update: {
+          brand_id?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_synced_at?: string | null
+          name?: string
+          sheet_id?: string | null
+          sheet_name?: string | null
+          sheet_url?: string | null
+          source_type?: string
+          sync_frequency?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_sources_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_sources_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_sources_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       engagement_multipliers: {
         Row: {
           created_at: string
