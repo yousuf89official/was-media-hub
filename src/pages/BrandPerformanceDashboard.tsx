@@ -3,15 +3,15 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Plus, RefreshCw, LayoutDashboard, Database, Eye, EyeOff } from "lucide-react";
 import { FinancialPerformance } from "@/components/brand-dashboard/FinancialPerformance";
-import { CampaignCards } from "@/components/brand-dashboard/CampaignCards";
+import { CampaignTabs } from "@/components/brand-dashboard/CampaignTabs";
 import { CampaignDashboardView } from "@/components/brand-dashboard/CampaignDashboardView";
 import { ChannelMultiSelect } from "@/components/brand-dashboard/ChannelMultiSelect";
+import { PaidMediaSection } from "@/components/brand-dashboard/PaidMediaSection";
 import { useChannels } from "@/hooks/useChannels";
 import { WidgetProvider } from "@/components/widgets/WidgetContext";
 import { WidgetGrid } from "@/components/widgets/WidgetGrid";
@@ -25,7 +25,7 @@ export default function BrandPerformanceDashboard() {
   // View state
   const [activeTab, setActiveTab] = useState<"dashboard" | "datasources">("dashboard");
   const [viewMode, setViewMode] = useState<"agency" | "client">("agency");
-  const [selectedCampaign, setSelectedCampaign] = useState<string>("all");
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
   
   // Fetch brand data
@@ -142,9 +142,9 @@ export default function BrandPerformanceDashboard() {
 
   // Get selected campaign data
   const selectedCampaignData = useMemo(() => {
-    if (selectedCampaign === "all") return null;
-    return campaigns?.find(c => c.id === selectedCampaign) || null;
-  }, [campaigns, selectedCampaign]);
+    if (!selectedCampaignId) return null;
+    return campaigns?.find(c => c.id === selectedCampaignId) || null;
+  }, [campaigns, selectedCampaignId]);
 
   if (brandLoading) {
     return (
@@ -169,15 +169,14 @@ export default function BrandPerformanceDashboard() {
     <div className="min-h-screen bg-background">
       {/* Header - Compact */}
       <div className="border-b bg-card">
-        <div className="px-4 lg:px-6 py-3">
+        <div className="px-4 lg:px-6 py-2">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
-              <Button variant="ghost" size="icon" onClick={() => navigate("/brands")} className="h-8 w-8 shrink-0">
+              <Button variant="ghost" size="icon" onClick={() => navigate("/brands")} className="h-7 w-7 shrink-0">
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <div className="min-w-0">
-                <h1 className="text-lg font-semibold truncate">{brand.name}</h1>
-                <p className="text-xs text-muted-foreground">Performance Hub</p>
+                <h1 className="text-base font-semibold truncate">{brand.name}</h1>
               </div>
             </div>
             
@@ -188,7 +187,7 @@ export default function BrandPerformanceDashboard() {
                   variant={activeTab === "dashboard" ? "default" : "ghost"} 
                   size="sm"
                   onClick={() => setActiveTab("dashboard")}
-                  className="h-7 text-xs gap-1"
+                  className="h-6 text-[10px] gap-1 px-2"
                 >
                   <LayoutDashboard className="h-3 w-3" />
                   Dashboard
@@ -197,7 +196,7 @@ export default function BrandPerformanceDashboard() {
                   variant={activeTab === "datasources" ? "default" : "ghost"} 
                   size="sm"
                   onClick={() => setActiveTab("datasources")}
-                  className="h-7 text-xs gap-1"
+                  className="h-6 text-[10px] gap-1 px-2"
                 >
                   <Database className="h-3 w-3" />
                   Data
@@ -205,7 +204,7 @@ export default function BrandPerformanceDashboard() {
               </div>
 
               {/* View Mode Toggle */}
-              <div className="flex items-center gap-1.5 border rounded-md px-2 py-1">
+              <div className="flex items-center gap-1 border rounded-md px-1.5 py-0.5">
                 <Label htmlFor="view-mode" className="text-muted-foreground">
                   {viewMode === "agency" ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
                 </Label>
@@ -213,62 +212,57 @@ export default function BrandPerformanceDashboard() {
                   id="view-mode"
                   checked={viewMode === "client"}
                   onCheckedChange={(v) => setViewMode(v ? "client" : "agency")}
-                  className="scale-75"
+                  className="scale-[0.6]"
                 />
-                <span className="text-xs">{viewMode === "agency" ? "Agency" : "Client"}</span>
+                <span className="text-[10px]">{viewMode === "agency" ? "Agency" : "Client"}</span>
               </div>
 
-              <Button variant="outline" size="icon" onClick={() => refetchCampaigns()} className="h-7 w-7">
+              <Button variant="ghost" size="icon" onClick={() => refetchCampaigns()} className="h-6 w-6">
                 <RefreshCw className="h-3 w-3" />
               </Button>
               
-              <Button size="sm" asChild className="h-7 text-xs">
+              <Button size="sm" asChild className="h-6 text-[10px] px-2">
                 <Link to={`/campaigns/new?brandId=${brandId}`}>
                   <Plus className="h-3 w-3 mr-1" />
-                  Campaign
+                  New
                 </Link>
               </Button>
             </div>
           </div>
-
-          {/* Campaign Tabs & Filters Row */}
-          {activeTab === "dashboard" && (
-            <div className="flex items-center gap-3 mt-3">
-              <Tabs value={selectedCampaign} onValueChange={setSelectedCampaign}>
-                <TabsList className="h-7">
-                  <TabsTrigger value="all" className="text-xs h-6 px-2">All Campaigns</TabsTrigger>
-                  {campaigns?.slice(0, 5).map((c) => (
-                    <TabsTrigger key={c.id} value={c.id} className="text-xs h-6 px-2 max-w-[100px] truncate">
-                      {c.name}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
-
-              {selectedCampaign === "all" && (
-                <ChannelMultiSelect
-                  channels={brandChannels}
-                  selectedChannels={selectedChannels}
-                  onSelectionChange={setSelectedChannels}
-                />
-              )}
-
-              <div className="ml-auto">
-                <Badge variant="outline" className="text-[10px]">
-                  {filteredCampaigns?.length || 0} campaigns
-                </Badge>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
+      {/* Campaign Tabs Bar - Separate Row */}
+      {activeTab === "dashboard" && (
+        <div className="border-b bg-card/50 px-4 lg:px-6 py-2">
+          <div className="flex items-center gap-3 flex-wrap">
+            <CampaignTabs
+              campaigns={campaigns || []}
+              selectedCampaignId={selectedCampaignId}
+              onSelectCampaign={setSelectedCampaignId}
+            />
+            
+            {/* Channel Filter - Always visible */}
+            <div className="ml-auto flex items-center gap-2">
+              <ChannelMultiSelect
+                channels={brandChannels}
+                selectedChannels={selectedChannels}
+                onSelectionChange={setSelectedChannels}
+              />
+              <Badge variant="outline" className="text-[9px] h-5">
+                {filteredCampaigns?.length || 0} campaigns
+              </Badge>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content - Full Width */}
-      <div className="px-4 lg:px-6 py-4 dashboard-container">
+      <div className="px-4 lg:px-6 py-3 dashboard-container">
         {activeTab === "dashboard" ? (
           <WidgetProvider>
-            {selectedCampaign === "all" || !selectedCampaignData ? (
-              <div className="space-y-4">
+            {!selectedCampaignId || !selectedCampaignData ? (
+              <div className="space-y-3">
                 {/* Financial Performance - Top */}
                 <FinancialPerformance 
                   metrics={financialMetrics} 
@@ -276,19 +270,15 @@ export default function BrandPerformanceDashboard() {
                   exchangeRate={campaigns?.[0]?.exchange_rate || 16000}
                 />
 
+                {/* Paid Media Section */}
+                <PaidMediaSection
+                  campaigns={filteredCampaigns || []}
+                  metrics={metrics || []}
+                  brandName={brand.name}
+                />
+
                 {/* Widget Grid */}
                 <WidgetGrid />
-
-                {/* Campaign Cards */}
-                <div>
-                  <h2 className="text-sm font-medium mb-2">Active Campaigns</h2>
-                  <CampaignCards 
-                    campaigns={filteredCampaigns || []} 
-                    metrics={metrics || []}
-                    selectedCampaignId={selectedCampaign !== "all" ? selectedCampaign : null}
-                    onSelectCampaign={(id) => setSelectedCampaign(id)}
-                  />
-                </div>
 
                 {/* Creative Gallery */}
                 <CreativeGallery brandName={brand.name} />
@@ -298,7 +288,7 @@ export default function BrandPerformanceDashboard() {
                 campaign={selectedCampaignData}
                 metrics={metrics || []}
                 brandName={brand.name}
-                onBack={() => setSelectedCampaign("all")}
+                onBack={() => setSelectedCampaignId(null)}
               />
             )}
           </WidgetProvider>
