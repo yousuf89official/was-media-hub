@@ -16,6 +16,7 @@ import { useChannels } from "@/hooks/useChannels";
 import { WidgetProvider } from "@/components/widgets/WidgetContext";
 import { WidgetGrid } from "@/components/widgets/WidgetGrid";
 import { CreativeGallery } from "@/components/creative-gallery/CreativeGallery";
+import { DataSourcesManager } from "@/components/data-sources/DataSourcesManager";
 
 export default function BrandPerformanceDashboard() {
   const { brandId } = useParams<{ brandId: string }>();
@@ -337,16 +338,7 @@ export default function BrandPerformanceDashboard() {
             </div>
           </WidgetProvider>
         ) : (
-          <div className="text-center py-12">
-            <Database className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-            <h2 className="text-xl font-semibold mb-2">Data Sources</h2>
-            <p className="text-muted-foreground mb-4">Connect Google Sheets or input data manually</p>
-            <Button disabled>
-              <Plus className="h-4 w-4 mr-2" />
-              Connect Data Source
-            </Button>
-            <p className="text-xs text-muted-foreground mt-2">Coming soon in Phase 2</p>
-          </div>
+          <DataSourcesManager brandId={brandId!} />
         )}
       </div>
     </div>
