@@ -7,9 +7,17 @@ export type WidgetType =
   | 'progress-bar'
   | 'data-table'
   | 'funnel'
-  | 'speedometer';
+  | 'speedometer'
+  | 'channel-performance';
 
 export type WidgetSize = 'small' | 'medium' | 'large' | 'full';
+
+export interface WidgetLayout {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
 
 export interface WidgetConfig {
   id: string;
@@ -17,6 +25,7 @@ export interface WidgetConfig {
   title: string;
   size: WidgetSize;
   position: number;
+  layout?: WidgetLayout;
   config: {
     metric?: string;
     dataSource?: string;
@@ -47,6 +56,7 @@ export const WIDGET_TYPES: { type: WidgetType; label: string; description: strin
   { type: 'data-table', label: 'Data Table', description: 'Tabular data display' },
   { type: 'funnel', label: 'Marketing Funnel', description: 'Funnel stage visualization' },
   { type: 'speedometer', label: 'Speedometer', description: 'Gauge for rates/performance' },
+  { type: 'channel-performance', label: 'Channel Performance', description: 'Channel metrics with branding' },
 ];
 
 export const WIDGET_SIZES: { size: WidgetSize; label: string; cols: number }[] = [

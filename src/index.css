@@ -37,7 +37,7 @@ All colors MUST be HSL.
     --input: 0 0% 90%;
     --ring: 357 100% 44%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     /* Sidebar tokens */
     --sidebar-background: 0 0% 98%;
@@ -51,6 +51,21 @@ All colors MUST be HSL.
     --gradient-red: linear-gradient(135deg, hsl(357 100% 44%), hsl(357 100% 54%));
     --shadow-glow: 0 10px 40px -10px hsl(357 100% 44% / 0.3);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Channel brand colors */
+    --instagram: 326 78% 52%;
+    --facebook: 214 89% 52%;
+    --tiktok: 0 0% 0%;
+    --youtube: 0 100% 50%;
+    --google: 217 89% 61%;
+    --linkedin: 201 100% 35%;
+    --twitter: 203 89% 53%;
+    
+    /* Compact spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 0.75rem;
+    --spacing-lg: 1rem;
   }
 
   .dark {
@@ -100,4 +115,125 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* 4K / Large TV Display Support */
+@media (min-width: 2560px) {
+  :root {
+    --radius: 0.75rem;
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 0.75rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+  }
+  
+  html {
+    font-size: 20px;
+  }
+  
+  .dashboard-container {
+    max-width: 100%;
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
+
+@media (min-width: 3840px) {
+  html {
+    font-size: 24px;
+  }
+  
+  .dashboard-container {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+}
+
+/* React Grid Layout styles */
+.react-grid-layout {
+  position: relative;
+  transition: height 200ms ease;
+}
+
+.react-grid-item {
+  transition: all 200ms ease;
+  transition-property: left, top, width, height;
+}
+
+.react-grid-item.cssTransforms {
+  transition-property: transform, width, height;
+}
+
+.react-grid-item.resizing {
+  opacity: 0.9;
+  z-index: 100;
+}
+
+.react-grid-item.react-draggable-dragging {
+  transition: none;
+  z-index: 100;
+  opacity: 0.9;
+}
+
+.react-grid-item.dropping {
+  visibility: hidden;
+}
+
+.react-grid-item > .react-resizable-handle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+}
+
+.react-grid-item > .react-resizable-handle::after {
+  content: "";
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid hsl(var(--muted-foreground) / 0.4);
+  border-bottom: 2px solid hsl(var(--muted-foreground) / 0.4);
+}
+
+.react-grid-item:hover > .react-resizable-handle::after {
+  border-color: hsl(var(--primary));
+}
+
+.react-resizable-handle-se {
+  bottom: 0;
+  right: 0;
+  cursor: se-resize;
+}
+
+.react-resizable-handle-sw {
+  bottom: 0;
+  left: 0;
+  cursor: sw-resize;
+}
+
+.react-resizable-handle-nw {
+  top: 0;
+  left: 0;
+  cursor: nw-resize;
+}
+
+.react-resizable-handle-ne {
+  top: 0;
+  right: 0;
+  cursor: ne-resize;
+}
+
+.react-resizable-handle-n,
+.react-resizable-handle-s {
+  left: 50%;
+  margin-left: -10px;
+  cursor: ns-resize;
+}
+
+.react-resizable-handle-e,
+.react-resizable-handle-w {
+  top: 50%;
+  margin-top: -10px;
+  cursor: ew-resize;
 }

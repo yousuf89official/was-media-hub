@@ -2,16 +2,17 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Image, Filter, Eye, TrendingUp, Plus, Upload } from 'lucide-react';
+import { Image, Eye, TrendingUp, Upload } from 'lucide-react';
 import { Creative, PlatformType, PLATFORM_CONFIG } from './types';
 import { InstagramFeedMockup } from './mockups/InstagramFeedMockup';
 import { InstagramStoryMockup } from './mockups/InstagramStoryMockup';
 import { TikTokMockup } from './mockups/TikTokMockup';
 import { YouTubeMockup } from './mockups/YouTubeMockup';
 import { GoogleSearchMockup } from './mockups/GoogleSearchMockup';
+import { useChannels } from '@/hooks/useChannels';
+import { usePlacements } from '@/hooks/usePlacements';
 
 interface CreativeGalleryProps {
   brandName?: string;
@@ -24,10 +25,10 @@ const MOCK_CREATIVES: Creative[] = [
     id: '1',
     campaignId: '1',
     platform: 'instagram-feed',
-    description: 'Introducing our newest innovation! Experience the difference. #NewProduct #Innovation',
+    description: 'Introducing our newest innovation! Experience the difference. #NewProduct',
     isCollaboration: false,
     isBoosted: true,
-    metrics: { impressions: 125000, reach: 98000, engagements: 8500, likes: 7200, comments: 342, shares: 189, saves: 567 },
+    metrics: { impressions: 125000, reach: 98000, engagements: 8500, likes: 7200 },
     source: 'paid',
     createdAt: '2024-01-15',
   },
@@ -35,10 +36,10 @@ const MOCK_CREATIVES: Creative[] = [
     id: '2',
     campaignId: '1',
     platform: 'tiktok',
-    description: 'POV: You just discovered the best product ever 🤯 #fyp #viral #musthave',
+    description: 'POV: You just discovered the best product ever 🤯 #fyp #viral',
     isCollaboration: true,
     isBoosted: false,
-    metrics: { impressions: 450000, reach: 380000, engagements: 45000, likes: 38000, comments: 2100, shares: 4200, saves: 890, views: 420000 },
+    metrics: { impressions: 450000, reach: 380000, engagements: 45000, views: 420000 },
     source: 'kol',
     createdAt: '2024-01-14',
   },
@@ -46,10 +47,10 @@ const MOCK_CREATIVES: Creative[] = [
     id: '3',
     campaignId: '1',
     platform: 'youtube',
-    headline: 'Product Launch 2024 - Full Review & Unboxing',
+    headline: 'Product Launch 2024 - Full Review',
     description: 'In this video, we reveal our latest product...',
     isBoosted: true,
-    metrics: { impressions: 89000, reach: 75000, engagements: 12000, likes: 8500, views: 125000 },
+    metrics: { impressions: 89000, reach: 75000, engagements: 12000, views: 125000 },
     source: 'paid',
     createdAt: '2024-01-13',
   },
@@ -57,8 +58,8 @@ const MOCK_CREATIVES: Creative[] = [
     id: '4',
     campaignId: '1',
     platform: 'google-search',
-    headline: 'Premium Products | Free Shipping Today',
-    description: 'Shop our award-winning collection. 30-day returns. Premium quality guaranteed. Order now and get 20% off!',
+    headline: 'Premium Products | Free Shipping',
+    description: 'Shop our award-winning collection. 30-day returns.',
     displayUrl: 'www.example.com/shop',
     isBoosted: true,
     metrics: { impressions: 250000, clicks: 7500, ctr: 0.03 },
@@ -82,193 +83,187 @@ export function CreativeGallery({ brandName = 'Brand', campaignId }: CreativeGal
   const [selectedSource, setSelectedSource] = useState<string>('all');
   const [selectedCreative, setSelectedCreative] = useState<Creative | null>(null);
 
+  const { data: channels } = useChannels();
+  const { data: placements } = usePlacements(selectedPlatform !== 'all' ? selectedPlatform : undefined);
+
   const filteredCreatives = MOCK_CREATIVES.filter(creative => {
     if (selectedPlatform !== 'all' && creative.platform !== selectedPlatform) return false;
     if (selectedSource !== 'all' && creative.source !== selectedSource) return false;
     return true;
   });
 
-  const renderMockup = (creative: Creative) => {
-    switch (creative.platform) {
-      case 'instagram-feed':
-        return <InstagramFeedMockup creative={creative} brandName={brandName} />;
-      case 'instagram-story':
-        return <InstagramStoryMockup creative={creative} brandName={brandName} />;
-      case 'tiktok':
-        return <TikTokMockup creative={creative} brandName={brandName} />;
-      case 'youtube':
-        return <YouTubeMockup creative={creative} brandName={brandName} />;
-      case 'google-search':
-        return <GoogleSearchMockup creative={creative} brandName={brandName} />;
-      default:
-        return null;
+  const renderMockup = (creative: Creative, scale: 'small' | 'large' = 'small') => {
+    const scaleClass = scale === 'small' ? 'scale-[0.45]' : 'scale-75';
+    const wrapperClass = scale === 'small' ? 'h-[180px] w-[100px]' : '';
+    
+    const mockup = (() => {
+      switch (creative.platform) {
+        case 'instagram-feed':
+          return <InstagramFeedMockup creative={creative} brandName={brandName} />;
+        case 'instagram-story':
+          return <InstagramStoryMockup creative={creative} brandName={brandName} />;
+        case 'tiktok':
+          return <TikTokMockup creative={creative} brandName={brandName} />;
+        case 'youtube':
+          return <YouTubeMockup creative={creative} brandName={brandName} />;
+        case 'google-search':
+          return <GoogleSearchMockup creative={creative} brandName={brandName} />;
+        default:
+          return null;
+      }
+    })();
+
+    if (scale === 'small') {
+      return (
+        <div className={`${wrapperClass} overflow-hidden flex items-start justify-center`}>
+          <div className={`transform ${scaleClass} origin-top`}>{mockup}</div>
+        </div>
+      );
     }
+    return mockup;
   };
 
   const getSourceBadge = (source: Creative['source']) => {
-    switch (source) {
-      case 'organic':
-        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Organic</Badge>;
-      case 'paid':
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Paid</Badge>;
-      case 'kol':
-        return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">KOL</Badge>;
-    }
+    const styles = {
+      organic: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
+      paid: "bg-blue-500/10 text-blue-600 border-blue-500/30",
+      kol: "bg-purple-500/10 text-purple-600 border-purple-500/30",
+    };
+    return <Badge variant="outline" className={`text-[9px] px-1 ${styles[source]}`}>{source.toUpperCase()}</Badge>;
+  };
+
+  const formatMetric = (value: number) => {
+    if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
+    return value.toString();
   };
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
+      <CardHeader className="py-3 px-4">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
-            <Image className="h-5 w-5 text-primary" />
-            <CardTitle>Creative Gallery</CardTitle>
+            <Image className="h-4 w-4 text-primary" />
+            <CardTitle className="text-sm">Creative Gallery</CardTitle>
+            <Badge variant="secondary" className="text-[10px]">{filteredCreatives.length}</Badge>
           </div>
-          <Button size="sm" variant="outline" className="gap-2">
-            <Upload className="h-4 w-4" />
-            Upload Creative
-          </Button>
-        </div>
-        
-        {/* Filters */}
-        <div className="flex items-center gap-4 mt-4">
+          
           <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-muted-foreground" />
             <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="h-7 w-[110px] text-xs">
                 <SelectValue placeholder="Platform" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Platforms</SelectItem>
                 {Object.entries(PLATFORM_CONFIG).map(([key, config]) => (
-                  <SelectItem key={key} value={key}>
+                  <SelectItem key={key} value={key} className="text-xs">
                     {config.icon} {config.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-          </div>
 
-          <Select value={selectedSource} onValueChange={setSelectedSource}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Source" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Sources</SelectItem>
-              <SelectItem value="organic">Organic</SelectItem>
-              <SelectItem value="paid">Paid</SelectItem>
-              <SelectItem value="kol">KOL</SelectItem>
-            </SelectContent>
-          </Select>
+            <Select value={selectedSource} onValueChange={setSelectedSource}>
+              <SelectTrigger className="h-7 w-[90px] text-xs">
+                <SelectValue placeholder="Source" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="organic">Organic</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="kol">KOL</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <div className="ml-auto text-sm text-muted-foreground">
-            {filteredCreatives.length} creative{filteredCreatives.length !== 1 ? 's' : ''}
+            <Button size="sm" variant="outline" className="h-7 text-xs gap-1">
+              <Upload className="h-3 w-3" />
+              Upload
+            </Button>
           </div>
         </div>
       </CardHeader>
 
-      <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <CardContent className="px-4 pb-4">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-2">
           {filteredCreatives.map(creative => (
             <Dialog key={creative.id}>
               <DialogTrigger asChild>
                 <div 
-                  className="flex flex-col items-center cursor-pointer group"
+                  className="flex flex-col cursor-pointer group rounded-lg border bg-card hover:shadow-md hover:border-primary/30 transition-all overflow-hidden"
                   onClick={() => setSelectedCreative(creative)}
                 >
                   {/* Mockup Preview */}
-                  <div className="transform scale-75 origin-top transition-transform group-hover:scale-[0.78]">
-                    {renderMockup(creative)}
+                  <div className="bg-muted/30 flex items-center justify-center p-1">
+                    {renderMockup(creative, 'small')}
                   </div>
                   
-                  {/* Info Bar */}
-                  <div className="w-full max-w-[240px] -mt-6 p-3 bg-card rounded-lg border shadow-sm space-y-2">
+                  {/* Info */}
+                  <div className="p-1.5 space-y-1 border-t">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium">
-                        {PLATFORM_CONFIG[creative.platform]?.icon} {PLATFORM_CONFIG[creative.platform]?.label}
+                      <span className="text-[9px] text-muted-foreground truncate">
+                        {PLATFORM_CONFIG[creative.platform]?.label}
                       </span>
                       {getSourceBadge(creative.source)}
                     </div>
                     
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Eye className="h-3 w-3" />
-                        {((creative.metrics?.impressions || 0) / 1000).toFixed(1)}K
+                    <div className="flex items-center gap-2 text-[9px] text-muted-foreground">
+                      <span className="flex items-center gap-0.5">
+                        <Eye className="h-2.5 w-2.5" />
+                        {formatMetric(creative.metrics?.impressions || 0)}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <TrendingUp className="h-3 w-3" />
-                        {((creative.metrics?.engagements || 0) / 1000).toFixed(1)}K
+                      <span className="flex items-center gap-0.5">
+                        <TrendingUp className="h-2.5 w-2.5" />
+                        {formatMetric(creative.metrics?.engagements || 0)}
                       </span>
-                    </div>
-
-                    <div className="flex gap-1">
-                      {creative.isCollaboration && (
-                        <Badge variant="secondary" className="text-[10px]">Collab</Badge>
-                      )}
-                      {creative.isBoosted && (
-                        <Badge variant="secondary" className="text-[10px]">Boosted</Badge>
-                      )}
                     </div>
                   </div>
                 </div>
               </DialogTrigger>
 
-              <DialogContent className="max-w-4xl">
+              <DialogContent className="max-w-3xl">
                 <DialogHeader>
-                  <DialogTitle>
-                    {PLATFORM_CONFIG[creative.platform]?.icon} {PLATFORM_CONFIG[creative.platform]?.label} Creative
+                  <DialogTitle className="text-sm">
+                    {PLATFORM_CONFIG[creative.platform]?.icon} {PLATFORM_CONFIG[creative.platform]?.label}
                   </DialogTitle>
                 </DialogHeader>
-                <div className="flex flex-col lg:flex-row gap-6 mt-4">
+                <div className="flex flex-col lg:flex-row gap-4 mt-2">
                   <div className="flex justify-center">
-                    {renderMockup(creative)}
+                    {renderMockup(creative, 'large')}
                   </div>
-                  <div className="flex-1 space-y-4">
+                  <div className="flex-1 space-y-3">
                     <div>
-                      <h4 className="text-sm font-medium mb-2">Performance Metrics</h4>
-                      <div className="grid grid-cols-2 gap-3">
+                      <h4 className="text-xs font-medium mb-2">Performance</h4>
+                      <div className="grid grid-cols-2 gap-2">
                         {creative.metrics?.impressions && (
-                          <div className="p-3 bg-muted rounded-lg">
-                            <p className="text-xs text-muted-foreground">Impressions</p>
-                            <p className="text-lg font-semibold">{creative.metrics.impressions.toLocaleString()}</p>
+                          <div className="p-2 bg-muted rounded">
+                            <p className="text-[10px] text-muted-foreground">Impressions</p>
+                            <p className="text-sm font-semibold">{creative.metrics.impressions.toLocaleString()}</p>
                           </div>
                         )}
                         {creative.metrics?.reach && (
-                          <div className="p-3 bg-muted rounded-lg">
-                            <p className="text-xs text-muted-foreground">Reach</p>
-                            <p className="text-lg font-semibold">{creative.metrics.reach.toLocaleString()}</p>
+                          <div className="p-2 bg-muted rounded">
+                            <p className="text-[10px] text-muted-foreground">Reach</p>
+                            <p className="text-sm font-semibold">{creative.metrics.reach.toLocaleString()}</p>
                           </div>
                         )}
                         {creative.metrics?.engagements && (
-                          <div className="p-3 bg-muted rounded-lg">
-                            <p className="text-xs text-muted-foreground">Engagements</p>
-                            <p className="text-lg font-semibold">{creative.metrics.engagements.toLocaleString()}</p>
+                          <div className="p-2 bg-muted rounded">
+                            <p className="text-[10px] text-muted-foreground">Engagements</p>
+                            <p className="text-sm font-semibold">{creative.metrics.engagements.toLocaleString()}</p>
                           </div>
                         )}
                         {creative.metrics?.views && (
-                          <div className="p-3 bg-muted rounded-lg">
-                            <p className="text-xs text-muted-foreground">Views</p>
-                            <p className="text-lg font-semibold">{creative.metrics.views.toLocaleString()}</p>
-                          </div>
-                        )}
-                        {creative.metrics?.clicks && (
-                          <div className="p-3 bg-muted rounded-lg">
-                            <p className="text-xs text-muted-foreground">Clicks</p>
-                            <p className="text-lg font-semibold">{creative.metrics.clicks.toLocaleString()}</p>
-                          </div>
-                        )}
-                        {creative.metrics?.ctr !== undefined && (
-                          <div className="p-3 bg-muted rounded-lg">
-                            <p className="text-xs text-muted-foreground">CTR</p>
-                            <p className="text-lg font-semibold">{(creative.metrics.ctr * 100).toFixed(2)}%</p>
+                          <div className="p-2 bg-muted rounded">
+                            <p className="text-[10px] text-muted-foreground">Views</p>
+                            <p className="text-sm font-semibold">{creative.metrics.views.toLocaleString()}</p>
                           </div>
                         )}
                       </div>
                     </div>
 
                     <div>
-                      <h4 className="text-sm font-medium mb-2">Details</h4>
-                      <div className="space-y-2 text-sm">
+                      <h4 className="text-xs font-medium mb-2">Details</h4>
+                      <div className="space-y-1.5 text-xs">
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Source</span>
                           {getSourceBadge(creative.source)}
@@ -295,12 +290,11 @@ export function CreativeGallery({ brandName = 'Brand', campaignId }: CreativeGal
         </div>
 
         {filteredCreatives.length === 0 && (
-          <div className="text-center py-12">
-            <Image className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No creatives found</h3>
-            <p className="text-muted-foreground mb-4">Upload your first creative to get started</p>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
+          <div className="text-center py-8">
+            <Image className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+            <p className="text-sm text-muted-foreground mb-2">No creatives found</p>
+            <Button size="sm" variant="outline" className="text-xs">
+              <Upload className="h-3 w-3 mr-1" />
               Upload Creative
             </Button>
           </div>
