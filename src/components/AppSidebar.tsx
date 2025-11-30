@@ -25,6 +25,7 @@ const menuItems = [
 
 const adminMenuItems = [
   { title: "Admin Settings", url: "/admin-settings", icon: Settings },
+  { title: "Brand & Campaigns", url: "/brand-campaign-management", icon: Package },
   { title: "Content Management", url: "/content-management", icon: Layout },
   { title: "Media Outlets", url: "/media-outlets", icon: Newspaper },
 ];
