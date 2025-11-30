@@ -9,11 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Plus, RefreshCw, LayoutDashboard, Database, Eye, EyeOff } from "lucide-react";
-import { DashboardMetricCards } from "@/components/brand-dashboard/DashboardMetricCards";
 import { FinancialPerformance } from "@/components/brand-dashboard/FinancialPerformance";
 import { CampaignCards } from "@/components/brand-dashboard/CampaignCards";
 import { useCampaignTypes } from "@/hooks/useCampaignTypes";
 import { useChannels } from "@/hooks/useChannels";
+import { WidgetProvider } from "@/components/widgets/WidgetContext";
+import { WidgetGrid } from "@/components/widgets/WidgetGrid";
 
 export default function BrandPerformanceDashboard() {
   const { brandId } = useParams<{ brandId: string }>();
@@ -309,26 +310,28 @@ export default function BrandPerformanceDashboard() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-6">
         {activeTab === "dashboard" ? (
-          <div className="space-y-6">
-            {/* Metric Cards */}
-            <DashboardMetricCards metrics={aggregatedMetrics} />
+          <WidgetProvider>
+            <div className="space-y-6">
+              {/* Widget Grid with Drag & Drop */}
+              <WidgetGrid />
 
-            {/* Financial Performance */}
-            <FinancialPerformance 
-              metrics={financialMetrics} 
-              viewMode={viewMode}
-              exchangeRate={campaigns?.[0]?.exchange_rate || 16000}
-            />
-
-            {/* Campaign Cards with KPI Progress */}
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Active Campaigns</h2>
-              <CampaignCards 
-                campaigns={campaigns || []} 
-                metrics={metrics || []}
+              {/* Financial Performance */}
+              <FinancialPerformance 
+                metrics={financialMetrics} 
+                viewMode={viewMode}
+                exchangeRate={campaigns?.[0]?.exchange_rate || 16000}
               />
+
+              {/* Campaign Cards with KPI Progress */}
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Active Campaigns</h2>
+                <CampaignCards 
+                  campaigns={campaigns || []} 
+                  metrics={metrics || []}
+                />
+              </div>
             </div>
-          </div>
+          </WidgetProvider>
         ) : (
           <div className="text-center py-12">
             <Database className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
