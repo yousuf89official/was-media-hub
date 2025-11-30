@@ -1,4 +1,4 @@
-import { BarChart3, Home, Package, TrendingUp, History, User, FileText, Layout } from "lucide-react";
+import { Home, Package, TrendingUp, History, User, FileText, Layout } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -15,7 +15,6 @@ import { useUserRole } from "@/hooks/useUserRole";
 
 const menuItems = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Campaigns", url: "/campaigns", icon: BarChart3 },
   { title: "Brands", url: "/brands", icon: Package },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "AVE Calculator", url: "/ave-calculator", icon: TrendingUp },

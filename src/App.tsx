@@ -14,10 +14,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotFound from "./pages/NotFound";
 import { DashboardLayout } from "./components/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
-import Campaigns from "./pages/Campaigns";
 import CampaignForm from "./pages/CampaignForm";
-import CampaignDetail from "./pages/CampaignDetail";
-import MetricsEntry from "./pages/MetricsEntry";
 import DataExport from "./pages/DataExport";
 import CalculationLogs from "./pages/CalculationLogs";
 import ContentManagement from "./pages/ContentManagement";
@@ -48,11 +45,8 @@ const App = () => (
               {/* Protected routes with sidebar */}
               <Route element={<DashboardLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/campaigns" element={<Campaigns />} />
                 <Route path="/campaigns/new" element={<CampaignForm />} />
-                <Route path="/campaigns/:id" element={<CampaignDetail />} />
                 <Route path="/campaigns/:id/edit" element={<CampaignForm />} />
-                <Route path="/campaigns/:id/metrics" element={<MetricsEntry />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/brands" element={<Brands />} />
                 <Route path="/brands/:brandId/dashboard" element={<BrandPerformanceDashboard />} />
