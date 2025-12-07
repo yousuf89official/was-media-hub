@@ -1,0 +1,445 @@
+{
+  "metadata": {
+    "exportDate": "2025-12-07T06:00:00Z",
+    "sourceDatabase": "PostgreSQL/Supabase",
+    "targetDatabase": "Firebase/Firestore",
+    "projectName": "WAS Media Hub",
+    "version": "1.0.0",
+    "totalCollections": 35,
+    "exportedBy": "Lovable AI"
+  },
+  "enums": {
+    "appRole": ["MasterAdmin", "Director", "Account", "Client"],
+    "userTypeEnum": ["agency", "client", "guest"],
+    "channelType": ["Social", "Programmatic", "Display", "PR", "Email", "Owned"],
+    "campaignStatus": ["draft", "running", "finished"],
+    "funnelType": ["TOP", "MID", "BOTTOM"],
+    "campaignTypeEnum": ["Branding.Brand", "Branding.Category", "Branding.Product", "Performance.Product"],
+    "serviceTypeEnum": ["SocialMediaManagement", "PaidMediaBuying", "InfluencerMarketing", "KOLManagement", "BrandActivation", "ProgrammaticDisplay", "ProgrammaticSocial", "RetailMedia", "SEO", "SEM", "CRO", "AnalyticsAndReporting"],
+    "engagementLevel": ["Low", "Moderate", "High", "Viral"],
+    "sentimentType": ["Positive", "Neutral", "Negative"],
+    "placementMockType": ["MobileFeedMock", "StoryMock", "ReelsMock", "InStreamMock", "DisplayAdMock", "BillboardMock"]
+  },
+  "collections": {
+    "departments": [
+      {"id": "78258ea1-35ab-46b7-88db-467cf1aa33b4", "code": "executive", "name": "Executive & Leadership", "description": "Agency vision, growth, large accounts, commercial outcomes", "displayOrder": 1, "isActive": true, "createdAt": "2025-11-30T15:58:56.416965Z", "updatedAt": "2025-11-30T15:58:56.416965Z"},
+      {"id": "b75529bc-6a51-4943-aba0-544e9cda3530", "code": "client_leadership", "name": "Client Leadership", "description": "Client relationship management and business outcomes", "displayOrder": 2, "isActive": true, "createdAt": "2025-11-30T15:58:56.416965Z", "updatedAt": "2025-11-30T15:58:56.416965Z"},
+      {"id": "bfc3db73-fa6c-4bcc-88df-c6e6a3b1ee0a", "code": "strategy", "name": "Strategy & Planning", "description": "Insight, segmentation, positioning, consumer & competitive analysis", "displayOrder": 3, "isActive": true, "createdAt": "2025-11-30T15:58:56.416965Z", "updatedAt": "2025-11-30T15:58:56.416965Z"},
+      {"id": "9ef520c3-54b8-49dd-82ef-5ef5a52a5418", "code": "creative", "name": "Creative", "description": "Big ideas, comms concept, creative positioning, asset production", "displayOrder": 4, "isActive": true, "createdAt": "2025-11-30T15:58:56.416965Z", "updatedAt": "2025-11-30T15:58:56.416965Z"},
+      {"id": "f777ad2d-58e1-47de-92cc-80bcd1107a55", "code": "performance", "name": "Performance & Digital Ads", "description": "ROI, cost efficiency, revenue, CRO", "displayOrder": 5, "isActive": true, "createdAt": "2025-11-30T15:58:56.416965Z", "updatedAt": "2025-11-30T15:58:56.416965Z"},
+      {"id": "0f1b3c18-358c-48be-ae33-94ce0ccaf173", "code": "social_content", "name": "Social & Content", "description": "Social ecosystem, content strategy, brand voice", "displayOrder": 6, "isActive": true, "createdAt": "2025-11-30T15:58:56.416965Z", "updatedAt": "2025-11-30T15:58:56.416965Z"},
+      {"id": "7106a881-2b58-4668-8542-dba32c655e0b", "code": "data_analytics", "name": "Technology + Data + Analytics", "description": "Performance insights, dashboards, attribution", "displayOrder": 7, "isActive": true, "createdAt": "2025-11-30T15:58:56.416965Z", "updatedAt": "2025-11-30T15:58:56.416965Z"},
+      {"id": "73fc7241-79fa-49cf-8844-00995e876730", "code": "tech_product", "name": "Tech & Digital Product", "description": "UX/UI, development, CRM automation", "displayOrder": 8, "isActive": true, "createdAt": "2025-11-30T15:58:56.416965Z", "updatedAt": "2025-11-30T15:58:56.416965Z"},
+      {"id": "7db9a96f-b981-484a-a1aa-2556117933d5", "code": "execution", "name": "Execution & Delivery", "description": "Daily optimization, campaign management, QA", "displayOrder": 9, "isActive": true, "createdAt": "2025-11-30T15:58:56.416965Z", "updatedAt": "2025-11-30T15:58:56.416965Z"},
+      {"id": "ef543c87-c12e-47a9-af8d-ccf355183994", "code": "support", "name": "Support Functions", "description": "Finance, HR, Project Management", "displayOrder": 10, "isActive": true, "createdAt": "2025-11-30T15:58:56.416965Z", "updatedAt": "2025-11-30T15:58:56.416965Z"}
+    ],
+    "jobTitles": [
+      {"id": "55b6a979-467b-4b19-956c-45832c2d8c3b", "code": "ceo", "name": "Chief Executive Officer", "description": "Agency vision, growth, large accounts", "departmentId": "78258ea1-35ab-46b7-88db-467cf1aa33b4", "seniorityLevel": 10, "displayOrder": 1, "isActive": true},
+      {"id": "5f2c1442-6ff9-4082-8493-7cbd24248709", "code": "client_director", "name": "Client Director", "description": "Owns client relationship and business outcomes", "departmentId": "b75529bc-6a51-4943-aba0-544e9cda3530", "seniorityLevel": 8, "displayOrder": 1, "isActive": true},
+      {"id": "ec19e2bf-0e60-491a-95ab-e2a46525acb2", "code": "account_manager", "name": "Account Manager", "description": "Campaign orchestration, briefs, timelines", "departmentId": "b75529bc-6a51-4943-aba0-544e9cda3530", "seniorityLevel": 6, "displayOrder": 2, "isActive": true},
+      {"id": "01c3438e-5630-4330-aa3f-2a2692df7202", "code": "head_of_strategy", "name": "Head of Strategy", "description": "Brand strategy & comms architecture", "departmentId": "bfc3db73-fa6c-4bcc-88df-c6e6a3b1ee0a", "seniorityLevel": 8, "displayOrder": 1, "isActive": true},
+      {"id": "d936082a-aa6c-4d8a-9d7e-e83e49951ee5", "code": "media_planning_director", "name": "Media Planning Director", "description": "Channel strategy, flighting, mix modeling", "departmentId": "bfc3db73-fa6c-4bcc-88df-c6e6a3b1ee0a", "seniorityLevel": 8, "displayOrder": 2, "isActive": true},
+      {"id": "478ee8b7-553e-4760-8f70-8aad1b445eb2", "code": "creative_director", "name": "Creative Director", "description": "Big idea, comms concept, creative positioning", "departmentId": "9ef520c3-54b8-49dd-82ef-5ef5a52a5418", "seniorityLevel": 8, "displayOrder": 1, "isActive": true},
+      {"id": "e60ec39d-f09f-452f-9075-c944ac7b4eba", "code": "art_director", "name": "Art Director", "description": "Develop and refine creative outputs", "departmentId": "9ef520c3-54b8-49dd-82ef-5ef5a52a5418", "seniorityLevel": 6, "displayOrder": 2, "isActive": true},
+      {"id": "afe67a96-d864-485e-9125-c464522f3a3d", "code": "performance_lead", "name": "Performance Marketing Lead", "description": "ROI, cost efficiency, CRO", "departmentId": "f777ad2d-58e1-47de-92cc-80bcd1107a55", "seniorityLevel": 7, "displayOrder": 1, "isActive": true},
+      {"id": "856ff999-8fa3-44ea-8fae-29ee6ca8322f", "code": "head_of_social", "name": "Head of Social", "description": "Social ecosystem, content strategy", "departmentId": "0f1b3c18-358c-48be-ae33-94ce0ccaf173", "seniorityLevel": 8, "displayOrder": 1, "isActive": true},
+      {"id": "90cc402a-6831-4951-a96e-52f3d29ac794", "code": "data_analyst", "name": "Data Analyst", "description": "Dashboards, attribution, reporting", "departmentId": "7106a881-2b58-4668-8542-dba32c655e0b", "seniorityLevel": 5, "displayOrder": 1, "isActive": true},
+      {"id": "96700a76-e763-4db2-a463-fefe9818badf", "code": "bi_lead", "name": "BI & Analytics Lead", "description": "Advanced analytics, MMM", "departmentId": "7106a881-2b58-4668-8542-dba32c655e0b", "seniorityLevel": 7, "displayOrder": 2, "isActive": true},
+      {"id": "9818bf5e-d083-4f1e-9c7b-0cb83dc191b4", "code": "ux_designer", "name": "UX/UI Designer", "description": "CRO, landing pages, brand experiences", "departmentId": "73fc7241-79fa-49cf-8844-00995e876730", "seniorityLevel": 5, "displayOrder": 1, "isActive": true},
+      {"id": "44b54d47-4c59-41e7-834e-9fa9bf4e945b", "code": "developer", "name": "Web/App Developer", "description": "Site builds, conversion pages", "departmentId": "73fc7241-79fa-49cf-8844-00995e876730", "seniorityLevel": 5, "displayOrder": 2, "isActive": true},
+      {"id": "d7a2f81e-e4a7-4e11-b6ef-b2e38e98f95a", "code": "campaign_manager", "name": "Campaign Manager", "description": "Daily optimization, troubleshooting, scaling", "departmentId": "7db9a96f-b981-484a-a1aa-2556117933d5", "seniorityLevel": 6, "displayOrder": 1, "isActive": true},
+      {"id": "e74dd5b9-9e8f-4ab3-8e32-12c753e8db00", "code": "finance_manager", "name": "Finance Manager", "description": "Billing, budgets, media spend control", "departmentId": "ef543c87-c12e-47a9-af8d-ccf355183994", "seniorityLevel": 6, "displayOrder": 1, "isActive": true}
+    ],
+    "channelCategories": [
+      {"id": "4cf66420-af9f-4e68-9c97-dfe3a0089a16", "name": "Meta", "brandColor": "#0081FB", "iconUrl": null, "isActive": true},
+      {"id": "cba57f13-97a2-45b7-aaa4-3b623fce02c8", "name": "YouTube", "brandColor": "#FF0000", "iconUrl": null, "isActive": true},
+      {"id": "06cc16e7-1037-413d-b90c-4833719c7968", "name": "TikTok", "brandColor": "#000000", "iconUrl": null, "isActive": true},
+      {"id": "8a3cdcde-7e5e-4c2a-a04f-dbd0669611c9", "name": "Programmatic", "brandColor": "#6366F1", "iconUrl": null, "isActive": true},
+      {"id": "1441633f-8d73-4e1c-9ec3-39c476e2e752", "name": "Retail", "brandColor": "#FF9900", "iconUrl": null, "isActive": true},
+      {"id": "04752567-182a-46aa-b44b-37c5f48b9008", "name": "OOH", "brandColor": "#8B5CF6", "iconUrl": null, "isActive": true},
+      {"id": "307d9e80-556d-4666-bdf3-15084d720d2e", "name": "Email", "brandColor": "#00D4AA", "iconUrl": null, "isActive": true},
+      {"id": "3c662770-c772-414e-aeae-97e1e6d3889c", "name": "Messaging", "brandColor": "#25D366", "iconUrl": null, "isActive": true}
+    ],
+    "channels": [
+      {"id": "ab3e277e-51aa-4f64-8766-e35ffb5ad9b8", "name": "Facebook", "channelType": "Social", "channelCategoryId": "4cf66420-af9f-4e68-9c97-dfe3a0089a16", "brandColor": "#1877F2", "iconUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/2023_Facebook_icon.svg/50px-2023_Facebook_icon.svg.png", "displayOrder": 0},
+      {"id": "3a50fdc8-75bd-4941-aa6d-635f4f814105", "name": "Instagram", "channelType": "Social", "channelCategoryId": "4cf66420-af9f-4e68-9c97-dfe3a0089a16", "brandColor": "#E1306C", "iconUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png", "displayOrder": 0},
+      {"id": "de44e07c-3e4a-447d-b11a-889e83e4f308", "name": "YouTube", "channelType": "Social", "channelCategoryId": "cba57f13-97a2-45b7-aaa4-3b623fce02c8", "brandColor": "#FF0000", "iconUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/YouTube_full-color_icon_%282017%29.svg/100px-YouTube_full-color_icon_%282017%29.svg.png", "displayOrder": 0},
+      {"id": "754fdf91-e904-48a7-a4c9-5fa8e2166d94", "name": "TikTok", "channelType": "Social", "channelCategoryId": "06cc16e7-1037-413d-b90c-4833719c7968", "brandColor": "#000000", "iconUrl": "https://upload.wikimedia.org/wikipedia/en/thumb/a/a9/TikTok_logo.svg/100px-TikTok_logo.svg.png", "displayOrder": 0},
+      {"id": "1f5615c0-d5d2-4ac5-9ee8-5b7c5419132b", "name": "LinkedIn", "channelType": "Social", "channelCategoryId": null, "brandColor": "#0A66C2", "iconUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/LinkedIn_logo_initials.png/50px-LinkedIn_logo_initials.png", "displayOrder": 0},
+      {"id": "b4169508-cbd4-42dd-8cc8-bd59cf3aad26", "name": "X", "channelType": "Social", "channelCategoryId": null, "brandColor": null, "iconUrl": null, "displayOrder": 0},
+      {"id": "135a468a-b9ff-4371-ba7b-c6ec166affd1", "name": "Media Relations", "channelType": "PR", "channelCategoryId": null, "brandColor": null, "iconUrl": null, "displayOrder": 0}
+    ],
+    "objectives": [
+      {"id": "262aaad2-5ab3-409e-98a3-02323035ec03", "name": "Brand Awareness", "description": "Increase awareness of your brand", "channelId": "ab3e277e-51aa-4f64-8766-e35ffb5ad9b8", "funnelType": "TOP"},
+      {"id": "48b33366-8017-4db6-b2fd-dae11d0a1e47", "name": "Brand Awareness", "description": "Increase awareness of your brand", "channelId": "3a50fdc8-75bd-4941-aa6d-635f4f814105", "funnelType": "TOP"},
+      {"id": "88b7b567-f2ac-4e82-ab07-38dce43ac72b", "name": "Brand Awareness", "description": "Increase brand recall", "channelId": "de44e07c-3e4a-447d-b11a-889e83e4f308", "funnelType": "TOP"},
+      {"id": "34f02489-e867-4287-a757-1924c33954de", "name": "Reach", "description": "Show your ad to maximum people", "channelId": "3a50fdc8-75bd-4941-aa6d-635f4f814105", "funnelType": "TOP"},
+      {"id": "234ab710-9e36-4173-861e-2fe4ade829f5", "name": "Reach", "description": "Show your ad to maximum people", "channelId": "ab3e277e-51aa-4f64-8766-e35ffb5ad9b8", "funnelType": "TOP"},
+      {"id": "d1d4b918-175c-4725-a14d-c20bd7151cc8", "name": "Reach", "description": "Maximize ad reach", "channelId": "754fdf91-e904-48a7-a4c9-5fa8e2166d94", "funnelType": "TOP"},
+      {"id": "56decf3e-dd40-444f-8e99-4444fac980ca", "name": "Traffic", "description": "Drive traffic to your website", "channelId": "ab3e277e-51aa-4f64-8766-e35ffb5ad9b8", "funnelType": "MID"},
+      {"id": "d227fcec-a35f-423b-a3af-f7fcfc1f62f8", "name": "Traffic", "description": "Drive traffic to destination", "channelId": "754fdf91-e904-48a7-a4c9-5fa8e2166d94", "funnelType": "MID"},
+      {"id": "96a3ea06-ef1c-4b04-a4d9-c5a8113d3a26", "name": "Engagement", "description": "Get more likes, comments, and shares", "channelId": "ab3e277e-51aa-4f64-8766-e35ffb5ad9b8", "funnelType": "MID"},
+      {"id": "bc7a34b1-78ee-4c2b-8adf-4aa1060cf650", "name": "Engagement", "description": "Get more likes, comments, and shares", "channelId": "3a50fdc8-75bd-4941-aa6d-635f4f814105", "funnelType": "MID"},
+      {"id": "7a86e9e9-a7c0-470e-95f8-166bef1edb6a", "name": "Consideration", "description": "Drive product consideration", "channelId": "de44e07c-3e4a-447d-b11a-889e83e4f308", "funnelType": "MID"},
+      {"id": "fb1c0780-17fc-4218-b018-33b620e675b3", "name": "Community Interaction", "description": "Increase followers and engagement", "channelId": "754fdf91-e904-48a7-a4c9-5fa8e2166d94", "funnelType": "MID"},
+      {"id": "c851d8cc-76a1-40a4-8a0c-394a49d57647", "name": "Lead Generation", "description": "Collect leads from interested users", "channelId": "3a50fdc8-75bd-4941-aa6d-635f4f814105", "funnelType": "MID"},
+      {"id": "a619e2e6-0cc2-4a50-9772-0e6786bc11a9", "name": "Conversions", "description": "Drive valuable actions on your website", "channelId": "ab3e277e-51aa-4f64-8766-e35ffb5ad9b8", "funnelType": "BOTTOM"},
+      {"id": "139583c7-6c67-49ab-90ed-6504b306fd0d", "name": "Conversions", "description": "Drive valuable actions on your website", "channelId": "3a50fdc8-75bd-4941-aa6d-635f4f814105", "funnelType": "BOTTOM"},
+      {"id": "957d285a-8072-4817-a48e-a0aa933024bf", "name": "Conversions", "description": "Drive website actions", "channelId": "de44e07c-3e4a-447d-b11a-889e83e4f308", "funnelType": "BOTTOM"},
+      {"id": "c6b8d71e-fec7-4702-87e6-aaaa06553dd4", "name": "Conversions", "description": "Drive website conversions", "channelId": "754fdf91-e904-48a7-a4c9-5fa8e2166d94", "funnelType": "BOTTOM"},
+      {"id": "3fa0d5fe-0606-44d6-a3d3-8299e521b8ad", "name": "Catalog Sales", "description": "Drive sales from your product catalog", "channelId": "3a50fdc8-75bd-4941-aa6d-635f4f814105", "funnelType": "BOTTOM"},
+      {"id": "eeee1206-173c-448f-9cca-39c7e49f5263", "name": "App Promotion", "description": "Drive app installs and events", "channelId": "754fdf91-e904-48a7-a4c9-5fa8e2166d94", "funnelType": "BOTTOM"}
+    ],
+    "buyingModels": [
+      {"id": "522a8832-b74c-40f6-ba51-4987a7504904", "name": "CPM", "description": "Cost per 1,000 impressions", "channelId": "ab3e277e-51aa-4f64-8766-e35ffb5ad9b8"},
+      {"id": "b3e64a80-0f11-440c-811a-d6b11529ebba", "name": "CPM", "description": "Cost per 1,000 impressions", "channelId": "3a50fdc8-75bd-4941-aa6d-635f4f814105"},
+      {"id": "0aa9b8d0-ae7f-4e71-b6cb-748cfd7196a8", "name": "CPM", "description": "Cost per 1,000 impressions", "channelId": "754fdf91-e904-48a7-a4c9-5fa8e2166d94"},
+      {"id": "97cae109-119a-4d57-9797-f1ebb92cdc07", "name": "CPM", "description": "Cost per 1,000 impressions", "channelId": "de44e07c-3e4a-447d-b11a-889e83e4f308"},
+      {"id": "91d2e0ea-5df6-4f53-a5bd-043a4f73bb03", "name": "CPC", "description": "Cost per click", "channelId": "ab3e277e-51aa-4f64-8766-e35ffb5ad9b8"},
+      {"id": "7cf51ee4-ef74-467b-b465-a04041cdaab8", "name": "CPC", "description": "Cost per click", "channelId": "3a50fdc8-75bd-4941-aa6d-635f4f814105"},
+      {"id": "5d0695f7-f404-4254-bf2e-682434e0fbd9", "name": "CPC", "description": "Cost per click", "channelId": "754fdf91-e904-48a7-a4c9-5fa8e2166d94"},
+      {"id": "bbd9efc2-4b57-4c51-9915-532ab9f76a41", "name": "CPV", "description": "Cost per video view", "channelId": "ab3e277e-51aa-4f64-8766-e35ffb5ad9b8"},
+      {"id": "2072db47-78b6-4af5-9aa4-98b5a306be3a", "name": "CPV", "description": "Cost per video view", "channelId": "3a50fdc8-75bd-4941-aa6d-635f4f814105"},
+      {"id": "b8492f73-bda2-4b39-b7ec-2e6f200f548e", "name": "CPV", "description": "Cost per 6-second video view", "channelId": "754fdf91-e904-48a7-a4c9-5fa8e2166d94"},
+      {"id": "c9dd56fe-aa41-4116-9b45-609ffcc04df7", "name": "CPV", "description": "Cost per view (TrueView)", "channelId": "de44e07c-3e4a-447d-b11a-889e83e4f308"},
+      {"id": "4357faee-1128-4ea2-b998-4b7abcffbf4d", "name": "CPA", "description": "Cost per acquisition/action", "channelId": "ab3e277e-51aa-4f64-8766-e35ffb5ad9b8"},
+      {"id": "9d75458d-d9b0-4038-880d-7792d69105e1", "name": "CPA", "description": "Cost per acquisition/action", "channelId": "3a50fdc8-75bd-4941-aa6d-635f4f814105"},
+      {"id": "e8d28af9-6080-49e9-a563-cd88fe1ff3a5", "name": "ROAS", "description": "Return on ad spend optimization", "channelId": "3a50fdc8-75bd-4941-aa6d-635f4f814105"},
+      {"id": "2517080e-00fe-43f4-b8b2-2e96c9df7dbf", "name": "oCPM", "description": "Optimized CPM for conversions", "channelId": "754fdf91-e904-48a7-a4c9-5fa8e2166d94"},
+      {"id": "d13751ff-072e-4cc8-ad94-c884fafafb3a", "name": "Target CPA", "description": "Target cost per acquisition", "channelId": "de44e07c-3e4a-447d-b11a-889e83e4f308"},
+      {"id": "fabeb96e-5d93-4ad7-876c-27f5ca06515d", "name": "Maximize Conversions", "description": "Automated bidding for conversions", "channelId": "de44e07c-3e4a-447d-b11a-889e83e4f308"}
+    ],
+    "placements": [
+      {"id": "76d1008b-749f-4d24-a4e2-44212b899b0a", "name": "Feed Post (Square)", "description": "Square feed post - most common format", "channelId": "3a50fdc8-75bd-4941-aa6d-635f4f814105", "aspectRatio": "1:1", "mockType": "MobileFeedMock", "isActive": true},
+      {"id": "84dbd435-59ca-4a86-a6d9-db48653f2f7f", "name": "Feed Post (Portrait)", "description": "Vertical feed post - higher engagement", "channelId": "3a50fdc8-75bd-4941-aa6d-635f4f814105", "aspectRatio": "4:5", "mockType": "MobileFeedMock", "isActive": true},
+      {"id": "8b7a44f1-357a-40dd-b289-56e7c48c7304", "name": "Story", "description": "Full-screen vertical story", "channelId": "3a50fdc8-75bd-4941-aa6d-635f4f814105", "aspectRatio": "9:16", "mockType": "StoryMock", "isActive": true},
+      {"id": "14a1ead2-c83e-4b2b-9fe7-23a1d5364eca", "name": "Reels", "description": "Vertical short-form video", "channelId": "3a50fdc8-75bd-4941-aa6d-635f4f814105", "aspectRatio": "9:16", "mockType": "ReelsMock", "isActive": true},
+      {"id": "05d7d167-eb61-4f47-8dce-4d65fcf86a69", "name": "Story", "description": "Full-screen story", "channelId": "ab3e277e-51aa-4f64-8766-e35ffb5ad9b8", "aspectRatio": "9:16", "mockType": "StoryMock", "isActive": true},
+      {"id": "2665298c-d6c1-457a-ba73-930315167da0", "name": "Reels", "description": "Short-form vertical video", "channelId": "ab3e277e-51aa-4f64-8766-e35ffb5ad9b8", "aspectRatio": "9:16", "mockType": "ReelsMock", "isActive": true},
+      {"id": "b2432bbe-a538-4988-95a3-99eadd5ef9ef", "name": "In-Stream Video", "description": "Video ad within content", "channelId": "ab3e277e-51aa-4f64-8766-e35ffb5ad9b8", "aspectRatio": "16:9", "mockType": "InStreamMock", "isActive": true},
+      {"id": "a4ea7b82-1b0e-49d0-b9bd-c57e21713e44", "name": "In-Feed Video", "description": "For You page video", "channelId": "754fdf91-e904-48a7-a4c9-5fa8e2166d94", "aspectRatio": "9:16", "mockType": "ReelsMock", "isActive": true},
+      {"id": "6c9709ef-395f-414a-8c13-1ba42078b3bc", "name": "Spark Ads", "description": "Boosted organic content", "channelId": "754fdf91-e904-48a7-a4c9-5fa8e2166d94", "aspectRatio": "9:16", "mockType": "ReelsMock", "isActive": true},
+      {"id": "42633935-2f8d-47a4-bf14-bdf32f3d7167", "name": "TopView", "description": "Full-screen takeover ad", "channelId": "754fdf91-e904-48a7-a4c9-5fa8e2166d94", "aspectRatio": "9:16", "mockType": "StoryMock", "isActive": true},
+      {"id": "403e07c7-cc24-468c-a93a-0f502678a042", "name": "In-Stream (Skippable)", "description": "Pre-roll skippable ad", "channelId": "de44e07c-3e4a-447d-b11a-889e83e4f308", "aspectRatio": "16:9", "mockType": "InStreamMock", "isActive": true},
+      {"id": "3f4b52a5-16d0-41ed-a6e6-65a00b316c99", "name": "In-Stream (Non-Skippable)", "description": "Pre-roll non-skippable ad (15s)", "channelId": "de44e07c-3e4a-447d-b11a-889e83e4f308", "aspectRatio": "16:9", "mockType": "InStreamMock", "isActive": true},
+      {"id": "307ff6db-b93a-46a7-ac2e-aab80a0d1589", "name": "Shorts", "description": "YouTube Shorts format", "channelId": "de44e07c-3e4a-447d-b11a-889e83e4f308", "aspectRatio": "9:16", "mockType": "ReelsMock", "isActive": true},
+      {"id": "7c9d9e85-e930-432c-83c1-765836b0da8d", "name": "Discovery", "description": "Search and browse placement", "channelId": "de44e07c-3e4a-447d-b11a-889e83e4f308", "aspectRatio": "16:9", "mockType": "DisplayAdMock", "isActive": true},
+      {"id": "811e630e-5de1-4e76-a969-ae30b3b5b8f7", "name": "Bumper", "description": "6-second non-skippable", "channelId": "de44e07c-3e4a-447d-b11a-889e83e4f308", "aspectRatio": "16:9", "mockType": "InStreamMock", "isActive": true},
+      {"id": "11fb6566-48eb-4686-bbc5-d84edeedbde8", "name": "Single Image Ad", "description": "Standard sponsored content", "channelId": "1f5615c0-d5d2-4ac5-9ee8-5b7c5419132b", "aspectRatio": "1.91:1", "mockType": "MobileFeedMock", "isActive": true},
+      {"id": "5c4c0579-9d3e-44ec-896d-26a36c148a10", "name": "Carousel", "description": "Multi-card carousel", "channelId": "1f5615c0-d5d2-4ac5-9ee8-5b7c5419132b", "aspectRatio": "1:1", "mockType": "MobileFeedMock", "isActive": true}
+    ],
+    "metricDefinitions": [
+      {"id": "ada2ded2-3328-46f5-8676-911a0d27db0d", "key": "impressions", "name": "Impressions", "description": "Total number of times content was displayed", "category": "awareness", "dataType": "number", "iconName": "Eye", "displayOrder": 1, "isSystem": true, "aggregationMethod": "sum"},
+      {"id": "4fcbd62f-a583-4fb0-805b-55eafe38c3c5", "key": "reach", "name": "Reach", "description": "Unique users who saw the content", "category": "awareness", "dataType": "number", "iconName": "Users", "displayOrder": 2, "isSystem": true, "aggregationMethod": "sum"},
+      {"id": "c910f72f-fb3f-4051-9858-3a28d626d9fd", "key": "views", "name": "Views", "description": "Total video views", "category": "awareness", "dataType": "number", "iconName": "Play", "displayOrder": 3, "isSystem": true, "aggregationMethod": "sum"},
+      {"id": "213c8059-8702-420e-82e0-03a50036a9ed", "key": "view_100", "name": "View 100%", "description": "Complete video views", "category": "awareness", "dataType": "number", "iconName": "CheckCircle", "displayOrder": 4, "isSystem": true, "aggregationMethod": "sum"},
+      {"id": "5224d020-6cb8-4f77-835c-d7dc80f7aad6", "key": "clicks", "name": "Clicks", "description": "Total clicks on content", "category": "engagement", "dataType": "number", "iconName": "MousePointerClick", "displayOrder": 5, "isSystem": true, "aggregationMethod": "sum"},
+      {"id": "a90d0636-daac-43a3-98ea-9f6c207025fb", "key": "link_clicks", "name": "Link Clicks", "description": "Clicks to external links", "category": "engagement", "dataType": "number", "iconName": "ExternalLink", "displayOrder": 6, "isSystem": true, "aggregationMethod": "sum"},
+      {"id": "99b37ef2-aa8a-48fd-a6b3-12924e739845", "key": "ctr", "name": "CTR", "description": "Click-through rate", "category": "engagement", "dataType": "percentage", "iconName": "Percent", "displayOrder": 7, "isSystem": true, "aggregationMethod": "sum"},
+      {"id": "46944057-5f83-4444-9207-78e631732ae8", "key": "engagements", "name": "Engagements", "description": "Total interactions (likes, comments, shares)", "category": "engagement", "dataType": "number", "iconName": "Heart", "displayOrder": 8, "isSystem": true, "aggregationMethod": "sum"},
+      {"id": "49cc2ed7-0529-4aa1-820f-4d19bee5c208", "key": "likes", "name": "Likes", "description": "Total likes", "category": "engagement", "dataType": "number", "iconName": "ThumbsUp", "displayOrder": 9, "isSystem": true, "aggregationMethod": "sum"},
+      {"id": "d0229317-1c6e-4399-aee9-595d81936446", "key": "comments", "name": "Comments", "description": "Total comments", "category": "engagement", "dataType": "number", "iconName": "MessageSquare", "displayOrder": 10, "isSystem": true, "aggregationMethod": "sum"},
+      {"id": "6488fd4d-8975-49e2-9e03-e28e1471d6ba", "key": "shares", "name": "Shares", "description": "Total shares", "category": "engagement", "dataType": "number", "iconName": "Share2", "displayOrder": 11, "isSystem": true, "aggregationMethod": "sum"},
+      {"id": "85b99b6b-1314-493a-b7ce-9bb8ee9b666a", "key": "saves", "name": "Saves", "description": "Total saves", "category": "engagement", "dataType": "number", "iconName": "Bookmark", "displayOrder": 12, "isSystem": true, "aggregationMethod": "sum"},
+      {"id": "5635b4f7-8a1e-4ccd-b3a8-ee4e01d3121b", "key": "followers_gained", "name": "Followers Gained", "description": "New followers acquired", "category": "engagement", "dataType": "number", "iconName": "UserPlus", "displayOrder": 13, "isSystem": true, "aggregationMethod": "sum"},
+      {"id": "3eb63731-326b-4a13-9f45-80b040a5afff", "key": "sessions", "name": "Sessions", "description": "Website sessions", "category": "conversion", "dataType": "number", "iconName": "Activity", "displayOrder": 14, "isSystem": true, "aggregationMethod": "sum"},
+      {"id": "0f6aa9cb-3d10-4a58-86b6-8b2a5e35909f", "key": "add_to_cart", "name": "Add to Cart", "description": "Items added to cart", "category": "conversion", "dataType": "number", "iconName": "ShoppingCart", "displayOrder": 15, "isSystem": true, "aggregationMethod": "sum"}
+    ],
+    "brands": [
+      {"id": "9f27d0a1-f5c2-457a-a92e-f95e069a3310", "name": "SharkNinja", "logoUrl": "", "website": "https://sharkninja.co.id", "markets": [], "categories": [], "heroProducts": [], "socialHandles": {}, "companyId": null, "createdAt": "2025-10-30T09:54:44.681481Z", "updatedAt": "2025-12-04T18:40:44.896221Z"},
+      {"id": "bc90103e-7c25-488b-969e-57fc6c527a73", "name": "JEVA SPIKE NATION", "logoUrl": null, "website": null, "markets": [], "categories": [], "heroProducts": [], "socialHandles": {}, "companyId": null, "createdAt": "2025-12-05T04:32:32.900027Z", "updatedAt": "2025-12-05T04:32:32.900027Z"}
+    ],
+    "products": [
+      {"id": "904e05f7-06e6-41b3-9d57-e41f2a954a56", "name": "Creami", "category": "Ninja Kitchen", "brandId": "9f27d0a1-f5c2-457a-a92e-f95e069a3310", "createdAt": "2025-11-30T07:58:40.969474Z", "updatedAt": "2025-11-30T07:58:40.969474Z"},
+      {"id": "a3f953c2-5e7b-445c-ae3e-ef55ff040ff3", "name": "Slushi", "category": "Ninja Kitchen", "brandId": "9f27d0a1-f5c2-457a-a92e-f95e069a3310", "createdAt": "2025-11-30T07:59:51.370516Z", "updatedAt": "2025-11-30T07:59:51.370516Z"}
+    ],
+    "campaigns": [
+      {"id": "710473a6-6fe8-4dbd-871e-fc4687874f64", "name": "Ninja CREAMi UGC", "brandId": "9f27d0a1-f5c2-457a-a92e-f95e069a3310", "productId": null, "channelId": "3a50fdc8-75bd-4941-aa6d-635f4f814105", "channelIds": ["3a50fdc8-75bd-4941-aa6d-635f4f814105", "754fdf91-e904-48a7-a4c9-5fa8e2166d94"], "funnelType": "TOP", "status": "draft", "startDate": "2025-07-25", "endDate": "2025-08-31", "costIdr": 0, "markupPercent": 20, "exchangeRate": 16000, "createdBy": "e6499b37-2952-4997-b15a-eb756b551e24", "createdAt": "2025-11-01T08:00:24.203141Z", "updatedAt": "2025-12-06T10:30:23.949511Z"},
+      {"id": "1d6dbc4a-aa70-4ebe-a87e-16dc77c2bd39", "name": "Slushi", "brandId": "9f27d0a1-f5c2-457a-a92e-f95e069a3310", "productId": "a3f953c2-5e7b-445c-ae3e-ef55ff040ff3", "channelId": "ab3e277e-51aa-4f64-8766-e35ffb5ad9b8", "channelIds": ["ab3e277e-51aa-4f64-8766-e35ffb5ad9b8", "3a50fdc8-75bd-4941-aa6d-635f4f814105", "754fdf91-e904-48a7-a4c9-5fa8e2166d94", "de44e07c-3e4a-447d-b11a-889e83e4f308"], "funnelType": "TOP", "status": "draft", "startDate": "2025-08-01", "endDate": "2025-08-31", "costIdr": 0, "markupPercent": 20, "exchangeRate": 16000, "createdBy": "e6499b37-2952-4997-b15a-eb756b551e24", "createdAt": "2025-11-30T08:00:01.441611Z", "updatedAt": "2025-12-05T14:26:41.576457Z"}
+    ],
+    "campaignTypes": [
+      {"id": "cc544c53-b7d1-490b-8052-eb046955bcc1", "name": "Brand Awareness", "description": "Build overall brand recognition and recall", "typeEnum": "Branding.Brand", "iconName": "Megaphone", "isActive": true},
+      {"id": "2d13bfd1-76cc-42d0-80f0-4050aeaaf2d6", "name": "Category Leadership", "description": "Establish dominance in product category", "typeEnum": "Branding.Category", "iconName": "Crown", "isActive": true},
+      {"id": "ea512d68-5e0a-4d8f-a97d-85db5629f6f9", "name": "Product Launch", "description": "Launch and promote specific products", "typeEnum": "Branding.Product", "iconName": "Rocket", "isActive": true},
+      {"id": "4236e2bf-2866-4d2b-a417-3a7c6b907032", "name": "Performance Marketing", "description": "Drive conversions and sales", "typeEnum": "Performance.Product", "iconName": "TrendingUp", "isActive": true}
+    ],
+    "serviceTypes": [
+      {"id": "1dce80b9-b2bb-4062-ab01-e6d540110d49", "name": "Social Media Management", "description": "Organic social content creation and community management", "typeEnum": "SocialMediaManagement", "iconName": "Users", "isActive": true},
+      {"id": "131bf0c3-ee16-44f0-b747-15ad01c91a9c", "name": "Paid Media Buying", "description": "Paid advertising across digital channels", "typeEnum": "PaidMediaBuying", "iconName": "CreditCard", "isActive": true},
+      {"id": "bbb6c025-364c-4040-b6f0-bd5489d0cbe2", "name": "Influencer Marketing", "description": "Micro and macro influencer partnerships", "typeEnum": "InfluencerMarketing", "iconName": "Star", "isActive": true},
+      {"id": "e1fe93d4-cda1-46a7-a3b2-ead040a4dcc1", "name": "KOL Management", "description": "Key Opinion Leader campaigns and collaborations", "typeEnum": "KOLManagement", "iconName": "Award", "isActive": true},
+      {"id": "546931eb-59ba-45ff-a98a-7df7b0e4a0cd", "name": "Brand Activation", "description": "Experiential and activation campaigns", "typeEnum": "BrandActivation", "iconName": "Zap", "isActive": true},
+      {"id": "003c0666-4fb3-4955-809c-2ee60103cc52", "name": "Programmatic Display", "description": "Automated display advertising", "typeEnum": "ProgrammaticDisplay", "iconName": "Monitor", "isActive": true},
+      {"id": "8b6b0c97-0524-4226-a4a4-7e555b4783e3", "name": "Programmatic Social", "description": "Automated social advertising", "typeEnum": "ProgrammaticSocial", "iconName": "Share2", "isActive": true},
+      {"id": "e7ce339c-a160-4184-a2d7-424cfda7f305", "name": "Retail Media", "description": "E-commerce and marketplace advertising", "typeEnum": "RetailMedia", "iconName": "ShoppingCart", "isActive": true},
+      {"id": "50ddbaf0-12af-49e1-ba7d-1817c2090639", "name": "SEO", "description": "Search engine optimization", "typeEnum": "SEO", "iconName": "Search", "isActive": true},
+      {"id": "ac57ff35-3adf-4a05-af6c-9b0c9d43fa4b", "name": "SEM", "description": "Search engine marketing", "typeEnum": "SEM", "iconName": "MousePointerClick", "isActive": true},
+      {"id": "fd5ee731-9618-4968-8013-5122113c59b9", "name": "CRO", "description": "Conversion rate optimization", "typeEnum": "CRO", "iconName": "Target", "isActive": true},
+      {"id": "c0c238f1-a3c3-4abc-868b-be7bb06c9031", "name": "Analytics & Reporting", "description": "Data analysis and performance reporting", "typeEnum": "AnalyticsAndReporting", "iconName": "BarChart3", "isActive": true}
+    ],
+    "campaignServiceCategories": [
+      {"id": "45624ace-5576-4aff-9846-80707e0b5ba4", "code": "a", "name": "Strategy & Research", "description": "Brand/comms strategy, consumer research & insight, competitive/category audit", "iconName": "Lightbulb", "displayOrder": 1, "isActive": true},
+      {"id": "9917823c-82c1-45d5-98e2-420c9feb8bb1", "code": "b", "name": "Creative & Content", "description": "Brand platform & key visuals, social content production, creative for performance ads, landing pages/microsites", "iconName": "Palette", "displayOrder": 2, "isActive": true},
+      {"id": "f9e28956-7303-4263-9f9a-cbdef3952cdb", "code": "c", "name": "Social Media Management", "description": "Channel management, community management, social customer care", "iconName": "Users", "displayOrder": 3, "isActive": true},
+      {"id": "25121b53-faf6-4417-987e-f2a52956adde", "code": "d", "name": "Paid Media Buying", "description": "Paid social, programmatic display/video/CTV, search, retail media/commerce media, OLV/CTV", "iconName": "DollarSign", "displayOrder": 4, "isActive": true},
+      {"id": "906f3225-8b92-41f7-aa9f-9160def745db", "code": "e", "name": "Influencer / KOL Marketing", "description": "Seeding, paid KOLs, affiliate KOLs, creators/UGC", "iconName": "Star", "displayOrder": 5, "isActive": true},
+      {"id": "f0dd0114-a794-49ff-bf55-c8360d9b6e7d", "code": "f", "name": "PR & Communications", "description": "Media relations, press releases, PR events, crisis comms", "iconName": "Megaphone", "displayOrder": 6, "isActive": true},
+      {"id": "56d24a89-b367-4b89-a2d2-6e921e8e89de", "code": "g", "name": "Brand Activation & Experiential", "description": "Pop-ups, roadshows, sampling, in-store demos, events", "iconName": "Sparkles", "displayOrder": 7, "isActive": true},
+      {"id": "731b5502-4dcd-4ecc-b0a7-df9b7b6445d2", "code": "h", "name": "CRM & Lifecycle", "description": "Email, SMS, WhatsApp, loyalty programs", "iconName": "Mail", "displayOrder": 8, "isActive": true},
+      {"id": "ea00319c-c9c4-4b6a-a030-4ad7cb6ad811", "code": "i", "name": "SEO & Content Marketing", "description": "Technical SEO, on-page, content hub, blog, YouTube SEO", "iconName": "Search", "displayOrder": 9, "isActive": true},
+      {"id": "ca4c9c57-c34c-46e3-bb4c-1bb68f79ffae", "code": "j", "name": "Data & Analytics", "description": "Dashboards, MMM, brand lift, sentiment, social listening, media mix optimization", "iconName": "BarChart3", "displayOrder": 10, "isActive": true}
+    ],
+    "cpmRates": [
+      {"id": "606b79b4-6d10-4184-bc51-21992bffecff", "channelId": "ab3e277e-51aa-4f64-8766-e35ffb5ad9b8", "cpmValue": 65000, "currency": "IDR", "effectiveFrom": "2025-10-30"},
+      {"id": "6a078ac4-e0c4-44d9-96a9-d95ffaef1265", "channelId": "3a50fdc8-75bd-4941-aa6d-635f4f814105", "cpmValue": 75000, "currency": "IDR", "effectiveFrom": "2025-10-30"},
+      {"id": "5be94517-6071-4059-8b7e-04db67a1daaa", "channelId": "754fdf91-e904-48a7-a4c9-5fa8e2166d94", "cpmValue": 35000, "currency": "IDR", "effectiveFrom": "2025-10-30"},
+      {"id": "32fdb20a-0d29-4394-92c9-715c8e6ff059", "channelId": "de44e07c-3e4a-447d-b11a-889e83e4f308", "cpmValue": 40000, "currency": "IDR", "effectiveFrom": "2025-10-30"},
+      {"id": "824a14bf-8917-4bd5-8edb-14d16f086f8f", "channelId": "1f5615c0-d5d2-4ac5-9ee8-5b7c5419132b", "cpmValue": 85000, "currency": "IDR", "effectiveFrom": "2025-10-30"},
+      {"id": "e42fc1d2-8f8d-4c32-acff-f403ec84b61b", "channelId": "b4169508-cbd4-42dd-8cc8-bd59cf3aad26", "cpmValue": 56000, "currency": "IDR", "effectiveFrom": "2025-10-30"},
+      {"id": "f868f119-d00a-4472-9926-abe501c49d9d", "channelId": "135a468a-b9ff-4371-ba7b-c6ec166affd1", "cpmValue": 0, "currency": "IDR", "effectiveFrom": "2025-11-19"}
+    ],
+    "platformMultipliers": [
+      {"id": "65d08356-b212-44d4-8df2-7888067863f3", "channelId": "ab3e277e-51aa-4f64-8766-e35ffb5ad9b8", "multiplier": 1.6},
+      {"id": "c0bc984d-5675-4638-bcd9-11058402caec", "channelId": "3a50fdc8-75bd-4941-aa6d-635f4f814105", "multiplier": 2.0},
+      {"id": "aa752087-675c-42df-8fcd-b341671c5f4c", "channelId": "754fdf91-e904-48a7-a4c9-5fa8e2166d94", "multiplier": 3.5},
+      {"id": "cb28c34d-31e6-4eed-9bef-a30111afd649", "channelId": "de44e07c-3e4a-447d-b11a-889e83e4f308", "multiplier": 2.5},
+      {"id": "37526ccd-3316-4c38-afd0-930048783b77", "channelId": "1f5615c0-d5d2-4ac5-9ee8-5b7c5419132b", "multiplier": 2.5},
+      {"id": "a358b3ff-f778-427d-a76d-e70012bb248b", "channelId": "b4169508-cbd4-42dd-8cc8-bd59cf3aad26", "multiplier": 1.3}
+    ],
+    "engagementMultipliers": [
+      {"id": "933c456e-7d18-4163-9192-3ab2dab6b9ec", "level": "Low", "multiplier": 1.5},
+      {"id": "fcd60060-9374-439b-b4ac-78b192868fc7", "level": "Moderate", "multiplier": 1.8},
+      {"id": "4aa185a5-91e7-4526-ac34-b04adce1e1b6", "level": "High", "multiplier": 2.5},
+      {"id": "57153590-996e-452f-8a68-cb5aa2fb3a44", "level": "Viral", "multiplier": 4.0}
+    ],
+    "sentimentMultipliers": [
+      {"id": "f75875a4-cbb4-48a7-8b8a-2e62181b276c", "sentiment": "Positive", "multiplier": 1.5},
+      {"id": "c86b0fb5-7c70-405c-ac1f-5149336ed369", "sentiment": "Neutral", "multiplier": 1.0},
+      {"id": "12989b98-21bb-4da2-9dd2-0e9a02b5e7be", "sentiment": "Negative", "multiplier": 0.8}
+    ],
+    "landingSections": [
+      {"id": "852e49b5-be4b-4b30-b012-0319201ac203", "sectionKey": "hero", "displayOrder": 1, "isActive": true, "content": {"title": "Digital Media Intelligence That Drives Results", "subtitle": "Track, measure, and optimize your media campaigns with real-time AVE and SOV calculations.", "primaryCtaText": "Get Started", "primaryCtaAction": "/auth", "secondaryCtaText": "Learn More", "secondaryCtaAction": "#features"}},
+      {"id": "8fb64f68-e108-4ab1-a4ed-bd014b3e4f05", "sectionKey": "features", "displayOrder": 2, "isActive": true, "content": {"title": "Powerful Features for Modern Teams"}},
+      {"id": "74f50253-c1a5-4b0d-8ebd-ce54da158165", "sectionKey": "cta", "displayOrder": 3, "isActive": true, "content": {"title": "Ready to Transform Your Media Analytics?", "description": "Join leading brands using WAS Media Hub to drive campaign success", "buttonText": "Start Tracking Now", "buttonAction": "/auth"}}
+    ],
+    "landingFeatures": [
+      {"id": "1485db93-47c9-433b-a81f-2d677c67de2b", "title": "Campaign Tracking", "description": "Monitor earned, owned, and paid media metrics in real-time", "iconName": "BarChart3", "displayOrder": 1, "isActive": true},
+      {"id": "91228dd8-ac0e-4bfc-b575-d7afafff6eb7", "title": "AVE Calculation", "description": "Automatic Advertising Value Equivalent with weighted multipliers", "iconName": "TrendingUp", "displayOrder": 2, "isActive": true},
+      {"id": "615fd17e-c12d-4729-ba07-8ff804f72e6a", "title": "Client Portal", "description": "Secure client access to view campaigns and reports", "iconName": "Users", "displayOrder": 3, "isActive": true},
+      {"id": "5f9673a9-90cf-421f-a6b2-139c220faa9f", "title": "Share of Voice", "description": "Track your brand's presence against competitors", "iconName": "Award", "displayOrder": 4, "isActive": true}
+    ],
+    "prSettings": [
+      {"id": "a0ea7028-47da-4c7c-a5d8-38c964f29308", "settingKey": "ecpm", "settingValue": 45000, "description": "Effective CPM value for PR calculations in IDR"}
+    ],
+    "userRoles": [
+      {"id": "2acefa25-ec2f-4806-8b41-f383a78e2ffc", "userId": "e6499b37-2952-4997-b15a-eb756b551e24", "role": "MasterAdmin"},
+      {"id": "d3c35b5a-f73b-453c-8888-4c9aa7d06634", "userId": "b8e36f94-e4a2-4ca3-aeae-4b77b8ee0f61", "role": "Account"},
+      {"id": "42173e88-e1f2-4985-b8b0-de6f5bb5c63d", "userId": "f8e8a10b-14b3-416d-a7d5-4a22709531ff", "role": "Account"},
+      {"id": "0daff17f-2f90-4dc7-ac22-c82e022ed6e0", "userId": "e17308c9-c415-4fd8-891c-de643aa9cb1f", "role": "Account"},
+      {"id": "8a70c512-8f03-466c-acee-4d9005d2811f", "userId": "cadc693a-d7af-490d-a6c2-219640872674", "role": "Account"}
+    ],
+    "campaignChannelConfigs": [
+      {"id": "76131568-ade1-433d-aa4c-7c7f15b281cf", "campaignId": "710473a6-6fe8-4dbd-871e-fc4687874f64", "channelId": "ab3e277e-51aa-4f64-8766-e35ffb5ad9b8", "budget": 0, "targeting": {}},
+      {"id": "53459423-4db5-404e-be6b-3e8948189ecf", "campaignId": "710473a6-6fe8-4dbd-871e-fc4687874f64", "channelId": "3a50fdc8-75bd-4941-aa6d-635f4f814105", "budget": 0, "targeting": {}}
+    ],
+    "creatives": [
+      {"id": "4fb091ad-6e3b-433b-b75b-627dab35a49d", "campaignId": "710473a6-6fe8-4dbd-871e-fc4687874f64", "placementId": "42633935-2f8d-47a4-bf14-bdf32f3d7167", "name": "dsadasd", "imageUrl": "https://kqenlckrxqqavpiytjpm.supabase.co/storage/v1/object/public/creatives/710473a6-6fe8-4dbd-871e-fc4687874f64/1764531854046.avif", "videoUrl": null, "headline": "dasdasd", "description": "dasdsd", "ctaText": "dasd", "displayUrl": "dasd", "source": "paid", "isBoosted": true, "isCollaboration": false, "storagePath": "710473a6-6fe8-4dbd-871e-fc4687874f64/1764531854046.avif", "metrics": {}}
+    ],
+    "dataSources": [
+      {"id": "7b035cbc-976f-412a-a92e-022fed0b5a13", "name": "Shark Campaigns", "sourceType": "google_sheets", "brandId": "9f27d0a1-f5c2-457a-a92e-f95e069a3310", "campaignId": null, "sheetId": "1Z-tpgAHhZ3cG7nlZQfOOjzxSNQc1bOeU0SgIbMW4fUk", "sheetUrl": "https://docs.google.com/spreadsheets/d/1Z-tpgAHhZ3cG7nlZQfOOjzxSNQc1bOeU0SgIbMW4fUk/", "sheetName": "creami", "syncFrequency": "hourly", "isActive": true, "createdBy": "e6499b37-2952-4997-b15a-eb756b551e24", "lastSyncedAt": "2025-12-01T10:29:13.212Z"}
+    ],
+    "siteSettings": [
+      {"id": "87ce3377-f300-41f1-b5c9-c63d786495bd", "key": "site_title", "value": "WAS Media Hub", "category": "branding", "description": "Main site title"},
+      {"id": "863ceecf-7625-477a-8870-538454603634", "key": "footer_text", "value": "© 2025 We Are Social Indonesia. All rights reserved.", "category": "content", "description": "Footer copyright text"},
+      {"id": "0ba85110-f646-4e39-b35e-f7cb439cd57a", "key": "header_login_text", "value": "Login", "category": "content", "description": "Header login button text"},
+      {"id": "b5af1e4c-d5e6-40a8-8d02-03f1ff42edfb", "key": "meta_description", "value": "Track, measure, and optimize your social media campaigns with real-time AVE and SOV calculations.", "category": "seo", "description": "Site meta description"},
+      {"id": "296c45ec-e55a-4b1b-a928-1d5263d0340a", "key": "meta_keywords", "value": "social media, analytics, AVE, SOV, campaign tracking", "category": "seo", "description": "Site meta keywords"}
+    ],
+    "siteImages": [
+      {"id": "7b0a5697-6fb6-479d-8c35-c1736895363b", "name": "sidebar_logo", "storagePath": "sidebar/sidebar_logo-1763543961576.png", "url": "https://kqenlckrxqqavpiytjpm.supabase.co/storage/v1/object/public/site-assets/sidebar/sidebar_logo-1763543961576.png", "altText": "WAS Indonesia", "usageLocation": "sidebar"},
+      {"id": "17b50a68-07b2-42c7-89c1-7effd3a14b11", "name": "header_logo", "storagePath": "header/header_logo-1763543976760.png", "url": "https://kqenlckrxqqavpiytjpm.supabase.co/storage/v1/object/public/site-assets/header/header_logo-1763543976760.png", "altText": "WAS Indonesia Header Logo", "usageLocation": "header"},
+      {"id": "c2961481-c145-4f88-a0e1-a4517791445c", "name": "footer_logo", "storagePath": "footer/footer_logo-1763543993626.png", "url": "https://kqenlckrxqqavpiytjpm.supabase.co/storage/v1/object/public/site-assets/footer/footer_logo-1763543993626.png", "altText": "WAS Indonesia Footer Logo", "usageLocation": "footer"}
+    ],
+    "mediaOutlets": [
+      {"id": "ab13d499-4c50-4e6b-af5c-bdbc83f1e27b", "name": "Kompas.com", "tier": 1, "averageMonthlyVisits": 170000000, "averagePageViewsPerArticle": 25000, "ecpm": 65000, "isActive": true},
+      {"id": "155a7e96-4df7-424c-8e71-d11865700d53", "name": "Msn.com", "tier": 1, "averageMonthlyVisits": 220000000, "averagePageViewsPerArticle": 30000, "ecpm": 70000, "isActive": true},
+      {"id": "1debb11c-9937-4b3f-bf76-e1395075024d", "name": "Detik.com", "tier": 1, "averageMonthlyVisits": 160000000, "averagePageViewsPerArticle": 23000, "ecpm": 60000, "isActive": true},
+      {"id": "876d70ec-3a7f-49ee-9ec5-be4bdacb1a92", "name": "Tribunnews.com", "tier": 1, "averageMonthlyVisits": 155000000, "averagePageViewsPerArticle": 20000, "ecpm": 55000, "isActive": true},
+      {"id": "d2e27c26-9901-4556-9254-493511175138", "name": "Liputan6.com", "tier": 1, "averageMonthlyVisits": 120000000, "averagePageViewsPerArticle": 20000, "ecpm": 60000, "isActive": true},
+      {"id": "71ad93c1-b7b0-44f8-9264-ec63920ef8a1", "name": "IDN Times", "tier": 1, "averageMonthlyVisits": 85000000, "averagePageViewsPerArticle": 10000, "ecpm": 50000, "isActive": true},
+      {"id": "e24fc8a4-06e2-47d9-8f21-99b345ca6fe0", "name": "CNBC Indonesia", "tier": 1, "averageMonthlyVisits": 40000000, "averagePageViewsPerArticle": 13000, "ecpm": 65000, "isActive": true},
+      {"id": "449f065a-284e-4df5-b996-d019f789d899", "name": "CNN Indonesia", "tier": 1, "averageMonthlyVisits": 35000000, "averagePageViewsPerArticle": 15000, "ecpm": 65000, "isActive": true},
+      {"id": "ad81fd94-718e-43f9-861c-89e29e1b0090", "name": "Tempo.co", "tier": 1, "averageMonthlyVisits": 30000000, "averagePageViewsPerArticle": 10000, "ecpm": 55000, "isActive": true},
+      {"id": "39ea24e6-2d86-4d56-8aba-ac877dc381eb", "name": "Kompas.id", "tier": 1, "averageMonthlyVisits": 20000000, "averagePageViewsPerArticle": 10000, "ecpm": 70000, "isActive": true},
+      {"id": "d361b951-1668-46d6-a066-873e3b790af0", "name": "Okezone.com", "tier": 2, "averageMonthlyVisits": 70000000, "averagePageViewsPerArticle": 9000, "ecpm": 40000, "isActive": true},
+      {"id": "0bf5f6d0-ed29-4410-8edb-2cd81d2f3d78", "name": "Merdeka.com", "tier": 2, "averageMonthlyVisits": 65000000, "averagePageViewsPerArticle": 8000, "ecpm": 40000, "isActive": true},
+      {"id": "5554b568-b1e6-4119-92be-ab13595a0ea7", "name": "Kumparan.com", "tier": 2, "averageMonthlyVisits": 60000000, "averagePageViewsPerArticle": 8000, "ecpm": 40000, "isActive": true},
+      {"id": "87dbdd70-ee21-4901-9266-c7356df57a43", "name": "Bola.com", "tier": 2, "averageMonthlyVisits": 37500000, "averagePageViewsPerArticle": 8000, "ecpm": 45000, "isActive": true},
+      {"id": "6bb5554f-d31c-4cc4-8689-8ddc1e2a4822", "name": "Grid.id", "tier": 2, "averageMonthlyVisits": 30000000, "averagePageViewsPerArticle": 7000, "ecpm": 35000, "isActive": true},
+      {"id": "6dd4f693-c69d-4356-8ced-a07577c8f312", "name": "Popbela.com", "tier": 2, "averageMonthlyVisits": 25000000, "averagePageViewsPerArticle": 6000, "ecpm": 35000, "isActive": true},
+      {"id": "14547150-2456-4e6a-bcfc-d6e42b20de1e", "name": "BolaSport.com", "tier": 2, "averageMonthlyVisits": 17000000, "averagePageViewsPerArticle": 7000, "ecpm": 40000, "isActive": true},
+      {"id": "31fbf625-dbb5-46d9-8d21-e328ef8e4765", "name": "Medcom.id", "tier": 2, "averageMonthlyVisits": 11000000, "averagePageViewsPerArticle": 8000, "ecpm": 45000, "isActive": true},
+      {"id": "bc0620de-b0c6-46f6-8a8f-88b4ac7a6f13", "name": "BeritaSatu.com", "tier": 2, "averageMonthlyVisits": 10000000, "averagePageViewsPerArticle": 5000, "ecpm": 35000, "isActive": true},
+      {"id": "881a1361-ce5b-4605-8de0-848e139cc1e8", "name": "Rri.co.id", "tier": 2, "averageMonthlyVisits": 9000000, "averagePageViewsPerArticle": 6000, "ecpm": 35000, "isActive": true}
+    ]
+  },
+  "firestoreStructure": {
+    "description": "Recommended Firestore collection hierarchy for WAS Media Hub",
+    "collections": {
+      "/users/{userId}": {
+        "description": "User profiles (maps to profiles table)",
+        "subcollections": {
+          "/roles": "User role assignments",
+          "/activityLogs": "User activity logs",
+          "/jobAssignments": "Job title assignments"
+        }
+      },
+      "/brands/{brandId}": {
+        "description": "Brand information",
+        "subcollections": {
+          "/products": "Products under this brand",
+          "/campaigns/{campaignId}": {
+            "description": "Campaigns for this brand",
+            "subcollections": {
+              "/channelConfigs": "Channel configurations for campaign",
+              "/metrics": "Daily metrics data",
+              "/creatives": "Creative assets",
+              "/adSets/{adSetId}": {
+                "description": "Ad sets for campaign",
+                "subcollections": {
+                  "/ads": "Individual ads"
+                }
+              }
+            }
+          },
+          "/dataSources": "Connected data sources"
+        }
+      },
+      "/channels/{channelId}": {
+        "description": "Channel/platform definitions",
+        "subcollections": {
+          "/objectives": "Available objectives",
+          "/buyingModels": "Available buying models",
+          "/placements": "Ad placement formats"
+        }
+      },
+      "/channelCategories": "Platform categories (Meta, Google, etc.)",
+      "/departments/{departmentId}": {
+        "description": "Organization departments",
+        "subcollections": {
+          "/jobTitles": "Job titles in department"
+        }
+      },
+      "/features/{featureId}": {
+        "description": "Application features/permissions",
+        "subcollections": {
+          "/permissions": "Feature permissions by job title"
+        }
+      },
+      "/campaignTypes": "Campaign type definitions",
+      "/serviceTypes": "Marketing service types",
+      "/campaignServiceCategories/{categoryId}": {
+        "description": "Service categories",
+        "subcollections": {
+          "/services": "Services in this category"
+        }
+      },
+      "/mediaOutlets": "PR media outlets",
+      "/settings": {
+        "description": "Application settings (single document collections)",
+        "documents": {
+          "prSettings": "PR calculation settings",
+          "cpmRates": "CPM rates by channel",
+          "platformMultipliers": "Platform AVE multipliers",
+          "engagementMultipliers": "Engagement level multipliers",
+          "sentimentMultipliers": "Sentiment multipliers"
+        }
+      },
+      "/siteContent": {
+        "description": "Landing page and site content",
+        "documents": {
+          "settings": "Site settings",
+          "sections": "Landing sections",
+          "features": "Landing features",
+          "images": "Site images"
+        }
+      },
+      "/metricDefinitions": "Metric definition catalog"
+    }
+  },
+  "migrationInstructions": {
+    "steps": [
+      {
+        "step": 1,
+        "title": "Set up Firebase Project",
+        "instructions": [
+          "Create a new Firebase project at console.firebase.google.com",
+          "Enable Firestore Database in Native mode",
+          "Enable Firebase Authentication",
+          "Enable Firebase Storage"
+        ]
+      },
+      {
+        "step": 2,
+        "title": "Configure Authentication",
+        "instructions": [
+          "Enable Email/Password authentication",
+          "Set up auth triggers for new user profile creation",
+          "Configure password reset email templates"
+        ]
+      },
+      {
+        "step": 3,
+        "title": "Import Reference Data First",
+        "instructions": [
+          "Import departments, jobTitles, features",
+          "Import channelCategories, channels",
+          "Import campaignTypes, serviceTypes",
+          "Import metricDefinitions",
+          "Import multiplier settings (engagement, sentiment, platform)",
+          "Import mediaOutlets"
+        ]
+      },
+      {
+        "step": 4,
+        "title": "Import User and Business Data",
+        "instructions": [
+          "Import brands and products",
+          "Import campaigns with nested data",
+          "Import creatives and metrics",
+          "Import user profiles and roles"
+        ]
+      },
+      {
+        "step": 5,
+        "title": "Set Up Security Rules",
+        "instructions": [
+          "Apply Firestore security rules (see securityRules section)",
+          "Configure Storage security rules for creatives bucket",
+          "Test rules with Firebase Emulator"
+        ]
+      },
+      {
+        "step": 6,
+        "title": "Deploy Cloud Functions",
+        "instructions": [
+          "Create Cloud Functions for: new user trigger, updated_at triggers",
+          "Deploy role checking functions (hasRole, canAccessBrand)",
+          "Set up scheduled functions for data sync"
+        ]
+      }
+    ],
+    "keyTransformations": {
+      "snake_case to camelCase": "All column names converted from snake_case to camelCase",
+      "UUID to Document ID": "PostgreSQL UUIDs become Firestore document IDs",
+      "Foreign Keys": "Replaced with document references or embedded in parent documents",
+      "JSONB": "Converted to native Firestore maps/arrays",
+      "Timestamps": "Converted to Firestore Timestamp objects",
+      "Enums": "Stored as string values with TypeScript type validation"
+    }
+  },
+  "securityRules": {
+    "description": "Firestore Security Rules equivalent to PostgreSQL RLS policies",
+    "rules": "rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    // Helper functions\n    function isAuthenticated() {\n      return request.auth != null;\n    }\n    \n    function hasRole(role) {\n      return isAuthenticated() && \n        get(/databases/$(database)/documents/users/$(request.auth.uid)/roles/$(role)).data != null;\n    }\n    \n    function isMasterAdmin() {\n      return hasRole('MasterAdmin');\n    }\n    \n    function isStaff() {\n      return hasRole('MasterAdmin') || hasRole('Director') || hasRole('Account');\n    }\n    \n    // Users collection\n    match /users/{userId} {\n      allow read: if request.auth.uid == userId || isMasterAdmin();\n      allow update: if request.auth.uid == userId;\n      allow create: if isMasterAdmin();\n      allow delete: if false;\n      \n      match /roles/{roleId} {\n        allow read: if request.auth.uid == userId || isMasterAdmin();\n        allow write: if isMasterAdmin();\n      }\n    }\n    \n    // Brands collection\n    match /brands/{brandId} {\n      allow read: if isAuthenticated();\n      allow write: if isStaff();\n      \n      match /campaigns/{campaignId} {\n        allow read: if isAuthenticated();\n        allow create, update: if isStaff();\n        allow delete: if hasRole('MasterAdmin') || hasRole('Director');\n      }\n    }\n    \n    // Channels collection\n    match /channels/{channelId} {\n      allow read: if isAuthenticated();\n      allow write: if isMasterAdmin();\n    }\n    \n    // Reference data (read-only for authenticated users)\n    match /{collection}/{docId} {\n      allow read: if collection in ['departments', 'jobTitles', 'features', \n        'campaignTypes', 'serviceTypes', 'metricDefinitions', 'channelCategories'];\n      allow write: if isMasterAdmin();\n    }\n  }\n}"
+  }
+}
