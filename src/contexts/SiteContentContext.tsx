@@ -1,10 +1,18 @@
-import { createContext, useContext, ReactNode } from "react";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { useSiteImages } from "@/hooks/useSiteImages";
-import { useLandingFeatures } from "@/hooks/useLandingFeatures";
-import { useLandingSections } from "@/hooks/useLandingSections";
+import {
+  createContext,
+  useContext,
+  ReactNode,
+  Suspense,
+  lazy,
+  useMemo,
+} from "react";
+import {
+  DEFAULT_CTA,
+  DEFAULT_HERO,
+  DEFAULT_SETTINGS,
+} from "@/utils/contentDefaults";
 
-interface SiteContentContextType {
+export interface SiteContentContextType {
   settings: any[];
   images: any[];
   features: any[];
@@ -16,53 +24,64 @@ interface SiteContentContextType {
   refetch: () => void;
 }
 
-const SiteContentContext = createContext<SiteContentContextType | undefined>(undefined);
+export const SiteContentContext = createContext<
+  SiteContentContextType | undefined
+>(undefined);
 
-export const SiteContentProvider = ({ children }: { children: ReactNode }) => {
-  const { data: settings = [], isLoading: settingsLoading, refetch: refetchSettings } = useSiteSettings();
-  const { data: images = [], isLoading: imagesLoading, refetch: refetchImages } = useSiteImages();
-  const { data: features = [], isLoading: featuresLoading, refetch: refetchFeatures } = useLandingFeatures();
-  const { data: sections = [], isLoading: sectionsLoading, refetch: refetchSections } = useLandingSections();
+const BackendProvider = lazy(() => import("./SiteContentProviderBackend"));
 
-  const isLoading = settingsLoading || imagesLoading || featuresLoading || sectionsLoading;
+const isBackendConfigured = () => {
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  return Boolean(url && key);
+};
 
-  const getSetting = (key: string) => {
-    const setting = settings.find((s) => s.key === key);
-    return setting?.value;
-  };
+const SiteContentProviderFallback = ({ children }: { children: ReactNode }) => {
+  const value = useMemo<SiteContentContextType>(() => {
+    const settings = Object.entries(DEFAULT_SETTINGS).map(([key, val]) => ({
+      key,
+      value: val,
+    }));
 
-  const getImage = (name: string) => {
-    return images.find((i) => i.name === name);
-  };
+    const sections = [
+      { section_key: "hero", content: DEFAULT_HERO },
+      { section_key: "cta", content: DEFAULT_CTA },
+      {
+        section_key: "features",
+        content: { title: "Powerful Features for Modern Teams" },
+      },
+    ];
 
-  const getSection = (key: string) => {
-    const section = sections.find((s) => s.section_key === key);
-    return section?.content;
-  };
-
-  const refetch = () => {
-    refetchSettings();
-    refetchImages();
-    refetchFeatures();
-    refetchSections();
-  };
+    return {
+      settings,
+      images: [],
+      features: [],
+      sections,
+      isLoading: false,
+      getSetting: (key: string) => settings.find((s) => s.key === key)?.value,
+      getImage: () => undefined,
+      getSection: (key: string) =>
+        sections.find((s) => s.section_key === key)?.content,
+      refetch: () => {},
+    };
+  }, []);
 
   return (
-    <SiteContentContext.Provider
-      value={{
-        settings,
-        images,
-        features,
-        sections,
-        isLoading,
-        getSetting,
-        getImage,
-        getSection,
-        refetch,
-      }}
-    >
+    <SiteContentContext.Provider value={value}>
       {children}
     </SiteContentContext.Provider>
+  );
+};
+
+export const SiteContentProvider = ({ children }: { children: ReactNode }) => {
+  if (!isBackendConfigured()) {
+    return <SiteContentProviderFallback>{children}</SiteContentProviderFallback>;
+  }
+
+  return (
+    <Suspense fallback={null}>
+      <BackendProvider>{children}</BackendProvider>
+    </Suspense>
   );
 };
 
@@ -73,3 +92,4 @@ export const useSiteContent = () => {
   }
   return context;
 };
+
