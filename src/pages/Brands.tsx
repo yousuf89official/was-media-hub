@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, LayoutDashboard, Package, Calendar, ExternalLink } from "lucide-react";
 import { useBrands, useCreateBrand } from "@/hooks/useBrands";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/safeClient";
 
 const Brands = () => {
   const { data: brands, isLoading } = useBrands();

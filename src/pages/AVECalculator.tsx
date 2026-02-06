@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/safeClient";
 import { Separator } from "@/components/ui/separator";
 import { Calculator, Download, Edit2, Save, X } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";

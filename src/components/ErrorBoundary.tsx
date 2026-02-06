@@ -33,21 +33,23 @@ class ErrorBoundary extends Component<Props, State> {
 
   public render() {
     if (this.state.hasError) {
+      const isSupabaseError = this.state.error?.message?.includes("supabaseUrl is required");
       return (
         <div className="min-h-screen flex items-center justify-center bg-background p-4">
           <Card className="max-w-lg w-full">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-destructive">
                 <AlertTriangle className="w-6 h-6" />
-                Something went wrong
+                {isSupabaseError ? "Backend Connecting…" : "Something went wrong"}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                We're sorry, but something unexpected happened. Please try refreshing the page or
-                return to the dashboard.
+                {isSupabaseError
+                  ? "The backend environment is still initializing. Please refresh the page in a moment."
+                  : "We're sorry, but something unexpected happened. Please try refreshing the page or return to the dashboard."}
               </p>
-              {this.state.error && (
+              {!isSupabaseError && this.state.error && (
                 <div className="bg-muted p-3 rounded-md">
                   <p className="text-sm font-mono text-destructive">
                     {this.state.error.message}
@@ -56,9 +58,11 @@ class ErrorBoundary extends Component<Props, State> {
               )}
               <div className="flex gap-2">
                 <Button onClick={() => window.location.reload()}>Refresh Page</Button>
-                <Button variant="outline" onClick={this.handleReset}>
-                  Go to Dashboard
-                </Button>
+                {!isSupabaseError && (
+                  <Button variant="outline" onClick={this.handleReset}>
+                    Go to Dashboard
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>

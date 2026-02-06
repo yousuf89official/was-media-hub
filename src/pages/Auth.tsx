@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, isSupabaseConfigured } from "@/integrations/supabase/safeClient";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -29,6 +29,22 @@ const Auth = () => {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
+
+  if (!isSupabaseConfigured || !supabase) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-background to-secondary/30">
+        <Card className="max-w-md w-full">
+          <CardHeader>
+            <CardTitle>Backend Connecting…</CardTitle>
+            <CardDescription>The backend environment is still initializing. Please refresh in a moment.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={() => window.location.reload()} className="w-full">Refresh Page</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

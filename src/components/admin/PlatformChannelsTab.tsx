@@ -19,7 +19,7 @@ import { useExtendedBuyingModels, useCreateBuyingModel, useUpdateBuyingModel, us
 import { usePlacements, useCreatePlacement, useUpdatePlacement, useDeletePlacement } from "@/hooks/usePlacements";
 import { useAllMediaOutlets, useAddMediaOutlet, useUpdateMediaOutlet, useDeleteMediaOutlet } from "@/hooks/useMediaOutlets";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/safeClient";
 import { toast } from "sonner";
 import { PRSettingsEditor } from "./PRSettingsEditor";
 
