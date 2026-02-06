@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/safeClient";
 import { useQuery } from "@tanstack/react-query";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { RefreshCw } from "lucide-react";

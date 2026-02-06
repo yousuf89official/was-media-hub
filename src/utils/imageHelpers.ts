@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/safeClient";
 
 export const validateImageFile = (file: File): { valid: boolean; error?: string } => {
   const validTypes = ["image/png", "image/jpeg", "image/jpg", "image/svg+xml", "image/webp"];
