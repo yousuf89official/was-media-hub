@@ -12,7 +12,7 @@
   "mcp": {
     "server": {
       "name": "was-media-hub",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "title": "WAS Media Hub"
     },
     "tools": [
@@ -105,6 +105,302 @@
           },
           "required": [
             "campaignId"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_channels",
+        "title": "List channels",
+        "description": "List available media channels and their ids, used when creating campaigns.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "search": {
+              "type": "string",
+              "description": "Filter channels by name."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_media_outlets",
+        "title": "List media outlets",
+        "description": "List PR media outlets (portals) with tier, traffic and eCPM values used for AVE.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "search": {
+              "type": "string",
+              "description": "Filter outlets by name."
+            },
+            "tier": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3,
+              "description": "Filter by tier."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Max rows to return (default 100)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_brand",
+        "title": "Create brand",
+        "description": "Create a new brand for the signed-in user's organisation.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Brand name."
+            },
+            "website": {
+              "type": "string",
+              "format": "uri",
+              "description": "Brand website URL."
+            },
+            "markets": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": "Markets, e.g. ['ID','SG']."
+            },
+            "categories": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": "Brand categories."
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_campaign",
+        "title": "Create campaign",
+        "description": "Create a draft campaign under a brand. Use `list_brands` for brand_id and `list_channels` for channel_id.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "brand_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Brand the campaign belongs to."
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Campaign name."
+            },
+            "channel_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Primary channel id."
+            },
+            "funnel_type": {
+              "type": "string",
+              "enum": [
+                "TOP",
+                "MID",
+                "BOTTOM"
+              ],
+              "description": "Funnel stage."
+            },
+            "start_date": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "description": "Start date (YYYY-MM-DD)."
+            },
+            "end_date": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "description": "End date (YYYY-MM-DD)."
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "running",
+                "finished"
+              ],
+              "description": "Defaults to draft."
+            },
+            "primary_kpi": {
+              "type": "string",
+              "description": "Primary KPI name."
+            },
+            "kpi_target": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Primary KPI target value."
+            },
+            "cost_idr": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Campaign cost in IDR."
+            }
+          },
+          "required": [
+            "brand_id",
+            "name",
+            "channel_id",
+            "funnel_type",
+            "start_date",
+            "end_date"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "update_campaign",
+        "title": "Update campaign",
+        "description": "Update an existing campaign's name, status, dates, KPI or cost. Only provided fields are changed.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "campaign_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Campaign to update."
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "running",
+                "finished"
+              ]
+            },
+            "start_date": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "end_date": {
+              "$ref": "#/properties/start_date"
+            },
+            "primary_kpi": {
+              "type": "string"
+            },
+            "kpi_target": {
+              "type": "number",
+              "minimum": 0
+            },
+            "cost_idr": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "campaign_id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "upsert_media_outlet",
+        "title": "Add or update media outlet",
+        "description": "Add a PR media outlet (portal) or update an existing one by name, including tier, traffic and eCPM used for AVE.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Outlet name, e.g. 'Palpres.disway.id'."
+            },
+            "tier": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3,
+              "description": "Outlet tier: 1, 2 or 3."
+            },
+            "average_monthly_visits": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Average monthly visits."
+            },
+            "average_page_views_per_article": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Average page views per article."
+            },
+            "ecpm": {
+              "type": "number",
+              "minimum": 0,
+              "description": "eCPM in IDR."
+            },
+            "is_active": {
+              "type": "boolean",
+              "description": "Whether the outlet is active."
+            }
+          },
+          "required": [
+            "name",
+            "tier"
           ],
           "additionalProperties": false,
           "$schema": "http://json-schema.org/draft-07/schema#"

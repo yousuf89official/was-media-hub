@@ -185,18 +185,247 @@ var getCampaignPerformance_default = defineTool3({
   }
 });
 
+// src/lib/mcp/tools/listChannels.ts
+import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.26.1";
+import { z as z4 } from "npm:zod@^3.25.76";
+var listChannels_default = defineTool4({
+  name: "list_channels",
+  title: "List channels",
+  description: "List available media channels and their ids, used when creating campaigns.",
+  inputSchema: {
+    search: z4.string().trim().optional().describe("Filter channels by name.")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ search }, ctx) => {
+    if (!ctx.isAuthenticated()) {
+      return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
+    }
+    const supabase = supabaseForUser(ctx);
+    let query = supabase.from("channels").select("id, name, channel_type, display_order").order("display_order", { nullsFirst: false }).order("name").limit(300);
+    if (search) query = query.ilike("name", `%${search}%`);
+    const { data, error } = await query;
+    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    return {
+      content: [{ type: "text", text: JSON.stringify(data ?? []) }],
+      structuredContent: { channels: data ?? [] }
+    };
+  }
+});
+
+// src/lib/mcp/tools/listMediaOutlets.ts
+import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.26.1";
+import { z as z5 } from "npm:zod@^3.25.76";
+var listMediaOutlets_default = defineTool5({
+  name: "list_media_outlets",
+  title: "List media outlets",
+  description: "List PR media outlets (portals) with tier, traffic and eCPM values used for AVE.",
+  inputSchema: {
+    search: z5.string().trim().optional().describe("Filter outlets by name."),
+    tier: z5.number().int().min(1).max(3).optional().describe("Filter by tier."),
+    limit: z5.number().int().optional().describe("Max rows to return (default 100).")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ search, tier, limit }, ctx) => {
+    if (!ctx.isAuthenticated()) {
+      return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
+    }
+    const supabase = supabaseForUser(ctx);
+    let query = supabase.from("media_outlets").select("id, name, tier, average_monthly_visits, average_page_views_per_article, ecpm, is_active").order("tier").order("name").limit(Math.min(Math.max(limit ?? 100, 1), 500));
+    if (search) query = query.ilike("name", `%${search}%`);
+    if (tier) query = query.eq("tier", tier);
+    const { data, error } = await query;
+    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    return {
+      content: [{ type: "text", text: JSON.stringify(data ?? []) }],
+      structuredContent: { outlets: data ?? [] }
+    };
+  }
+});
+
+// src/lib/mcp/tools/createBrand.ts
+import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@0.26.1";
+import { z as z6 } from "npm:zod@^3.25.76";
+var createBrand_default = defineTool6({
+  name: "create_brand",
+  title: "Create brand",
+  description: "Create a new brand for the signed-in user's organisation.",
+  inputSchema: {
+    name: z6.string().trim().min(1).describe("Brand name."),
+    website: z6.string().trim().url().optional().describe("Brand website URL."),
+    markets: z6.array(z6.string().trim().min(1)).optional().describe("Markets, e.g. ['ID','SG']."),
+    categories: z6.array(z6.string().trim().min(1)).optional().describe("Brand categories.")
+  },
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  handler: async ({ name, website, markets, categories }, ctx) => {
+    if (!ctx.isAuthenticated()) {
+      return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
+    }
+    const supabase = supabaseForUser(ctx);
+    const { data, error } = await supabase.from("brands").insert({ name, website, markets, categories }).select("id, name, website, markets, categories").single();
+    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    return {
+      content: [{ type: "text", text: JSON.stringify(data) }],
+      structuredContent: { brand: data }
+    };
+  }
+});
+
+// src/lib/mcp/tools/createCampaign.ts
+import { defineTool as defineTool7 } from "npm:@lovable.dev/mcp-js@0.26.1";
+import { z as z7 } from "npm:zod@^3.25.76";
+var isoDate = z7.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD");
+var createCampaign_default = defineTool7({
+  name: "create_campaign",
+  title: "Create campaign",
+  description: "Create a draft campaign under a brand. Use `list_brands` for brand_id and `list_channels` for channel_id.",
+  inputSchema: {
+    brand_id: z7.string().uuid().describe("Brand the campaign belongs to."),
+    name: z7.string().trim().min(1).describe("Campaign name."),
+    channel_id: z7.string().uuid().describe("Primary channel id."),
+    funnel_type: z7.enum(["TOP", "MID", "BOTTOM"]).describe("Funnel stage."),
+    start_date: isoDate.describe("Start date (YYYY-MM-DD)."),
+    end_date: isoDate.describe("End date (YYYY-MM-DD)."),
+    status: z7.enum(["draft", "running", "finished"]).optional().describe("Defaults to draft."),
+    primary_kpi: z7.string().trim().optional().describe("Primary KPI name."),
+    kpi_target: z7.number().nonnegative().optional().describe("Primary KPI target value."),
+    cost_idr: z7.number().nonnegative().optional().describe("Campaign cost in IDR.")
+  },
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  handler: async (input, ctx) => {
+    if (!ctx.isAuthenticated()) {
+      return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
+    }
+    if (input.end_date < input.start_date) {
+      return { content: [{ type: "text", text: "end_date must be on or after start_date" }], isError: true };
+    }
+    const supabase = supabaseForUser(ctx);
+    const { data, error } = await supabase.from("campaigns").insert({
+      ...input,
+      status: input.status ?? "draft",
+      created_by: ctx.getUserId()
+    }).select("id, name, brand_id, channel_id, funnel_type, status, start_date, end_date").single();
+    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    return {
+      content: [{ type: "text", text: JSON.stringify(data) }],
+      structuredContent: { campaign: data }
+    };
+  }
+});
+
+// src/lib/mcp/tools/updateCampaign.ts
+import { defineTool as defineTool8 } from "npm:@lovable.dev/mcp-js@0.26.1";
+import { z as z8 } from "npm:zod@^3.25.76";
+var isoDate2 = z8.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD");
+var updateCampaign_default = defineTool8({
+  name: "update_campaign",
+  title: "Update campaign",
+  description: "Update an existing campaign's name, status, dates, KPI or cost. Only provided fields are changed.",
+  inputSchema: {
+    campaign_id: z8.string().uuid().describe("Campaign to update."),
+    name: z8.string().trim().min(1).optional(),
+    status: z8.enum(["draft", "running", "finished"]).optional(),
+    start_date: isoDate2.optional(),
+    end_date: isoDate2.optional(),
+    primary_kpi: z8.string().trim().optional(),
+    kpi_target: z8.number().nonnegative().optional(),
+    cost_idr: z8.number().nonnegative().optional()
+  },
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  handler: async ({ campaign_id, ...patch }, ctx) => {
+    if (!ctx.isAuthenticated()) {
+      return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
+    }
+    const updates = Object.fromEntries(
+      Object.entries(patch).filter(([, v]) => v !== void 0)
+    );
+    if (Object.keys(updates).length === 0) {
+      return { content: [{ type: "text", text: "No fields to update" }], isError: true };
+    }
+    const supabase = supabaseForUser(ctx);
+    const { data, error } = await supabase.from("campaigns").update(updates).eq("id", campaign_id).select("id, name, status, start_date, end_date, primary_kpi, kpi_target, cost_idr").maybeSingle();
+    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    if (!data) {
+      return {
+        content: [{ type: "text", text: "Campaign not found or you lack permission to edit it." }],
+        isError: true
+      };
+    }
+    return {
+      content: [{ type: "text", text: JSON.stringify(data) }],
+      structuredContent: { campaign: data }
+    };
+  }
+});
+
+// src/lib/mcp/tools/upsertMediaOutlet.ts
+import { defineTool as defineTool9 } from "npm:@lovable.dev/mcp-js@0.26.1";
+import { z as z9 } from "npm:zod@^3.25.76";
+var upsertMediaOutlet_default = defineTool9({
+  name: "upsert_media_outlet",
+  title: "Add or update media outlet",
+  description: "Add a PR media outlet (portal) or update an existing one by name, including tier, traffic and eCPM used for AVE.",
+  inputSchema: {
+    name: z9.string().trim().min(1).describe("Outlet name, e.g. 'Palpres.disway.id'."),
+    tier: z9.number().int().min(1).max(3).describe("Outlet tier: 1, 2 or 3."),
+    average_monthly_visits: z9.number().int().nonnegative().optional().describe("Average monthly visits."),
+    average_page_views_per_article: z9.number().int().nonnegative().optional().describe("Average page views per article."),
+    ecpm: z9.number().nonnegative().optional().describe("eCPM in IDR."),
+    is_active: z9.boolean().optional().describe("Whether the outlet is active.")
+  },
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  handler: async (input, ctx) => {
+    if (!ctx.isAuthenticated()) {
+      return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
+    }
+    const supabase = supabaseForUser(ctx);
+    const columns = "id, name, tier, average_monthly_visits, average_page_views_per_article, ecpm, is_active";
+    const { data: existing, error: findError } = await supabase.from("media_outlets").select("id").ilike("name", input.name).maybeSingle();
+    if (findError) return { content: [{ type: "text", text: findError.message }], isError: true };
+    const payload = {
+      name: input.name,
+      tier: input.tier,
+      average_monthly_visits: input.average_monthly_visits ?? 0,
+      average_page_views_per_article: input.average_page_views_per_article ?? 0,
+      ecpm: input.ecpm ?? 0,
+      is_active: input.is_active ?? true
+    };
+    const { data, error } = existing ? await supabase.from("media_outlets").update(payload).eq("id", existing.id).select(columns).maybeSingle() : await supabase.from("media_outlets").insert(payload).select(columns).maybeSingle();
+    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    if (!data) {
+      return {
+        content: [{ type: "text", text: "Not saved \u2014 you may lack permission to manage media outlets." }],
+        isError: true
+      };
+    }
+    return {
+      content: [{ type: "text", text: JSON.stringify(data) }],
+      structuredContent: { outlet: data, created: !existing }
+    };
+  }
+});
+
 // src/lib/mcp/index.ts
 var projectRef = "kqenlckrxqqavpiytjpm";
 var mcp_default = defineMcp({
   name: "was-media-hub",
   title: "WAS Media Hub",
-  version: "0.1.0",
-  instructions: "Tools for WAS Media Hub, a media campaign performance platform. Use `list_brands` to find brands, `list_campaigns` to browse campaigns (optionally by brand or status), and `get_campaign_performance` for a campaign's details plus aggregated metrics. All tools act as the signed-in user and respect their access permissions.",
+  version: "0.2.0",
+  instructions: "Tools for WAS Media Hub, a media campaign performance platform. Read: `list_brands`, `list_campaigns`, `get_campaign_performance`, `list_channels`, `list_media_outlets`. Write: `create_brand`, `create_campaign`, `update_campaign`, `upsert_media_outlet`. Fetch ids with the list tools before writing. All tools act as the signed-in user and respect their access permissions.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated"
   }),
-  tools: [listBrands_default, listCampaigns_default, getCampaignPerformance_default]
+  tools: [
+    listBrands_default,
+    listCampaigns_default,
+    getCampaignPerformance_default,
+    listChannels_default,
+    listMediaOutlets_default,
+    createBrand_default,
+    createCampaign_default,
+    updateCampaign_default,
+    upsertMediaOutlet_default
+  ]
 });
 
 // lovable-mcp-supabase-entry.ts
