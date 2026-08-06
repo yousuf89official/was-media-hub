@@ -1,4 +1,3 @@
-import { useUserRole } from "@/hooks/useUserRole";
 import { RequireRole } from "@/components/RequireRole";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +12,6 @@ import { useToast } from "@/hooks/use-toast";
 import { PRSettingsEditor } from "@/components/admin/PRSettingsEditor";
 
 function AdminSettingsContent() {
-  const { data: userRole } = useUserRole();
   const { toast } = useToast();
   const { data: channels } = useChannels();
 

@@ -16,6 +16,16 @@ import { Calculator, Download, Edit2, Save, X } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { AVEResultsPDF } from '@/components/pdf/AVEResultsPDF';
+import {
+  MAX_CPM,
+  MAX_IMPRESSIONS,
+  MAX_PUBLICATIONS,
+  cpmSchema,
+  impressionsSchema,
+  publicationCountSchema,
+  toSafeFloat,
+  toSafeInt,
+} from "@/schemas/aveSchema";
 
 interface PROutletDetail {
   name: string;
@@ -98,9 +108,15 @@ const AVECalculator = () => {
   };
 
   const handleUpdateCpm = async (channelId: string) => {
+    const parsedCpm = cpmSchema.safeParse(Number.parseFloat(editCpmValue));
+    if (!parsedCpm.success) {
+      toast.error(parsedCpm.error.issues[0].message);
+      return;
+    }
+
     const { error } = await supabase
       .from("cpm_rates")
-      .update({ cpm_value: parseFloat(editCpmValue) })
+      .update({ cpm_value: parsedCpm.data })
       .eq("channel_id", channelId)
       .is("effective_to", null);
 
@@ -168,6 +184,25 @@ const AVECalculator = () => {
     if (missingImpressions.length > 0) {
       toast.error("Please enter impressions for all selected social channels");
       return;
+    }
+
+    // Validate impressions ranges for every selected social channel
+    for (const channelId of nonPRChannels) {
+      const result = impressionsSchema.safeParse(impressionsData[channelId]);
+      if (!result.success) {
+        const channelName = channels?.find(c => c.id === channelId)?.name ?? "channel";
+        toast.error(`${channelName}: ${result.error.issues[0].message}`);
+        return;
+      }
+    }
+
+    // Validate publication counts for selected media outlets
+    for (const [outletId, count] of Object.entries(publicationCounts)) {
+      const result = publicationCountSchema.safeParse(count);
+      if (!result.success) {
+        toast.error(result.error.issues[0].message);
+        return;
+      }
     }
 
     // Set calculation date
@@ -578,8 +613,16 @@ const AVECalculator = () => {
                       <>
                         <Input
                           type="number"
+                          min={0}
+                          max={MAX_CPM}
                           value={editCpmValue}
-                          onChange={(e) => setEditCpmValue(e.target.value)}
+                          onChange={(e) =>
+                            setEditCpmValue(
+                              e.target.value === ""
+                                ? ""
+                                : String(toSafeFloat(e.target.value, MAX_CPM))
+                            )
+                          }
                           className="w-24 h-8"
                         />
                         <Button
@@ -621,11 +664,13 @@ const AVECalculator = () => {
                     <Input
                       type="number"
                       placeholder="Enter impressions"
+                      min={0}
+                      max={MAX_IMPRESSIONS}
                       value={impressionsData[channelId] || ""}
                       onChange={(e) =>
                         setImpressionsData((prev) => ({
                           ...prev,
-                          [channelId]: parseInt(e.target.value) || 0,
+                          [channelId]: toSafeInt(e.target.value, MAX_IMPRESSIONS),
                         }))
                       }
                       className="flex-1"
@@ -714,9 +759,13 @@ const AVECalculator = () => {
                                       id={`pub-${outlet.id}`}
                                       type="number"
                                       min="1"
+                                      max={MAX_PUBLICATIONS}
                                       value={publicationCounts[outlet.id] || 1}
                                       onChange={(e) => {
-                                        const value = parseInt(e.target.value) || 1;
+                                        const value = Math.max(
+                                          1,
+                                          toSafeInt(e.target.value, MAX_PUBLICATIONS) || 1
+                                        );
                                         setPublicationCounts((prev) => ({
                                           ...prev,
                                           [outlet.id]: value,
