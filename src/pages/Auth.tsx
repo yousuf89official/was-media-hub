@@ -74,6 +74,10 @@ const Auth = () => {
       }
 
       toast.success("Welcome back!");
+      if (next) {
+        window.location.href = next;
+        return;
+      }
       navigate("/dashboard");
     } catch (error: any) {
       toast.error(error.message || "Failed to login");
@@ -91,7 +95,7 @@ const Auth = () => {
         email: signupEmail,
         password: signupPassword,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth`,
+          emailRedirectTo: `${window.location.origin}/auth${next ? `?next=${encodeURIComponent(next)}` : ""}`,
           data: {
             name: signupName,
           },
