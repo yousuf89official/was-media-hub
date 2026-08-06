@@ -1,12 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/safeClient";
 import { toast } from "sonner";
+import type { TablesUpdate } from "@/integrations/supabase/types";
 
 export const useProfileUpdate = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: Record<string, any>) => {
+    mutationFn: async (data: TablesUpdate<"profiles">) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
