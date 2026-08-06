@@ -1,10 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Upload, X } from "lucide-react";
 import { useProfilePicture } from "@/hooks/useProfilePicture";
 import { supabase } from "@/integrations/supabase/safeClient";
+import { useSignedAvatarUrl } from "@/utils/storageUrls";
 import { toast } from "sonner";
 
 interface ProfilePictureUploadProps {
@@ -13,10 +14,16 @@ interface ProfilePictureUploadProps {
 }
 
 export function ProfilePictureUpload({ currentUrl, userName }: ProfilePictureUploadProps) {
-  const [preview, setPreview] = useState<string | null>(currentUrl || null);
+  const signedCurrentUrl = useSignedAvatarUrl(currentUrl);
+  const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploadPicture } = useProfilePicture();
+
+  useEffect(() => {
+    if (signedCurrentUrl) setPreview(signedCurrentUrl);
+  }, [signedCurrentUrl]);
+
 
   const validateFile = (file: File): boolean => {
     const validTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];

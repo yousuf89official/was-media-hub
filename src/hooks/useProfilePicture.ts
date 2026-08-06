@@ -28,20 +28,16 @@ export const useProfilePicture = () => {
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data } = supabase.storage
-        .from("profile-pictures")
-        .getPublicUrl(filePath);
-
-      // Update profile with new URL
+      // Store the object path; the bucket is private and read via signed URLs
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ profile_picture_url: data.publicUrl })
+        .update({ profile_picture_url: filePath })
         .eq("id", userId);
 
       if (updateError) throw updateError;
 
-      return data.publicUrl;
+      return filePath;
+
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
