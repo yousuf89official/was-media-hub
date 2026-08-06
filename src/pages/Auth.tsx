@@ -57,21 +57,12 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email: loginEmail,
         password: loginPassword,
       });
 
       if (error) throw error;
-
-      // Check if email is verified
-      if (!data.user?.email_confirmed_at) {
-        // Sign out the user immediately
-        await supabase.auth.signOut();
-        toast.error("Please verify your email before logging in. Check your inbox for the verification link.");
-        setIsLoading(false);
-        return;
-      }
 
       toast.success("Welcome back!");
       if (next) {
@@ -104,7 +95,16 @@ const Auth = () => {
 
       if (error) throw error;
 
-      toast.success("Account created! Please check your email and click 'Verify Email' to activate your account.");
+      toast.success("Account created!");
+      if (data.session) {
+        if (next) {
+          window.location.href = next;
+          return;
+        }
+        navigate("/dashboard");
+        return;
+      }
+      setIsLoading(false);
     } catch (error: any) {
       toast.error(error.message || "Failed to sign up");
       setIsLoading(false);
@@ -212,7 +212,6 @@ const Auth = () => {
                       onChange={(e) => setSignupPassword(e.target.value)}
                       required
                       disabled={isLoading}
-                      minLength={6}
                     />
                   </div>
                 </CardContent>

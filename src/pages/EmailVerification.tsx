@@ -115,10 +115,11 @@ export default function EmailVerification() {
       return;
     }
 
-    if (newPassword.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    if (newPassword.length < 1) {
+      toast.error("Password cannot be empty");
       return;
     }
+
 
     setIsUpdatingPassword(true);
 
@@ -158,7 +159,6 @@ export default function EmailVerification() {
                   placeholder="Enter new password"
                   className="mt-2"
                   required
-                  minLength={6}
                   disabled={isUpdatingPassword}
                 />
               </div>
@@ -172,7 +172,6 @@ export default function EmailVerification() {
                   placeholder="Confirm new password"
                   className="mt-2"
                   required
-                  minLength={6}
                   disabled={isUpdatingPassword}
                 />
               </div>

@@ -115,14 +115,15 @@ export default function Profile() {
       return;
     }
 
-    if (newPassword.length < 6) {
+    if (newPassword.length < 1) {
       toast({
         title: "Error",
-        description: "Password must be at least 6 characters",
+        description: "Password cannot be empty",
         variant: "destructive",
       });
       return;
     }
+
 
     setIsUpdating(true);
 
