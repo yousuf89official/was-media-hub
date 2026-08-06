@@ -35,6 +35,7 @@ const BrandPerformanceDashboard = lazy(() =>
   import("./pages/BrandPerformanceDashboard")
 );
 const UserManagement = lazy(() => import("./pages/UserManagement"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 
 const queryClient = createQueryClient();
 
@@ -53,6 +54,7 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/verify-email" element={<EmailVerification />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
 
                 {/* Protected routes with sidebar */}
                 <Route element={<DashboardLayout />}>
