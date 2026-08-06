@@ -11,6 +11,7 @@ import CookieConsent from "./components/CookieConsent";
 import { SiteContentProvider } from "@/contexts/SiteContentContext";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotFound from "./pages/NotFound";
+import { RequireRole } from "./components/RequireRole";
 
 const Auth = lazy(() => import("./pages/Auth"));
 const EmailVerification = lazy(() => import("./pages/EmailVerification"));
@@ -72,18 +73,20 @@ const App = () => (
                     path="/calculation-logs"
                     element={<CalculationLogs />}
                   />
-                  <Route
-                    path="/content-management"
-                    element={<ContentManagement />}
-                  />
-                  <Route
-                    path="/brand-campaign-management"
-                    element={<BrandCampaignManagement />}
-                  />
-                  <Route
-                    path="/user-management"
-                    element={<UserManagement />}
-                  />
+                  <Route element={<RequireRole allowed={["MasterAdmin"]} />}>
+                    <Route
+                      path="/content-management"
+                      element={<ContentManagement />}
+                    />
+                    <Route
+                      path="/brand-campaign-management"
+                      element={<BrandCampaignManagement />}
+                    />
+                    <Route
+                      path="/user-management"
+                      element={<UserManagement />}
+                    />
+                  </Route>
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/profile/data-export" element={<DataExport />} />
                 </Route>

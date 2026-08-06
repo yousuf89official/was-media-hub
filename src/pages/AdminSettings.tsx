@@ -1,6 +1,4 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useUserRole } from "@/hooks/useUserRole";
+import { RequireRole } from "@/components/RequireRole";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useChannels } from "@/hooks/useChannels";
@@ -13,17 +11,9 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { PRSettingsEditor } from "@/components/admin/PRSettingsEditor";
 
-export default function AdminSettings() {
-  const navigate = useNavigate();
-  const { data: userRole, isLoading } = useUserRole();
+function AdminSettingsContent() {
   const { toast } = useToast();
   const { data: channels } = useChannels();
-
-  useEffect(() => {
-    if (!isLoading && userRole !== "MasterAdmin") {
-      navigate("/dashboard");
-    }
-  }, [userRole, isLoading, navigate]);
 
   const { data: cpmRates, refetch: refetchCpm } = useQuery({
     queryKey: ["cpm-rates"],
@@ -87,14 +77,6 @@ export default function AdminSettings() {
       refetchCpm();
     }
   };
-
-  if (isLoading) {
-    return <div className="p-8">Loading...</div>;
-  }
-
-  if (userRole !== "MasterAdmin") {
-    return null;
-  }
 
   return (
     <div className="p-8">
@@ -290,5 +272,13 @@ export default function AdminSettings() {
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+export default function AdminSettings() {
+  return (
+    <RequireRole allowed={["MasterAdmin"]}>
+      <AdminSettingsContent />
+    </RequireRole>
   );
 }

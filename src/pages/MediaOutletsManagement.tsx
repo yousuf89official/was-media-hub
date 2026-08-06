@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useUserRole } from "@/hooks/useUserRole";
+import { RequireRole } from "@/components/RequireRole";
 import {
   useAllMediaOutlets,
   useAddMediaOutlet,
@@ -39,9 +38,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Edit2, Trash2, Newspaper } from "lucide-react";
 import { toast } from "sonner";
 
-const MediaOutletsManagement = () => {
-  const navigate = useNavigate();
-  const { data: userRole, isLoading: roleLoading } = useUserRole();
+const MediaOutletsManagementContent = () => {
   const { data: outlets, isLoading } = useAllMediaOutlets();
   const addOutlet = useAddMediaOutlet();
   const updateOutlet = useUpdateMediaOutlet();
@@ -56,12 +53,6 @@ const MediaOutletsManagement = () => {
     average_page_views_per_article: 0,
     ecpm: 0,
   });
-
-  // Redirect if not MasterAdmin
-  if (!roleLoading && userRole !== "MasterAdmin") {
-    navigate("/dashboard");
-    return null;
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,7 +110,7 @@ const MediaOutletsManagement = () => {
     return acc;
   }, {} as Record<string, any[]>);
 
-  if (roleLoading || isLoading) {
+  if (isLoading) {
     return <div className="p-8">Loading...</div>;
   }
 
@@ -339,5 +330,11 @@ const MediaOutletsManagement = () => {
     </div>
   );
 };
+
+const MediaOutletsManagement = () => (
+  <RequireRole allowed={["MasterAdmin"]}>
+    <MediaOutletsManagementContent />
+  </RequireRole>
+);
 
 export default MediaOutletsManagement;
