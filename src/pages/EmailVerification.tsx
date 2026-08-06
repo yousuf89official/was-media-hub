@@ -115,10 +115,11 @@ export default function EmailVerification() {
       return;
     }
 
-    if (newPassword.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    if (newPassword.length < 1) {
+      toast.error("Password cannot be empty");
       return;
     }
+
 
     setIsUpdatingPassword(true);
 
