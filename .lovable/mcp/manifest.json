@@ -1,0 +1,116 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://kqenlckrxqqavpiytjpm.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "was-media-hub",
+      "version": "0.1.0",
+      "title": "WAS Media Hub"
+    },
+    "tools": [
+      {
+        "name": "list_brands",
+        "title": "List brands",
+        "description": "List brands the signed-in user can access, with optional name search.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "search": {
+              "type": "string",
+              "description": "Filter brands by name."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Max rows to return (default 50)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_campaigns",
+        "title": "List campaigns",
+        "description": "List campaigns visible to the signed-in user, optionally filtered by brand, status, or name.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "brandId": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Only campaigns for this brand id."
+            },
+            "status": {
+              "type": "string",
+              "description": "Campaign status filter, e.g. active."
+            },
+            "search": {
+              "type": "string",
+              "description": "Filter by campaign name."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Max rows to return (default 25)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_campaign_performance",
+        "title": "Get campaign performance",
+        "description": "Return a campaign's details plus aggregated performance metrics (impressions, reach, clicks, engagements, spend) over an optional date range.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "campaignId": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Campaign id."
+            },
+            "startDate": {
+              "type": "string",
+              "description": "Inclusive start date, YYYY-MM-DD."
+            },
+            "endDate": {
+              "type": "string",
+              "description": "Inclusive end date, YYYY-MM-DD."
+            }
+          },
+          "required": [
+            "campaignId"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
