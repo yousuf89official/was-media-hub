@@ -212,7 +212,6 @@ const Auth = () => {
                       onChange={(e) => setSignupPassword(e.target.value)}
                       required
                       disabled={isLoading}
-                      minLength={6}
                     />
                   </div>
                 </CardContent>

@@ -158,7 +158,6 @@ export default function EmailVerification() {
                   placeholder="Enter new password"
                   className="mt-2"
                   required
-                  minLength={6}
                   disabled={isUpdatingPassword}
                 />
               </div>
@@ -172,7 +171,6 @@ export default function EmailVerification() {
                   placeholder="Confirm new password"
                   className="mt-2"
                   required
-                  minLength={6}
                   disabled={isUpdatingPassword}
                 />
               </div>
