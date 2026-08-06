@@ -95,7 +95,16 @@ const Auth = () => {
 
       if (error) throw error;
 
-      toast.success("Account created! Please check your email and click 'Verify Email' to activate your account.");
+      toast.success("Account created!");
+      if (data.session) {
+        if (next) {
+          window.location.href = next;
+          return;
+        }
+        navigate("/dashboard");
+        return;
+      }
+      setIsLoading(false);
     } catch (error: any) {
       toast.error(error.message || "Failed to sign up");
       setIsLoading(false);
