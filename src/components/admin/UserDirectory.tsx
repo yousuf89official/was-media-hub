@@ -11,6 +11,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Search, Edit, UserCog, Building2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { UserWithAssignment } from "@/hooks/useUserManagement";
+import { SignedAvatarImage } from "@/components/profile/SignedAvatarImage";
+
 
 export const UserDirectory = () => {
   const { data: users, isLoading } = useAllUsers();
@@ -131,7 +133,7 @@ export const UserDirectory = () => {
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.profilePictureUrl || undefined} />
+                      <SignedAvatarImage src={user.profilePictureUrl} alt={user.name} />
                       <AvatarFallback>
                         {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                       </AvatarFallback>
@@ -190,7 +192,7 @@ export const UserDirectory = () => {
             <div className="space-y-4">
               <div className="flex items-center gap-3 pb-4 border-b">
                 <Avatar className="h-12 w-12">
-                  <AvatarImage src={editingUser.profilePictureUrl || undefined} />
+                  <SignedAvatarImage src={editingUser.profilePictureUrl} alt={editingUser.name} />
                   <AvatarFallback>
                     {editingUser.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                   </AvatarFallback>
