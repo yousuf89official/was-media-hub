@@ -2172,6 +2172,10 @@ export type Database = {
         Args: { _access_level?: string; _brand_id: string; _user_id: string }
         Returns: boolean
       }
+      can_i_access_brand: {
+        Args: { _access_level?: string; _brand_id: string }
+        Returns: boolean
+      }
       get_user_accessible_features: {
         Args: { _user_id: string }
         Returns: {
@@ -2199,6 +2203,19 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      my_accessible_features: {
+        Args: never
+        Returns: {
+          can_create: boolean
+          can_delete: boolean
+          can_edit: boolean
+          can_export: boolean
+          can_view: boolean
+          feature_code: string
+          feature_id: string
+          feature_name: string
+        }[]
       }
     }
     Enums: {
