@@ -197,9 +197,9 @@ export const useCanAccessBrand = (brandId?: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return false;
 
+      // Self-scoped RPC: evaluates access for the signed-in user only.
       const { data, error } = await supabase
-        .rpc("can_access_brand", { 
-          _user_id: user.id, 
+        .rpc("can_i_access_brand", {
           _brand_id: brandId,
           _access_level: 'view'
         });

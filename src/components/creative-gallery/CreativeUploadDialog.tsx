@@ -83,7 +83,8 @@ export function CreativeUploadDialog({ open, onOpenChange, campaignId }: Creativ
         display_url: formData.display_url || undefined,
         is_collaboration: formData.is_collaboration,
         is_boosted: formData.is_boosted,
-        image_url: imageUrl || undefined,
+        // Store the object path, not a signed URL (signed URLs expire).
+        image_url: storagePath || undefined,
         storage_path: storagePath || undefined,
         metrics: {},
       };
