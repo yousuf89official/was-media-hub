@@ -46,6 +46,42 @@ export interface CreateCreativeInput {
   metrics?: Record<string, number>;
 }
 
+const CREATIVES_BUCKET = "creatives";
+const SIGNED_URL_TTL = 60 * 60;
+
+/** Derives the object path from a stored value (legacy public URL or plain path). */
+const toStoragePath = (creative: Pick<CreativeDB, "storage_path" | "image_url">): string | null => {
+  if (creative.storage_path) return creative.storage_path;
+  const url = creative.image_url;
+  if (!url || url.startsWith("data:") || url.startsWith("blob:")) return null;
+  const marker = `/${CREATIVES_BUCKET}/`;
+  const index = url.indexOf(marker);
+  if (index === -1) return url.startsWith("http") ? null : url;
+  return url.slice(index + marker.length).split("?")[0];
+};
+
+/** The creatives bucket is private, so display URLs must be signed per request. */
+const withSignedUrls = async (creatives: CreativeDB[]): Promise<CreativeDB[]> => {
+  const paths = creatives.map(toStoragePath);
+  const unique = Array.from(new Set(paths.filter(Boolean) as string[]));
+  if (unique.length === 0) return creatives;
+
+  const { data } = await supabase.storage
+    .from(CREATIVES_BUCKET)
+    .createSignedUrls(unique, SIGNED_URL_TTL);
+
+  const signedByPath = new Map<string, string>();
+  (data || []).forEach((entry) => {
+    if (entry.path && entry.signedUrl) signedByPath.set(entry.path, entry.signedUrl);
+  });
+
+  return creatives.map((creative, i) => {
+    const path = paths[i];
+    const signed = path ? signedByPath.get(path) : undefined;
+    return signed ? { ...creative, image_url: signed } : creative;
+  });
+};
+
 export const useCreatives = (campaignId?: string) => {
   return useQuery({
     queryKey: ["creatives", campaignId],
