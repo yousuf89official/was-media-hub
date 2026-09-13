@@ -92,8 +92,8 @@ export const usePermissions = () => {
     queryFn: async () => {
       if (!user?.id) return [];
       
-      const { data, error } = await supabase
-        .rpc("get_user_accessible_features", { _user_id: user.id });
+      // Self-scoped RPC: returns permissions for the signed-in user only.
+      const { data, error } = await supabase.rpc("my_accessible_features");
 
       if (error) throw error;
       
