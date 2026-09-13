@@ -225,6 +225,10 @@ export const uploadCreativeFile = async (file: File, campaignId: string): Promis
 
   if (uploadError) throw uploadError;
 
-  const { data } = supabase.storage.from("creatives").getPublicUrl(fileName);
-  return { path: fileName, url: data.publicUrl };
+  // Private bucket: hand back a short-lived signed URL for immediate preview only.
+  const { data } = await supabase.storage
+    .from(CREATIVES_BUCKET)
+    .createSignedUrl(fileName, SIGNED_URL_TTL);
+
+  return { path: fileName, url: data?.signedUrl ?? "" };
 };
