@@ -100,7 +100,7 @@ export const useCreatives = (campaignId?: string) => {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as CreativeDB[];
+      return withSignedUrls((data || []) as CreativeDB[]);
     },
     enabled: true,
   });
@@ -120,7 +120,9 @@ export const useCreative = (id: string) => {
         .maybeSingle();
 
       if (error) throw error;
-      return data as CreativeDB | null;
+      if (!data) return null;
+      const [signed] = await withSignedUrls([data as CreativeDB]);
+      return signed;
     },
     enabled: !!id,
   });
